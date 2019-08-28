@@ -28,10 +28,3 @@ To prevent inadvertently having authenticating incorrectly after switching iRODS
 recommended that each environment have its own authentication file, i.e., the field
 `irods_authentication_file` in the environment file is set to distinct file name for each
 environment.
-
-
-## Installation
-
-To install these functions locally, they need to be copied into the `.config/fish/functions/`
-directory under the user's home directory. To install them system wide, they need to be copied into
-`/etc/fish/functions/`.
