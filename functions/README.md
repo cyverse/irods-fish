@@ -1,4 +1,4 @@
-# iRODS Environments
+# fish Functions
 
 Here are some fish functions for working within multiple iRODS environments.
 
