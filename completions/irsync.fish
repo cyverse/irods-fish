@@ -5,8 +5,8 @@
 # TODO make suggest multiple local paths
 # TODO make suggest at most one remote path
 
-function __irods_suggestions
-  set curArg (commandline --current-token | string replace --regex '^i:' '')
+function __irsync_irods_suggestions
+  set curArg (string replace --regex '^i:' '' (commandline --current-token))
   set dirName ''
   if string match --quiet --regex / $curArg
     set pathParts (string split --right --max 1 / $curArg)
@@ -18,9 +18,6 @@ function __irods_suggestions
     | string replace --regex '^' "i:$dirName"
 end
 
-function __suggest_irods_path
-  string match --quiet --regex '^i:' (commandline --current-token)
-end
-
 complete --command irsync \
-  --condition __suggest_irods_path --no-files --arguments '(__irods_exec_slow __irods_suggestions)'
+  --condition "string match --quiet --regex '^i:' (commandline --current-token)" \
+  --no-files --arguments '(__irods_exec_slow __irsync_irods_suggestions)'
