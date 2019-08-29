@@ -1,11 +1,13 @@
 # tab completion for ido
 
 function __ido_suggestions
-  if [ (count (commandline --cut-at-cursor --tokenize)) -eq 1 ]
+  set cmdTerms (commandline --cut-at-cursor --tokenize)
+  if [ (count $cmdTerms ) -eq 1 ]
     ienvs
   else
-    # XXX Needs to switch to correct iRODS envirnoment before complete
-    complete --do-complete=(string replace --regex -- '\s*ido\s+[^\s]+\s+' '' (commandline))
+    set environ $cmdTerms[2]
+    set cmd (string replace --regex -- '\s*ido\s+'"$environ"'\s+' '' (commandline))
+    ido $environ complete "--do-complete='$cmd'"
   end
 end
 
