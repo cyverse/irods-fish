@@ -10,7 +10,6 @@ order of popularity. I plan to implement or complete the implementations of the 
 the iCommands in this order, deferring those marked with `-` to the end.
 
 ```
-  2837 ils
   1322 iquest
 - 1065 iadmin
    997 irm
