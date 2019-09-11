@@ -83,11 +83,10 @@ complete --command ihelp --short-option h \
   --description 'shows help' \
   --condition '__ihelp_no_args' --exclusive
 
-# TODO should not match if -h or an iCommand is present
 complete --command ihelp --short-option a \
   --description 'prints the help text for all the iCommands' \
-  --exclusive
+  --condition '__ihelp_no_args' --exclusive
 
 # TODO should not match if -h or -a are present
 # TODO see how git add is implemented
-complete --command ihelp --no-files --arguments '(__ihelp_suggestions)'
+complete --command ihelp --arguments '(__ihelp_suggestions)' --no-files
