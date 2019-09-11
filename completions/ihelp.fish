@@ -58,24 +58,6 @@ end
 
 
 #
-# Suggestion Functions
-#
-
-function __ihelp_suggestions
-  if [ (count (commandline --cut-at-cursor --tokenize)) -eq 1 ]
-    set args \
-      iadmin ibun icd ichksum ichmod icp idbug ienv ierror iexecmd iexit ifsck iget igetwild \
-      igroupadmin ihelp iinit ilocate ils ilsresc imcoll imeta imiscsvrinfo imkdir imv ipasswd \
-      iphybun iphymv ips iput ipwd iqdel iqmod iqstat iquest iquota ireg irepl irm irmtrash irsync \
-      irule iscan isysmeta iticket itrim iuserinfo ixmsg izonereport
-    for arg in $args
-      echo $arg
-    end
-  end
-end
-
-
-#
 # Completions
 #
 
@@ -87,6 +69,12 @@ complete --command ihelp --short-option a \
   --description 'prints the help text for all the iCommands' \
   --condition '__ihelp_no_args' --exclusive
 
-# TODO should not match if -h or -a are present
-# TODO see how git add is implemented
-complete --command ihelp --arguments '(__ihelp_suggestions)' --no-files
+for helpEntry in (ihelp | string match --entire --regex -- '^[a-z]+ +- ')
+  set --local entryParts (string split --max 1 -- - $helpEntry | string trim)
+
+  complete --command ihelp --arguments $entryParts[1] \
+    --description (string replace --all --regex '(\(.*?\)|\.$)' '' $entryParts[2]) \
+    --condition 'test (count (commandline --cut-at-cursor --tokenize)) -eq 1'
+end
+
+complete --command ihelp --no-files
