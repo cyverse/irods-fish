@@ -30,8 +30,11 @@ complete --command iquest --short-option z \
 # TODO implement
 # iquest [-z Zonename]
 
+complete --command iquest --long-option no-page \
+  --description 'do not prompt asking whether to continue or not' \
+  --condition '__iquest_no_opts -h --no-page' --no-file
+
 # TODO implement
-# iquest [--no-page]
 # iquest selectionConditionString
 # iquest [hint]
 # iquest [format]
