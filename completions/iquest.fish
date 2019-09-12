@@ -21,7 +21,7 @@ end
 
 complete --command iquest --short-option h \
   --description 'shows help' \
-  --condition '__irods_no_args_condition' --exclusive
+  --condition '__irods_no_args_condition'
 
 complete --command iquest --short-option z \
   --description 'the zone to query' \
@@ -32,12 +32,24 @@ complete --command iquest --short-option z \
 
 complete --command iquest --long-option no-page \
   --description 'do not prompt asking whether to continue or not' \
-  --condition '__iquest_no_opts -h --no-page attrs' --no-file
+  --condition '__iquest_no_opts -h --no-page attrs'
 
 # TODO implement
 # iquest selectionConditionString
-# iquest [hint] selectionConditionString
-# iquest [hint] [format] selectionConditionString
+
+# TODO ensure no-distinct and uppercase are not suggested after [format] or
+# selectionConditionString.
+
+complete --command iquest --arguments no-distinct \
+  --description 'show duplicate results' \
+  --condition '__iquest_no_opts -h --sql attrs no-distinct'
+
+complete --command iquest --arguments uppercase \
+  --description 'convert predicate attributes to uppercase' \
+  --condition '__iquest_no_opts -h --sql attrs uppercase'
+
+# TODO implement
+# iquest [format] selectionConditionString
 
 complete --command iquest --long-option sql \
   --description 'executes a specific query' \
@@ -48,7 +60,8 @@ complete --command iquest --long-option sql \
 # iquest --sql 'pre-defined SQL string' [format]
 # iquest --sql 'pre-defined SQL string' [format] [arguments]
 
-complete --command iquest --arguments '(echo attrs)' \
+complete --command iquest --arguments attrs \
+  --description 'list the attributes that can be queried' \
   --condition '__irods_no_args_condition' --no-files
 
 complete --command iquest --no-files
