@@ -36,11 +36,19 @@ complete --command iquest --long-option no-page \
 
 # TODO implement
 # iquest selectionConditionString
-# iquest [hint]
-# iquest [format]
+# iquest [hint] selectionConditionString
+# iquest [hint] [format] selectionConditionString
+
+complete --command iquest --long-option sql \
+  --description 'executes a specific query' \
+  --condition '__iquest_no_opts -h --sql' --exclusive
 
 # TODO implement
+# iquest --sql 'pre-defined SQL string'
+# iquest --sql 'pre-defined SQL string' [format]
 # iquest --sql 'pre-defined SQL string' [format] [arguments]
+
+# TODO implement
 # iquest attrs
 
 complete --command iquest --no-files
