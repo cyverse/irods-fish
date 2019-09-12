@@ -89,18 +89,6 @@ end
 # Condition Functions
 #
 
-function __ils_no_args
-  set args (__ils_tokenize_cmdline)
-  switch (count $args)
-    case 0
-      return 0
-    case 1
-      test $args[1] = -
-    case '*'
-      return 1
-  end
-end
-
 function __ils_no_opts
   set args (__ils_tokenize_cmdline)
   for opt in $argv
@@ -146,7 +134,7 @@ end
 
 complete --command ils --short-option h \
   --description 'shows help' \
-  --condition '__ils_no_args' --exclusive
+  --condition '__irods_no_args_condition' --exclusive
 
 complete --command ils --short-option A \
   --description 'ACL and inheritance format' \
