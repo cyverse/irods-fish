@@ -11,7 +11,7 @@ function __irods_no_args_condition \
     case 0
       return 0
     case 1
-      test $args[1] = -
+      test -z $args[1]; or test $args[1] = - 
     case '*'
       return 1
   end
