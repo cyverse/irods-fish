@@ -75,52 +75,13 @@ function __ils_collection_suggestions --argument-names sugBegin
     | string replace --filter --regex $filter '$1'
 end
 
-function __ils_parse_arg --argument-names arg
-  if string match --invert --quiet --regex -- '^-[^-]' $arg  # -, --bundle, or path
-    echo $arg
-  else                                                       # short arg group
-    # split apart short arg group
-    set argChars (string split -- '' (string trim --left --chars '-' -- $arg))
-    while [ (count $argChars) -gt 0 ]
-      if string match --quiet --regex -- '[AhLlrVv]' $argChars[1]  # flag
-        echo '-'$argChars[1]
-        set --erase argChars[1]
-      else if [ $argChars[1] = t ]                                 # ticket
-        echo '-'$argChars[1]
-        set --erase argChars[1]
-        # The rest of the short arg can only be the ticket value
-        if [ (count $argChars) -gt 0 ]
-          string join -- '' $argChars
-        end
-        break
-      else                                                         # unknown
-        # Dump the rest as part of an unknown argument
-        string join -- '' '-' $argChars
-        break
-      end
-    end
-    return 0
-  end
-end
-
-# This function tokenizes the current arguments passed to ils. It would expand
-# all of the options to individual arguments, e.g., '-rv' would become '-r'
-# '-v'. If the cursor is still on an argument, i.e., the character before the
-# cursor isn't white space, the last argument returned would be the current
-# argument. Otherwise, it would be a space, i.e., ' '.
-function __ils_parse_args
-  set completeArgs (commandline --cut-at-cursor --tokenize)
-  set --erase completeArgs[1]
-  set remainingArg (commandline --cut-at-cursor --current-token)
-  set args $completeArgs $remainingArg
-  for arg in $completeArgs $remainingArg
-    __ils_parse_arg $arg
-  end
-end
-
 function __ils_separable_paths --argument-names partialPath basePath
   set baseMatch (string sub --length (string length $partialPath) $basePath)
   string match --invert --quiet $baseMatch'*' $partialPath
+end
+
+function __ils_tokenize_cmdline
+  __irods_tokenize_cmdline AhLlrVv t
 end
 
 
@@ -129,7 +90,7 @@ end
 #
 
 function __ils_no_args
-  set args (__ils_parse_args)
+  set args (__ils_tokenize_cmdline)
   switch (count $args)
     case 0
       return 0
@@ -141,7 +102,7 @@ function __ils_no_args
 end
 
 function __ils_no_opts
-  set args (__ils_parse_args)
+  set args (__ils_tokenize_cmdline)
   for opt in $argv
     if contains -- $opt $args
       return 1
@@ -156,7 +117,7 @@ end
 #
 
 function __ils_path_suggestions
-  set args (__ils_parse_args)
+  set args (__ils_tokenize_cmdline)
   set --erase suggestions
   if contains -- --bundle $args
     set suggestions (__ils_bundle_suggestion $args[-1])
