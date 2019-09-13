@@ -134,7 +134,7 @@ end
 
 complete --command ils --short-option h \
   --description 'shows help' \
-  --condition '__irods_no_args_condition' --exclusive
+  --condition '__irods_no_args_condition (__ils_tokenize_cmdline)'
 
 complete --command ils --short-option A \
   --description 'ACL and inheritance format' \

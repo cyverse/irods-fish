@@ -2,11 +2,11 @@
 
 complete --command ihelp --short-option h \
   --description 'shows help' \
-  --condition '__irods_no_args_condition' --exclusive
+  --condition "__irods_no_args_condition (__irods_tokenize_cmdline ah '')"
 
 complete --command ihelp --short-option a \
   --description 'prints the help text for all the iCommands' \
-  --condition '__irods_no_args_condition' --exclusive
+  --condition "__irods_no_args_condition (__irods_tokenize_cmdline ah '')"
 
 for helpEntry in (ihelp | string match --entire --regex -- '^[a-z]+ +- ')
   set --local entryParts (string split --max 1 -- - $helpEntry | string trim)
