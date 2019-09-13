@@ -1,17 +1,48 @@
 # tab completion for iquest
 
 #
+# Helper Functions
+#
+
+function __iquest_tokenize_cmdline
+  __irods_tokenize_cmdline h z
+end
+
+
+#
 # Condition Functions
 #
 
 function __iquest_no_opts
-  set args (__irods_tokenize_cmdline hz '')
+  set args (__iquest_tokenize_cmdline)
   for opt in $argv
     if contains -- $opt $args
       return 1
     end
   end
-  return 0
+  true
+end
+
+function __iquest_suggest_zone
+  if __iquest_no_opts -h --sql attrs
+    set args (__iquest_tokenize_cmdline)
+    if set zIdx (contains --index -- -z $args)
+      test "$zIdx" -ge (math (count $args) - 1)
+    else
+      true
+    end
+  else
+    false
+  end
+end
+
+
+#
+# Suggestion Functions
+#
+
+function __iquest_zone_suggestions
+  iquest --no-page '%s' 'select ZONE_NAME' | string match --invert 'CAT_NO_ROWS_FOUND:*'
 end
 
 
@@ -19,49 +50,63 @@ end
 # Completions
 #
 
+complete --command iquest --no-files
+
+#
+# iquest -h
+#
+
 complete --command iquest --short-option h \
-  --description 'shows help' \
-  --condition '__irods_no_args_condition'
+  --condition '__irods_no_args_condition (__iquest_tokenize_cmdline)' \
+  --description 'shows help'
 
+#
+# iquest [-z <zone>][--no-page] [no-distinct] [uppercase] [<format>] <general-query>
+#
+
+# TODO <general-query>
+
+# -z <zone> <general-query>
 complete --command iquest --short-option z \
-  --description 'the zone to query' \
-  --condition '__iquest_no_opts -h -z attrs' --exclusive
+  --arguments '(__irods_exec_slow __iquest_zone_suggestions)' --exclusive \
+  --condition '__iquest_suggest_zone' \
+  --description 'the zone to query'
 
-# TODO implement
-# iquest [-z Zonename]
+# --no-page <general-query>
+complete --command iquest --long-option no-page --no-files \
+  --condition '__iquest_no_opts -h --sql attrs --no-page' \
+  --description 'do not prompt asking whether to continue or not'
 
-complete --command iquest --long-option no-page \
-  --description 'do not prompt asking whether to continue or not' \
-  --condition '__iquest_no_opts -h --no-page attrs'
-
-# TODO implement
-# iquest selectionConditionString
-
-# TODO ensure no-distinct and uppercase are not suggested after [format] or
-# selectionConditionString.
-
+# no-distinct <general-query>
+# TODO ensure not after uppercase
 complete --command iquest --arguments no-distinct \
   --description 'show duplicate results' \
   --condition '__iquest_no_opts -h --sql attrs no-distinct'
 
+# uppercase <general-query>
 complete --command iquest --arguments uppercase \
   --description 'convert predicate attributes to uppercase' \
   --condition '__iquest_no_opts -h --sql attrs uppercase'
 
-# TODO implement
-# iquest [format] selectionConditionString
+# TODO <format> <general-query>
 
-complete --command iquest --long-option sql \
-  --description 'executes a specific query' \
-  --condition '__iquest_no_opts -h --sql attrs' --exclusive
+#
+# iquest --sql <specific-query> [<format>] [<argument>...]
+#
 
-# TODO implement
-# iquest --sql 'pre-defined SQL string'
-# iquest --sql 'pre-defined SQL string' [format]
-# iquest --sql 'pre-defined SQL string' [format] [arguments]
+# --sql <specific-query>
+# TODO suggest specific queries
+complete --command iquest --long-option sql --exclusive \
+  --condition 'test (count (__iquest_tokenize_cmdline)) -le 1' \
+  --description 'executes a specific query'
+
+# TODO --sql <specific-query> <format>
+# TODO --sql <specific-query> <argument>...
+
+#
+# iquest attrs
+#
 
 complete --command iquest --arguments attrs \
   --description 'list the attributes that can be queried' \
-  --condition '__irods_no_args_condition' --no-files
-
-complete --command iquest --no-files
+  --condition 'test (count (__iquest_tokenize_cmdline)) -le 1'
