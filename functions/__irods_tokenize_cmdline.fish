@@ -2,7 +2,7 @@
 # all of the short options to individual arguments, e.g., "-rv" would become
 # "'-r' '-v'". If the cursor is still on an argument, i.e., the character before
 # the cursor isn't white space, the last argument returned would be the current
-# argument. Otherwise, it would be a space, i.e., " ". The command itself is
+# argument. Otherwise, it would be empty, i.e., "". The command itself is
 # removed.
 #
 # Example 1:
@@ -11,7 +11,7 @@
 #
 # Example 2:
 # The command line "ils -r --bundle -tToken /path |", where "|" is the cursor,
-# gets tokenized as "'-r' '--bundle' '-t' 'Token' '/path' ' '".
+# gets tokenized as "'-r' '--bundle' '-t' 'Token' '/path' ''".
 
 function __irods_tokenize_cmdline --argument-names shortFlags shortOptParams \
     --description 'Splits apart the short options into individual arguments'
