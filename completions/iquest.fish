@@ -26,7 +26,7 @@ end
 function __iquest_suggest_spec_query
   set args (__iquest_tokenize_cmdline)
   if set sqlIdx (contains --index -- --sql $args)
-    test "$sqlIdx" -ge (math (count $args) - 1)
+    test "$sqlIdx" -eq (math (count $args) - 1)
   else
     false
   end
@@ -115,8 +115,6 @@ complete --command iquest --long-option sql --exclusive \
 complete --command iquest \
   --arguments '(__irods_exec_slow __iquest_spec_query_suggestions)' --no-files \
   --condition '__iquest_suggest_spec_query'
-
-# TODO --sql <specific-query> <argument>...
 
 #
 # iquest attrs
