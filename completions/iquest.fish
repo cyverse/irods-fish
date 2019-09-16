@@ -24,6 +24,7 @@ function __iquest_no_opts
   true
 end
 
+# TODO combine with __iquest_suggest_uppercase somehow
 function __iquest_suggest_no_distinct
   set args (__iquest_tokenize_cmdline)
   set argCnt (count $args)
@@ -51,6 +52,29 @@ function __iquest_suggest_spec_query
   set args (__iquest_tokenize_cmdline)
   if set sqlIdx (contains --index -- --sql $args)
     test "$sqlIdx" -eq (math (count $args) - 1)
+  else
+    false
+  end
+end
+
+function __iquest_suggest_uppercase
+  set args (__iquest_tokenize_cmdline)
+  set argCnt (count $args)
+  if test $argCnt -le 1
+    true
+  else if __iquest_no_opts -h --sql attrs upper uppercase
+    set idx 1
+    while test $idx -lt $argCnt
+      if command test "$args[$idx]" = '-z'
+        set idx (math $idx + 1)
+      else
+        if test "$args[$idx]" != --no-page -a "$args[$idx]" != no-distinct
+          return 1
+        end
+      end
+      set idx (math $idx + 1)
+    end
+    true
   else
     false
   end
@@ -99,7 +123,7 @@ complete --command iquest --short-option h \
   --description 'shows help'
 
 #
-# iquest [-z <zone>][--no-page][[no-distinct] [uppercase]] <format> <general-query>
+# iquest [-z <zone>][--no-page][[no-distinct] [uppercase] [<format>]] <general-query>
 #
 
 # TODO <general-query>
@@ -121,10 +145,9 @@ complete --command iquest --arguments no-distinct \
   --description 'show duplicate results'
 
 # uppercase <general-query>
-# TODO Don't suggest after <format>
 complete --command iquest --arguments uppercase \
-  --description 'convert predicate attributes to uppercase' \
-  --condition '__iquest_no_opts -h --sql attrs upper uppercase'
+  --condition __iquest_suggest_uppercase \
+  --description 'convert predicate attributes to uppercase'
 
 #
 # iquest --sql <specific-query> [<argument>...]
@@ -144,5 +167,5 @@ complete --command iquest \
 #
 
 complete --command iquest --arguments attrs \
-  --description 'list the attributes that can be queried' \
-  --condition 'test (count (__iquest_tokenize_cmdline)) -le 1'
+  --condition 'test (count (__iquest_tokenize_cmdline)) -le 1' \
+  --description 'list the attributes that can be queried'
