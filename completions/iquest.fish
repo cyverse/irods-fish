@@ -23,6 +23,15 @@ function __iquest_no_opts
   true
 end
 
+function __iquest_suggest_spec_query
+  set args (__iquest_tokenize_cmdline)
+  if set sqlIdx (contains --index -- --sql $args)
+    test "$sqlIdx" -ge (math (count $args) - 1)
+  else
+    false
+  end
+end
+
 function __iquest_suggest_zone
   if __iquest_no_opts -h --sql attrs
     set args (__iquest_tokenize_cmdline)
@@ -40,6 +49,11 @@ end
 #
 # Suggestion Functions
 #
+
+function __iquest_spec_query_suggestions
+  # TODO replace awk with string manipulations
+  iquest --sql ls | awk 'BEGIN { RS = "----\n"; FS = "\n" } { print $1 }'
+end
 
 function __iquest_zone_suggestions
   iquest --no-page '%s' 'select ZONE_NAME' | string match --invert 'CAT_NO_ROWS_FOUND:*'
@@ -94,10 +108,13 @@ complete --command iquest --arguments uppercase \
 #
 
 # --sql <specific-query>
-# TODO suggest specific queries
 complete --command iquest --long-option sql --exclusive \
   --condition 'test (count (__iquest_tokenize_cmdline)) -le 1' \
   --description 'executes a specific query'
+
+complete --command iquest \
+  --arguments '(__irods_exec_slow __iquest_spec_query_suggestions)' --no-files \
+  --condition '__iquest_suggest_spec_query'
 
 # TODO --sql <specific-query> <format>
 # TODO --sql <specific-query> <argument>...
