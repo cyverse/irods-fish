@@ -7,10 +7,10 @@ Here are the iCommands that whose completion implementations don't exist or are 
 first character is a `-`, it is an admin command requiring the user to be a `rodsadmin`. The number
 after the first character is how many times the iCommand shows up in my history. The are list in
 order of popularity. I plan to implement or complete the implementations of the tab completions for
-the iCommands in this order, deferring those marked with `-` to the end.
+the iCommands in this order, deferring those marked with `-` to the end. After even the admin
+commands are implemented, implement completion for `iquest` general queries.
 
 ```
-  1322 iquest
 - 1065 iadmin
    997 irm
    948 icd

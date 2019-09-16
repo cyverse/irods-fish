@@ -24,7 +24,6 @@ end
 # Condition Functions
 #
 
-# TODO combine with __iquest_suggest_uppercase somehow
 function __iquest_suggest_no_distinct
   set args (__iquest_tokenize_cmdline)
   set argCnt (count $args)
@@ -99,8 +98,15 @@ end
 #
 
 function __iquest_spec_query_suggestions
-  # TODO replace awk with string manipulations
-  iquest --sql ls | awk 'BEGIN { RS = "----\n"; FS = "\n" } { print $1 }'
+  set extractedName 0
+  iquest --sql ls | while read line
+    if [ $line = ---- ]
+      set extractedName 0
+    else if [ $extractedName -eq 0 ]
+      echo $line
+      set extractedName 1
+    end
+  end
 end
 
 function __iquest_zone_suggestions
