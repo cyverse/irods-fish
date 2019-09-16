@@ -78,15 +78,14 @@ complete --command iquest --long-option no-page --no-files \
   --description 'do not prompt asking whether to continue or not'
 
 # no-distinct <general-query>
-# TODO ensure not after uppercase
 complete --command iquest --arguments no-distinct \
   --description 'show duplicate results' \
-  --condition '__iquest_no_opts -h --sql attrs no-distinct'
+  --condition '__iquest_no_opts -h --sql attrs upper uppercase no-distinct'
 
 # uppercase <general-query>
 complete --command iquest --arguments uppercase \
   --description 'convert predicate attributes to uppercase' \
-  --condition '__iquest_no_opts -h --sql attrs uppercase'
+  --condition '__iquest_no_opts -h --sql attrs upper uppercase'
 
 # TODO <format> <general-query>
 
