@@ -13,6 +13,7 @@ end
 # Condition Functions
 #
 
+# TODO factor out for loop into helper function
 function __iquest_no_opts
   set args (__iquest_tokenize_cmdline)
   for opt in $argv
@@ -21,6 +22,29 @@ function __iquest_no_opts
     end
   end
   true
+end
+
+function __iquest_suggest_no_distinct
+  set args (__iquest_tokenize_cmdline)
+  set argCnt (count $args)
+  if test $argCnt -le 1
+    true
+  else if __iquest_no_opts -h --sql attrs upper uppercase no-distinct
+    set idx 1
+    while test $idx -lt $argCnt
+      if command test "$args[$idx]" = '-z'
+        set idx (math $idx + 1)
+      else
+        if test "$args[$idx]" != --no-page
+          return 1
+        end
+      end
+      set idx (math $idx + 1)
+    end
+    true
+  else
+    false
+  end
 end
 
 function __iquest_suggest_spec_query
@@ -93,15 +117,14 @@ complete --command iquest --long-option no-page --no-files \
 
 # no-distinct <general-query>
 complete --command iquest --arguments no-distinct \
-  --description 'show duplicate results' \
-  --condition '__iquest_no_opts -h --sql attrs upper uppercase no-distinct'
+  --condition __iquest_suggest_no_distinct \
+  --description 'show duplicate results'
 
 # uppercase <general-query>
+# TODO Don't suggest after <format>
 complete --command iquest --arguments uppercase \
   --description 'convert predicate attributes to uppercase' \
   --condition '__iquest_no_opts -h --sql attrs upper uppercase'
-
-# TODO <format> <general-query>
 
 #
 # iquest --sql <specific-query> [<argument>...]
