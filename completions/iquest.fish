@@ -1,4 +1,6 @@
 # tab completion for iquest
+#
+# TODO support tab completion of general queries
 
 #
 # Helper Functions
@@ -8,21 +10,19 @@ function __iquest_tokenize_cmdline
   __irods_tokenize_cmdline h z
 end
 
+function __iquest_no_opts
+  while read arg
+    if contains -- $arg $argv
+      return 1
+    end
+  end
+  return 0
+end
+
 
 #
 # Condition Functions
 #
-
-# TODO factor out for loop into helper function
-function __iquest_no_opts
-  set args (__iquest_tokenize_cmdline)
-  for opt in $argv
-    if contains -- $opt $args
-      return 1
-    end
-  end
-  true
-end
 
 # TODO combine with __iquest_suggest_uppercase somehow
 function __iquest_suggest_no_distinct
@@ -30,7 +30,7 @@ function __iquest_suggest_no_distinct
   set argCnt (count $args)
   if test $argCnt -le 1
     true
-  else if __iquest_no_opts -h --sql attrs upper uppercase no-distinct
+  else if echo $args | __iquest_no_opts -h --sql attrs upper uppercase no-distinct
     set idx 1
     while test $idx -lt $argCnt
       if command test "$args[$idx]" = '-z'
@@ -62,7 +62,7 @@ function __iquest_suggest_uppercase
   set argCnt (count $args)
   if test $argCnt -le 1
     true
-  else if __iquest_no_opts -h --sql attrs upper uppercase
+  else if echo $args | __iquest_no_opts -h --sql attrs upper uppercase
     set idx 1
     while test $idx -lt $argCnt
       if command test "$args[$idx]" = '-z'
@@ -81,7 +81,7 @@ function __iquest_suggest_uppercase
 end
 
 function __iquest_suggest_zone
-  if __iquest_no_opts -h --sql attrs
+  if __iquest_tokenize_cmdline | __iquest_no_opts -h --sql attrs
     set args (__iquest_tokenize_cmdline)
     if set zIdx (contains --index -- -z $args)
       test "$zIdx" -ge (math (count $args) - 1)
@@ -126,8 +126,6 @@ complete --command iquest --short-option h \
 # iquest [-z <zone>][--no-page][[no-distinct] [uppercase] [<format>]] <general-query>
 #
 
-# TODO <general-query>
-
 # -z <zone> <general-query>
 complete --command iquest --short-option z \
   --arguments '(__irods_exec_slow __iquest_zone_suggestions)' --exclusive \
@@ -136,7 +134,7 @@ complete --command iquest --short-option z \
 
 # --no-page <general-query>
 complete --command iquest --long-option no-page --no-files \
-  --condition '__iquest_no_opts -h --sql attrs --no-page' \
+  --condition '__iquest_tokenize_cmdline | __iquest_no_opts -h --sql attrs --no-page' \
   --description 'do not prompt asking whether to continue or not'
 
 # no-distinct <general-query>
