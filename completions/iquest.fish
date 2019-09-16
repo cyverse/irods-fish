@@ -75,7 +75,7 @@ complete --command iquest --short-option h \
   --description 'shows help'
 
 #
-# iquest [-z <zone>][--no-page] [no-distinct] [uppercase] [<format>] <general-query>
+# iquest [-z <zone>][--no-page][[no-distinct] [uppercase]] <format> <general-query>
 #
 
 # TODO <general-query>
@@ -104,7 +104,7 @@ complete --command iquest --arguments uppercase \
 # TODO <format> <general-query>
 
 #
-# iquest --sql <specific-query> [<format>] [<argument>...]
+# iquest --sql <specific-query> [<argument>...]
 #
 
 # --sql <specific-query>
@@ -116,7 +116,6 @@ complete --command iquest \
   --arguments '(__irods_exec_slow __iquest_spec_query_suggestions)' --no-files \
   --condition '__iquest_suggest_spec_query'
 
-# TODO --sql <specific-query> <format>
 # TODO --sql <specific-query> <argument>...
 
 #
