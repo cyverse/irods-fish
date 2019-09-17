@@ -168,7 +168,4 @@ complete --command ils --long-option bundle \
   --description 'list the subfiles in the bundle file created by iphybun command' \
   --condition '__ils_no_opts -h -A -L -l -t -V -v --bundle' --no-files
 
-complete --command ils --arguments '(__ils_path_suggestions)' \
-  --condition \
-    "string match --invert --quiet --regex -- '^-([AhLlrtVv]+\$|-?)' (commandline --current-token)" \
-  --no-files
+complete --command ils --arguments '(__ils_path_suggestions)' --no-files
