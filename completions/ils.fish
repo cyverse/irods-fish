@@ -5,7 +5,7 @@
 #
 
 function __ils_absolute_path --argument-names path
-  string match --quiet /\* $path
+ string match --quiet -- /\* $path
 end
 
 function __ils_bundle_suggestion --argument-names curPath
@@ -35,12 +35,12 @@ function __ils_bundle_suggestion --argument-names curPath
 end
 
 function __ils_join_path
-  string match --invert '' $argv | string join / | string replace --all --regex '/+' /
+  string match --invert -- '' $argv | string join / | string replace --all --regex '/+' /
 end
 
 function __ils_split_path --argument-names path
   set --erase parts
-  if string match --invert --quiet '*/*' $path
+  if string match --invert --quiet -- '*/*' $path
     set parts[1] ''
     set parts[2] $path
   else
