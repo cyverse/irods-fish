@@ -15,11 +15,16 @@ complete --command irm --arguments '(__irods_path_suggestions)' --no-files
 
 # irm -f (<collection>|<data-object>)
 complete --command irm --short-option f \
-  --condition '__irods_tokenize_cmdline hf "" | __irods_missing -h -f' \
+  --condition '__irods_tokenize_cmdline hfU "" | __irods_missing -h -f' \
   --description 'immediate removal of data-objects without putting them in trash'
 
 # TODO irm -r <collection>
+
 # TODO irm -U (<collection>|<data-object>)
+complete --command irm --short-option U \
+  --condition '__irods_tokenize_cmdline hfU "" | __irods_missing -h -U' \
+  --description 'unregister the file or collection'
+
 # TODO irm (-v|-V) (<collection>|<data-object>)
 # TODO irm --empty (<collection>|<data-object>)
 # TODO irm -n <repl-num> (<collection>|<data-object>)
