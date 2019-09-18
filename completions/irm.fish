@@ -13,9 +13,9 @@ complete --command irm --short-option h \
 # irm (<collection>|<data-object>)
 complete --command irm --arguments '(__irods_path_suggestions)' --no-files
 
-# TODO irm -f (<collection>|<data-object>)
+# irm -f (<collection>|<data-object>)
 complete --command irm --short-option f \
-  --condition '' \
+  --condition '__irods_tokenize_cmdline hf "" | __irods_missing -h -f' \
   --description 'immediate removal of data-objects without putting them in trash'
 
 # TODO irm -r <collection>
