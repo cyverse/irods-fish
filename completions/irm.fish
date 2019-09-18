@@ -3,9 +3,22 @@
 # TODO make suggest appropriate arguments
 # TODO make suggest multiple arguments, if applicable
 
+#
+# Helper Functions
+#
+
+function __irm_tokenize_cmdline
+  __irods_tokenize_cmdline hfrUvV n
+end
+
+
+#
+# Completions
+#
+
 # irm -h
 complete --command irm --short-option h \
-  --condition '__irods_no_args_condition (__irods_tokenize_cmdline hfrUvV n)' \
+  --condition '__irods_no_args_condition (__irm_tokenize_cmdline)' \
   --description 'shows help'
 
 # irm [-f] [-r] [-U] [(-v|-V)] [--empty] [-n <repl-num>] (<collection>|<data-object>)
@@ -15,14 +28,14 @@ complete --command irm --arguments '(__irods_path_suggestions)' --no-files
 
 # irm -f (<collection>|<data-object>)
 complete --command irm --short-option f \
-  --condition '__irods_tokenize_cmdline hfU "" | __irods_missing -h -f' \
+  --condition '__irm_tokenize_cmdline | __irods_missing -h -f' \
   --description 'immediate removal of data-objects without putting them in trash'
 
 # TODO irm -r <collection>
 
-# TODO irm -U (<collection>|<data-object>)
+# irm -U (<collection>|<data-object>)
 complete --command irm --short-option U \
-  --condition '__irods_tokenize_cmdline hfU "" | __irods_missing -h -U' \
+  --condition '__irm_tokenize_cmdline | __irods_missing -h -U' \
   --description 'unregister the file or collection'
 
 # TODO irm (-v|-V) (<collection>|<data-object>)
