@@ -39,5 +39,10 @@ complete --command irm --short-option U \
   --description 'unregister the file or collection'
 
 # TODO irm (-v|-V) (<collection>|<data-object>)
-# TODO irm --empty (<collection>|<data-object>)
+
+# irm --empty (<collection>|<data-object>)
+complete --command irm --long-option empty \
+  --condition '__irm_tokenize_cmdline | __irods_missing -h --empty' \
+  --description 'removed a bundle file only if all the subfiles of the bundle have been removed'
+
 # TODO irm -n <repl-num> (<collection>|<data-object>)
