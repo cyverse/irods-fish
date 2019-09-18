@@ -57,10 +57,8 @@ function __iquest_suggest_uppercase
     while test $idx -lt $argCnt
       if command test "$args[$idx]" = '-z'
         set idx (math $idx + 1)
-      else
-        if test "$args[$idx]" != --no-page -a "$args[$idx]" != no-distinct
-          return 1
-        end
+      else if command test "$args[$idx]" != --no-page -a "$args[$idx]" != no-distinct
+        return 1
       end
       set idx (math $idx + 1)
     end

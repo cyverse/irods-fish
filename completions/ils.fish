@@ -86,16 +86,6 @@ end
 
 
 #
-# Condition Functions
-#
-
-# TODO replace with __irods_missing
-function __ils_no_opts
-  __ils_tokenize_cmdline | __irods_missing $argv
-end
-
-
-#
 # Suggestion Functions
 #
 
@@ -133,34 +123,37 @@ complete --command ils --short-option h \
 
 complete --command ils --short-option A \
   --description 'ACL and inheritance format' \
-  --condition '__ils_no_opts -A -h --bundle' --no-files
+  --condition '__ils_tokenize_cmdline | __irods_missing -A -h --bundle' --no-files
 
 complete --command ils --short-option L \
   --description 'very long format' \
-  --condition '__ils_no_opts -h -L -l --bundle' --no-files
+  --condition '__ils_tokenize_cmdline | __irods_missing -h -L -l --bundle' --no-files
 
 complete --command ils --short-option l \
   --description 'long format' \
-  --condition '__ils_no_opts -h -L -l --bundle' --no-files
+  --condition '__ils_tokenize_cmdline | __irods_missing -h -L -l --bundle' --no-files
 
 complete --command ils --short-option r \
   --description 'recursive - show subcollections' \
-  --condition '__ils_no_opts -h -r' --no-files
+  --condition '__ils_tokenize_cmdline | __irods_missing -h -r' --no-files
 
 complete --command ils --short-option t \
   --description 'use a ticket to access collection information' \
-  --condition '__ils_no_opts -h -t --bundle' --exclusive
+  --condition '__ils_tokenize_cmdline | __irods_missing -h -t --bundle' --exclusive
 
 complete --command ils --short-option V \
   --description 'very verbose' \
-  --condition '__ils_no_opts -h -V -v --bundle' --no-files
+  --condition '__ils_tokenize_cmdline | __irods_missing -h -V -v --bundle' --no-files
 
 complete --command ils --short-option v \
   --description 'verbose' \
-  --condition '__ils_no_opts -h -V -v --bundle' --no-files
+  --condition '__ils_tokenize_cmdline | __irods_missing -h -V -v --bundle' --no-files
 
 complete --command ils --long-option bundle \
   --description 'list the subfiles in the bundle file created by iphybun command' \
-  --condition '__ils_no_opts -h -A -L -l -t -V -v --bundle' --no-files
+  --condition '__ils_tokenize_cmdline | __irods_missing -h -A -L -l -t -V -v --bundle' --no-files
 
-complete --command ils --arguments '(__ils_path_suggestions)' --no-files
+complete --command ils --arguments '(__ils_path_suggestions)' --no-files \
+  --condition '__ils_tokenize_cmdline | __irods_missing -h -t'
+
+complete --command ils --no-files
