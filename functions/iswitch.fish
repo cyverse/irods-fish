@@ -14,7 +14,7 @@ function iswitch --argument-names environ \
   else
     set ieFile $HOME/.irods/$environ.json
 
-    if test -e "$eFile"
+    if test -e "$ieFile"
       set --export --global IRODS_ENVIRONMENT_FILE $ieFile
     else
       printf 'The environment %s doesn\'t exist, or its file %s isn\'t readable.\n' \
