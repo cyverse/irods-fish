@@ -4,7 +4,7 @@ function __irods_path_suggestions \
   function __suggestions
     set curArg (commandline --current-token)
     set dirName ''
-    if string match --quiet --regex / $curArg
+    if string match --quiet --regex -- / $curArg
       set pathParts (string split --right --max 1 / $curArg)
       set dirName "$pathParts[1]"/
     end
