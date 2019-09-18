@@ -1,7 +1,7 @@
 # autocompletions for iswitch
 
 function __iswitch_suggestions
-  if [ (count (commandline --cut-at-cursor --tokenize)) -eq 1 ]
+  if test (count (commandline --cut-at-cursor --tokenize)) -eq 1
     ienvs
   end
 end

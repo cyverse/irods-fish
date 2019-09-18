@@ -2,7 +2,7 @@
 
 function __ido_suggestions
   set cmdTerms (commandline --cut-at-cursor --tokenize)
-  if [ (count $cmdTerms ) -eq 1 ]
+  if test (count $cmdTerms ) -eq 1
     ienvs
   else
     set environ $cmdTerms[2]

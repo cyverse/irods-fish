@@ -10,15 +10,6 @@ function __iquest_tokenize_cmdline
   __irods_tokenize_cmdline h z
 end
 
-function __iquest_no_opts
-  while read arg
-    if contains -- $arg $argv
-      return 1
-    end
-  end
-  return 0
-end
-
 
 #
 # Condition Functions
@@ -29,7 +20,7 @@ function __iquest_suggest_no_distinct
   set argCnt (count $args)
   if test $argCnt -le 1
     true
-  else if echo $args | __iquest_no_opts -h --sql attrs upper uppercase no-distinct
+  else if echo $args | __irods_missing -h --sql attrs upper uppercase no-distinct
     set idx 1
     while test $idx -lt $argCnt
       if command test "$args[$idx]" = '-z'
@@ -61,7 +52,7 @@ function __iquest_suggest_uppercase
   set argCnt (count $args)
   if test $argCnt -le 1
     true
-  else if echo $args | __iquest_no_opts -h --sql attrs upper uppercase
+  else if echo $args | __irods_missing -h --sql attrs upper uppercase
     set idx 1
     while test $idx -lt $argCnt
       if command test "$args[$idx]" = '-z'
@@ -80,7 +71,7 @@ function __iquest_suggest_uppercase
 end
 
 function __iquest_suggest_zone
-  if __iquest_tokenize_cmdline | __iquest_no_opts -h --sql attrs
+  if __iquest_tokenize_cmdline | __irods_missing -h --sql attrs
     set args (__iquest_tokenize_cmdline)
     if set zIdx (contains --index -- -z $args)
       test "$zIdx" -ge (math (count $args) - 1)
@@ -100,9 +91,9 @@ end
 function __iquest_spec_query_suggestions
   set extractedName 0
   iquest --sql ls | while read line
-    if [ $line = ---- ]
+    if test "$line" = ----
       set extractedName 0
-    else if [ $extractedName -eq 0 ]
+    else if test "$extractedName" -eq 0
       echo $line
       set extractedName 1
     end
@@ -140,7 +131,7 @@ complete --command iquest --short-option z \
 
 # --no-page <general-query>
 complete --command iquest --long-option no-page --no-files \
-  --condition '__iquest_tokenize_cmdline | __iquest_no_opts -h --sql attrs --no-page' \
+  --condition '__iquest_tokenize_cmdline | __irods_missing -h --sql attrs --no-page' \
   --description 'do not prompt asking whether to continue or not'
 
 # no-distinct <general-query>

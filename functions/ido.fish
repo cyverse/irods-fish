@@ -1,7 +1,7 @@
 function ido --argument-names environ cmd \
     --description 'executes a command in the given iRODS environment without switching to it'
 
-  if [ (count $argv) -lt 2 ]
+  if test (count $argv) -lt 2
     printf 'Usage: ido ENVIRON CMD [ARG]...\n' >&2
     printf 'Executes `CMD [ARG]...` in the iRODS environment ENVIRON\n\n' >&2
     printf 'Call `ienvs` to list the available iRODS environments.\n' >&2

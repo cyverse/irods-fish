@@ -21,13 +21,13 @@ function __irods_tokenize_cmdline --argument-names shortFlags shortOptParams \
       echo $term
     else
       set optChars (string split -- '' (string trim --left --chars '-' -- $term))
-      while [ (count $optChars) -gt 0 ]
-        if [ -n $flags ]; and string match --quiet --regex -- "[$flags]" $optChars[1]
+      while test (count $optChars) -gt 0
+        if test -n "$flags"; and string match --quiet --regex -- "[$flags]" $optChars[1]
           echo '-'$optChars[1]
           set --erase optChars[1]
-        else if [ -n $params ]; and string match --quiet --regex -- "[$params]" $optChars[1]
+        else if test -n "$params"; and string match --quiet --regex -- "[$params]" $optChars[1]
           echo '-'$optChars[1]
-          if [ (count $optChars) -gt 1 ]
+          if test (count $optChars) -gt 1
             string join -- '' $optChars[2..-1]
           end
           set --erase optChars

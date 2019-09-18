@@ -14,6 +14,10 @@ complete --command irm --short-option h \
 complete --command irm --arguments '(__irods_path_suggestions)' --no-files
 
 # TODO irm -f (<collection>|<data-object>)
+complete --command irm --short-option f \
+  --condition '' \
+  --description 'immediate removal of data-objects without putting them in trash'
+
 # TODO irm -r <collection>
 # TODO irm -U (<collection>|<data-object>)
 # TODO irm (-v|-V) (<collection>|<data-object>)

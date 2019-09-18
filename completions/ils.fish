@@ -11,7 +11,7 @@ end
 function __ils_bundle_suggestion --argument-names curPath
   set zone (command ienv | string replace --filter --regex -- '^.*irods_zone_name - ' '')
   set bundlePath /$zone/bundle/
-  if [ -z $curPath ]
+  if test -z "$curPath"
     echo $bundlePath
   else
     set cwd (string trim --right --chars / (command ipwd))
@@ -24,7 +24,7 @@ function __ils_bundle_suggestion --argument-names curPath
     if __ils_separable_paths $curAbsPath $bundlePath
       return 1
     end
-    if [ (string length $curAbsPath) -lt (string length $bundlePath) ]
+    if test (string length $curAbsPath) -lt (string length $bundlePath)
       if __ils_absolute_path $curPath
         echo $bundlePath
       else
@@ -62,7 +62,7 @@ function __ils_collection_suggestions --argument-names sugBegin
   set sugColl $sugParts[2]
   set parent (__ils_join_path $sugBase $sugParent)
   set --erase relCollPat
-  if [ -z $sugColl ]
+  if test -z "$sugColl"
     set relCollPat '_%'
   else
     set relCollPat $sugColl%
@@ -89,14 +89,9 @@ end
 # Condition Functions
 #
 
+# TODO replace with __irods_missing
 function __ils_no_opts
-  set args (__ils_tokenize_cmdline)
-  for opt in $argv
-    if contains -- $opt $args
-      return 1
-    end
-  end
-  return 0
+  __ils_tokenize_cmdline | __irods_missing $argv
 end
 
 
@@ -109,11 +104,11 @@ function __ils_path_suggestions
   set --erase suggestions
   if contains -- --bundle $args
     set suggestions (__ils_bundle_suggestion $args[-1])
-    if [ $status -ne 0 ]
+    if test "$status" -ne 0
       return 0
     end
   end
-  if [ (count $suggestions) -eq 0 ]
+  if test (count $suggestions) -eq 0
     if contains -- -r $args
       set suggestions (__irods_exec_slow __ils_collection_suggestions $args[-1])
     else
