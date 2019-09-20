@@ -7,9 +7,11 @@
 function __irods_missing \
     --description 'determines if a set of arguments are all missing from its input'
 
-  while read arg
-    if contains -- $arg $argv
-      return 1
+  while read --array args
+    for arg in $args
+      if contains -- $arg $argv
+        return 1
+      end
     end
   end
 
