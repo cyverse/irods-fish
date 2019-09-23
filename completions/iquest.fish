@@ -18,13 +18,17 @@ end
 function __iquest_suggest_no_distinct
   set args (__iquest_tokenize_cmdline)
   set argCnt (count $args)
-  if test $argCnt -le 1
+  if test "$argCnt" -le 1
     true
   else if echo $args | __irods_missing -h --sql attrs upper uppercase no-distinct
     set idx 1
-    while test $idx -lt $argCnt
+    while test "$idx" -lt $argCnt
       if command test "$args[$idx]" = '-z'
-        set idx (math $idx + 1)
+        if test "$idx" -eq (math $argCnt - 1)
+          return 1
+        else
+          set idx (math $idx + 1)
+        end
       else
         if test "$args[$idx]" != --no-page
           return 1
@@ -35,6 +39,17 @@ function __iquest_suggest_no_distinct
     true
   else
     false
+  end
+end
+
+function __iquest_suggest_no_page
+  set args (__iquest_tokenize_cmdline)
+  if not echo $args | __irods_missing -h --sql attrs --no-page
+    false
+  else if set zIdx (contains --index -- -z $args)
+    test "$zIdx" -lt (math (count $args) - 1)
+  else
+    true
   end
 end
 
@@ -69,7 +84,7 @@ function __iquest_suggest_uppercase
 end
 
 function __iquest_suggest_zone
-  if __iquest_tokenize_cmdline | __irods_missing -h --sql attrs
+  if __iquest_tokenize_cmdline | __irods_missing -h -z --sql attrs
     set args (__iquest_tokenize_cmdline)
     if set zIdx (contains --index -- -z $args)
       test "$zIdx" -ge (math (count $args) - 1)
@@ -124,12 +139,12 @@ complete --command iquest --short-option h \
 # -z <zone> <general-query>
 complete --command iquest --short-option z \
   --arguments '(__irods_exec_slow __iquest_zone_suggestions)' --exclusive \
-  --condition '__iquest_suggest_zone' \
+  --condition __iquest_suggest_zone \
   --description 'the zone to query'
 
 # --no-page <general-query>
 complete --command iquest --long-option no-page --no-files \
-  --condition '__iquest_tokenize_cmdline | __irods_missing -h --sql attrs --no-page' \
+  --condition __iquest_suggest_no_page \
   --description 'do not prompt asking whether to continue or not'
 
 # no-distinct <general-query>
@@ -153,7 +168,7 @@ complete --command iquest --long-option sql --exclusive \
 
 complete --command iquest \
   --arguments '(__irods_exec_slow __iquest_spec_query_suggestions)' --no-files \
-  --condition '__iquest_suggest_spec_query'
+  --condition __iquest_suggest_spec_query
 
 #
 # iquest attrs
