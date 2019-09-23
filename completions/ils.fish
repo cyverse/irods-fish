@@ -38,6 +38,14 @@ function __ils_join_path
   string match --invert -- '' $argv | string join / | string replace --all --regex '/+' /
 end
 
+function __ils_needs_ticket
+  if set tIdx (contains --index -- -t $argv)
+    test "$tIdx" -ge (math (count $argv) - 1)
+  else
+    false
+  end
+end
+
 function __ils_split_path --argument-names path
   set --erase parts
   if string match --invert --quiet -- '*/*' $path
@@ -86,6 +94,20 @@ end
 
 
 #
+# Condition Functions
+#
+
+function __ils_suggest
+  set args (__ils_tokenize_cmdline)
+  if not echo $args | __irods_missing -h $argv
+    false
+  else
+    not __ils_needs_ticket $args
+  end
+end
+
+
+#
 # Suggestion Functions
 #
 
@@ -118,40 +140,40 @@ end
 #
 
 complete --command ils --short-option h \
-  --description 'shows help' \
-  --condition '__irods_no_args_condition (__ils_tokenize_cmdline)'
+  --condition '__irods_no_args_condition (__ils_tokenize_cmdline)' \
+  --description 'shows help'
 
-complete --command ils --short-option A \
-  --description 'ACL and inheritance format' \
-  --condition '__ils_tokenize_cmdline | __irods_missing -A -h --bundle' --no-files
+complete --command ils --short-option A  \
+  --condition '__ils_suggest -A --bundle' \
+  --description 'ACL and inheritance format'
 
 complete --command ils --short-option L \
-  --description 'very long format' \
-  --condition '__ils_tokenize_cmdline | __irods_missing -h -L -l --bundle' --no-files
+  --condition '__ils_suggest -L -l --bundle' \
+  --description 'very long format'
 
 complete --command ils --short-option l \
-  --description 'long format' \
-  --condition '__ils_tokenize_cmdline | __irods_missing -h -L -l --bundle' --no-files
+  --condition '__ils_suggest -L -l --bundle' \
+  --description 'long format'
 
 complete --command ils --short-option r \
-  --description 'recursive - show subcollections' \
-  --condition '__ils_tokenize_cmdline | __irods_missing -h -r' --no-files
+  --condition '__ils_suggest -r' \
+  --description 'recursive - show subcollections'
 
-complete --command ils --short-option t \
-  --description 'use a ticket to access collection information' \
-  --condition '__ils_tokenize_cmdline | __irods_missing -h -t --bundle' --exclusive
+complete --command ils --short-option t --exclusive \
+  --condition '__ils_tokenize_cmdline | __irods_missing -h -t --bundle' \
+  --description 'use a ticket to access collection information'
 
 complete --command ils --short-option V \
-  --description 'very verbose' \
-  --condition '__ils_tokenize_cmdline | __irods_missing -h -V -v --bundle' --no-files
+  --condition '__ils_suggest -V -v --bundle' \
+  --description 'very verbose'
 
 complete --command ils --short-option v \
-  --description 'verbose' \
-  --condition '__ils_tokenize_cmdline | __irods_missing -h -V -v --bundle' --no-files
+  --condition '__ils_suggest -V -v --bundle' \
+  --description 'verbose'
 
 complete --command ils --long-option bundle \
-  --description 'list the subfiles in the bundle file created by iphybun command' \
-  --condition '__ils_tokenize_cmdline | __irods_missing -h -A -L -l -t -V -v --bundle' --no-files
+  --condition '__ils_tokenize_cmdline | __irods_missing -h -A -L -l -t -V -v --bundle' \
+  --description 'list the subfiles in the bundle file created by iphybun command'
 
 complete --command ils --arguments '(__ils_path_suggestions)' --no-files \
   --condition '__ils_tokenize_cmdline | __irods_missing -h -t'
