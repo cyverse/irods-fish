@@ -6,6 +6,14 @@
 # Helper Functions
 #
 
+function __iquest_needs_zone
+  if set zIdx (contains --index -- -z $argv)
+    test "$zIdx" -ge (math (count $argv) - 1)
+  else
+    false
+  end
+end
+
 function __iquest_tokenize_cmdline
   __irods_tokenize_cmdline h z
 end
@@ -24,7 +32,7 @@ function __iquest_suggest_no_distinct
     set idx 1
     while test "$idx" -lt $argCnt
       if command test "$args[$idx]" = '-z'
-        if test "$idx" -eq (math $argCnt - 1)
+        if __iquest_needs_zone $args
           return 1
         else
           set idx (math $idx + 1)
@@ -46,10 +54,8 @@ function __iquest_suggest_no_page
   set args (__iquest_tokenize_cmdline)
   if not echo $args | __irods_missing -h --sql attrs --no-page
     false
-  else if set zIdx (contains --index -- -z $args)
-    test "$zIdx" -lt (math (count $args) - 1)
   else
-    true
+    not __iquest_needs_zone $args
   end
 end
 
@@ -71,7 +77,11 @@ function __iquest_suggest_uppercase
     set idx 1
     while test $idx -lt $argCnt
       if command test "$args[$idx]" = '-z'
-        set idx (math $idx + 1)
+        if __iquest_needs_zone $args
+          return 1
+        else
+          set idx (math $idx + 1)
+        end
       else if command test "$args[$idx]" != --no-page -a "$args[$idx]" != no-distinct
         return 1
       end
@@ -84,10 +94,10 @@ function __iquest_suggest_uppercase
 end
 
 function __iquest_suggest_zone
-  if __iquest_tokenize_cmdline | __irods_missing -h -z --sql attrs
+  if __iquest_tokenize_cmdline | __irods_missing -h --sql attrs
     set args (__iquest_tokenize_cmdline)
     if set zIdx (contains --index -- -z $args)
-      test "$zIdx" -ge (math (count $args) - 1)
+      __iquest_needs_zone $args; and test "$args[-1]" != -
     else
       true
     end
