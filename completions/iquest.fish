@@ -7,11 +7,7 @@
 #
 
 function __iquest_needs_zone
-  if set zIdx (contains --index -- -z $argv)
-    test "$zIdx" -ge (math (count $argv) - 1)
-  else
-    false
-  end
+  __irods_cmdline_needs_param_val -z $argv
 end
 
 function __iquest_tokenize_cmdline

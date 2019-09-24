@@ -38,14 +38,6 @@ function __ils_join_path
   string match --invert -- '' $argv | string join / | string replace --all --regex '/+' /
 end
 
-function __ils_needs_ticket
-  if set tIdx (contains --index -- -t $argv)
-    test "$tIdx" -ge (math (count $argv) - 1)
-  else
-    false
-  end
-end
-
 function __ils_split_path --argument-names path
   set --erase parts
   if string match --invert --quiet -- '*/*' $path
@@ -102,7 +94,7 @@ function __ils_suggest
   if not echo $args | __irods_missing -h $argv
     false
   else
-    not __ils_needs_ticket $args
+    not __irods_cmdline_needs_param_val -t $args
   end
 end
 
