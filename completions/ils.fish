@@ -1,6 +1,4 @@
 # tab completion for ils
-# XXX - When suggesting paths, it doesn't filter paths that are already suggested when one is absolute and the other is relative
-# XXX - For some arguments, it is only suppose to suggest one path
 
 #
 # Helper functions
@@ -38,6 +36,15 @@ end
 
 function __ils_join_path
   string match --invert -- '' $argv | string join / | string replace --all --regex '/+' /
+end
+
+function __ils_mk_path_absolute --argument-names path
+  set canonicalPath (string trim --right --chars / $path)
+  if __ils_absolute_path $canonicalPath
+    echo $canonicalPath
+  else
+    echo (__ils_join_path (command ipwd) $canonicalPath)
+  end
 end
 
 function __ils_split_path --argument-names path
@@ -121,9 +128,17 @@ function __ils_path_suggestions
       set suggestions (__irods_path_suggestions)
     end
   end
+  set --erase cmdLineCanonicalPaths
+  if test (count $args) -gt 1
+    for arg in $args[1..-2]
+      if string match --quiet --regex -- '^[^-]' $arg
+        set cmdLineCanonicalPaths $cmdLineCanonicalPaths (__ils_mk_path_absolute $arg)
+      end
+    end
+  end
   for suggestion in $suggestions
-    if not contains $suggestion $args[1..-2]; \
-       and not contains (string trim --right --chars / $suggestion) $args[1..-2]
+    set canonicalSug (__ils_mk_path_absolute $suggestion)
+    if not contains $canonicalSug $cmdLineCanonicalPaths
       echo $suggestion
     end
   end
