@@ -1,6 +1,7 @@
 # tab completion for irm
 #
 # TODO make suggest multiple arguments, if applicable
+# TODO verify order of command line arguments
 
 #
 # Helper Functions
@@ -52,6 +53,7 @@ end
 # Suggestion Functions
 #
 
+# TODO make it remove all duplicate suggestions by resolving relative paths. This applies to the ils version too.
 function __irm_path_suggestions
   set args (__irm_tokenize_cmdline)
   set --erase suggestions
@@ -61,7 +63,8 @@ function __irm_path_suggestions
     set suggestions (__irods_path_suggestions)
   end
   for suggestion in $suggestions
-    if not contains $suggestion $args[1..-2]
+    if not contains $suggestion $args[1..-2]; \
+       and not contains (string trim --right --chars / $suggestion) $args[1..-2]
       echo $suggestion
     end
   end

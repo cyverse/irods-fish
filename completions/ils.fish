@@ -1,4 +1,6 @@
 # tab completion for ils
+# XXX - When suggesting paths, it doesn't filter paths that are already suggested when one is absolute and the other is relative
+# XXX - For some arguments, it is only suppose to suggest one path
 
 #
 # Helper functions
@@ -120,7 +122,8 @@ function __ils_path_suggestions
     end
   end
   for suggestion in $suggestions
-    if not contains $suggestion $args[1..-2]
+    if not contains $suggestion $args[1..-2]; \
+       and not contains (string trim --right --chars / $suggestion) $args[1..-2]
       echo $suggestion
     end
   end
