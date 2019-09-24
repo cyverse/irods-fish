@@ -35,8 +35,6 @@ complete --command irm --short-option h \
   --condition '__irods_no_args_condition (__irm_tokenize_cmdline)' \
   --description 'shows help'
 
-# irm [-f] [-r] [-U] [(-v|-V)] [--empty] [-n <repl-num>] (<collection>|<data-object>)
-
 # irm (<collection>|<data-object>)
 complete --command irm --arguments '(__irods_path_suggestions)' --no-files
 
@@ -45,7 +43,10 @@ complete --command irm --short-option f \
   --condition '__irm_suggest -f' \
   --description 'immediate removal of data-objects without putting them in trash'
 
-# TODO irm -r <collection>
+# irm -r <collection>
+complete --command irm --short-option r \
+  --condition '__irm_suggest -r' \
+  --description 'recursive - remove the whole subtree'
 
 # irm -U (<collection>|<data-object>)
 complete --command irm --short-option U \
