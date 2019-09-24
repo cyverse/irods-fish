@@ -1,29 +1,57 @@
 # tab completion for irm
-#
-# TODO make suggest multiple arguments, if applicable
-# TODO verify order of command line arguments
 
 #
 # Helper Functions
 #
 
+function __irm_absolute_path --argument-names path
+ string match --quiet -- /\* $path
+end
+
+function __irm_join_path
+  string match --invert -- '' $argv | string join / | string replace --all --regex '/+' /
+end
+
+function __irm_mk_path_absolute --argument-names path
+  set canonicalPath (string trim --right --chars / $path)
+  if __irm_absolute_path $canonicalPath
+    echo $canonicalPath
+  else
+    echo (__irm_join_path (command ipwd) $canonicalPath)
+  end
+end
+
+function __irm_split_path --argument-names path
+  set --erase parts
+  if string match --invert --quiet -- '*/*' $path
+    set parts[1] ''
+    set parts[2] $path
+  else
+    set parts (string split --right --max 1 / $path)
+    if string match --quiet '/*' $path
+      set parts[1] (__irm_join_path / $parts[1])
+    end
+  end
+  printf '%s\n%s\n' $parts[1] $parts[2]
+end
+
 function __irm_collection_suggestions --argument-names sugBegin
   set sugBase ''
-  if not __ils_absolute_path $sugBegin
+  if not __irm_absolute_path $sugBegin
     set sugBase (command ipwd)
   end
-  set sugParts (__ils_split_path $sugBegin)
+  set sugParts (__irm_split_path $sugBegin)
   set sugParent $sugParts[1]
   set sugColl $sugParts[2]
-  set parent (__ils_join_path $sugBase $sugParent)
+  set parent (__irm_join_path $sugBase $sugParent)
   set --erase relCollPat
   if test -z "$sugColl"
     set relCollPat '_%'
   else
     set relCollPat $sugColl%
   end
-  set collPat (__ils_join_path $parent $relCollPat)
-  set filter '^'(__ils_join_path $sugBase '(.*)')
+  set collPat (__irm_join_path $parent $relCollPat)
+  set filter '^'(__irm_join_path $sugBase '(.*)')
   command iquest --no-page '%s/' \
        "select COLL_NAME where COLL_PARENT_NAME = '$parent' and COLL_NAME like '$collPat'" \
     | string match --invert --regex '^CAT_NO_ROWS_FOUND:' \
@@ -53,7 +81,6 @@ end
 # Suggestion Functions
 #
 
-# TODO make it remove all duplicate suggestions by resolving relative paths. This applies to the ils version too.
 function __irm_path_suggestions
   set args (__irm_tokenize_cmdline)
   set --erase suggestions
@@ -62,9 +89,17 @@ function __irm_path_suggestions
   else
     set suggestions (__irods_path_suggestions)
   end
+  set --erase cmdLineCanonicalPaths
+  if test (count $args) -gt 1
+    for arg in $args[1..-2]
+      if string match --quiet --regex -- '^[^-]' $arg
+        set cmdLineCanonicalPaths $cmdLineCanonicalPaths (__irm_mk_path_absolute $arg)
+      end
+    end
+  end
   for suggestion in $suggestions
-    if not contains $suggestion $args[1..-2]; \
-       and not contains (string trim --right --chars / $suggestion) $args[1..-2]
+    set canonicalSug (__irm_mk_path_absolute $suggestion)
+    if not contains $canonicalSug $cmdLineCanonicalPaths
       echo $suggestion
     end
   end
