@@ -5,7 +5,7 @@
 #
 
 function __icd_tokenize_cmdline
-  __irods_tokenize_cmdline hV ''
+  __irods_tokenize_cmdline hVv ''
 end
 
 
@@ -25,7 +25,10 @@ complete --command icd --arguments '(__irods_path_suggestions)' --no-files
 
 # icd -V <collection>
 complete --command icd --short-option V \
-  --condition '__icd_tokenize_cmdline | __irods_missing -h -V' \
+  --condition '__icd_tokenize_cmdline | __irods_missing -h -V -v' \
   --description 'very verbose'
 
-# TODO icd -v <collection>
+# icd -v <collection>
+complete --command icd --short-option v \
+  --condition '__icd_tokenize_cmdline | __irods_missing -h -V -v' \
+  --description 'verbose'
