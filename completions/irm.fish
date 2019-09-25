@@ -4,16 +4,12 @@
 # Helper Functions
 #
 
-function __irm_join_path
-  string match --invert -- '' $argv | string join / | string replace --all --regex '/+' /
-end
-
 function __irm_mk_path_absolute --argument-names path
   set canonicalPath (string trim --right --chars / $path)
   if __irods_is_path_absolute $canonicalPath
     echo $canonicalPath
   else
-    echo (__irm_join_path (command ipwd) $canonicalPath)
+    echo (__irods_join_path (command ipwd) $canonicalPath)
   end
 end
 
@@ -25,7 +21,7 @@ function __irm_split_path --argument-names path
   else
     set parts (string split --right --max 1 / $path)
     if string match --quiet '/*' $path
-      set parts[1] (__irm_join_path / $parts[1])
+      set parts[1] (__irods_join_path / $parts[1])
     end
   end
   printf '%s\n%s\n' $parts[1] $parts[2]
@@ -39,15 +35,15 @@ function __irm_collection_suggestions --argument-names sugBegin
   set sugParts (__irm_split_path $sugBegin)
   set sugParent $sugParts[1]
   set sugColl $sugParts[2]
-  set parent (__irm_join_path $sugBase $sugParent)
+  set parent (__irods_join_path $sugBase $sugParent)
   set --erase relCollPat
   if test -z "$sugColl"
     set relCollPat '_%'
   else
     set relCollPat $sugColl%
   end
-  set collPat (__irm_join_path $parent $relCollPat)
-  set filter '^'(__irm_join_path $sugBase '(.*)')
+  set collPat (__irods_join_path $parent $relCollPat)
+  set filter '^'(__irods_join_path $sugBase '(.*)')
   command iquest --no-page '%s/' \
        "select COLL_NAME where COLL_PARENT_NAME = '$parent' and COLL_NAME like '$collPat'" \
     | string match --invert --regex '^CAT_NO_ROWS_FOUND:' \
