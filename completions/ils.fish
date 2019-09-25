@@ -4,10 +4,6 @@
 # Helper functions
 #
 
-function __ils_absolute_path --argument-names path
- string match --quiet -- /\* $path
-end
-
 function __ils_bundle_suggestion --argument-names curPath
   set zone (command ienv | string replace --filter --regex -- '^.*irods_zone_name - ' '')
   set bundlePath /$zone/bundle/
@@ -16,7 +12,7 @@ function __ils_bundle_suggestion --argument-names curPath
   else
     set cwd (string trim --right --chars / (command ipwd))
     set --erase curAbsPath
-    if __ils_absolute_path $curPath
+    if __irods_is_path_absolute $curPath
       set curAbsPath $curPath
     else
       set curAbsPath $cwd/$curPath
@@ -25,7 +21,7 @@ function __ils_bundle_suggestion --argument-names curPath
       return 1
     end
     if test (string length $curAbsPath) -lt (string length $bundlePath)
-      if __ils_absolute_path $curPath
+      if __irods_is_path_absolute $curPath
         echo $bundlePath
       else
         string replace "$cwd"/ '' $bundlePath
@@ -40,7 +36,7 @@ end
 
 function __ils_mk_path_absolute --argument-names path
   set canonicalPath (string trim --right --chars / $path)
-  if __ils_absolute_path $canonicalPath
+  if __irods_is_path_absolute $canonicalPath
     echo $canonicalPath
   else
     echo (__ils_join_path (command ipwd) $canonicalPath)
@@ -63,7 +59,7 @@ end
 
 function __ils_collection_suggestions --argument-names sugBegin
   set sugBase ''
-  if not __ils_absolute_path $sugBegin
+  if not __irods_is_path_absolute $sugBegin
     set sugBase (command ipwd)
   end
   set sugParts (__ils_split_path $sugBegin)

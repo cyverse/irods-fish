@@ -4,17 +4,13 @@
 # Helper Functions
 #
 
-function __irm_absolute_path --argument-names path
- string match --quiet -- /\* $path
-end
-
 function __irm_join_path
   string match --invert -- '' $argv | string join / | string replace --all --regex '/+' /
 end
 
 function __irm_mk_path_absolute --argument-names path
   set canonicalPath (string trim --right --chars / $path)
-  if __irm_absolute_path $canonicalPath
+  if __irods_is_path_absolute $canonicalPath
     echo $canonicalPath
   else
     echo (__irm_join_path (command ipwd) $canonicalPath)
@@ -37,7 +33,7 @@ end
 
 function __irm_collection_suggestions --argument-names sugBegin
   set sugBase ''
-  if not __irm_absolute_path $sugBegin
+  if not __irods_is_path_absolute $sugBegin
     set sugBase (command ipwd)
   end
   set sugParts (__irm_split_path $sugBegin)
