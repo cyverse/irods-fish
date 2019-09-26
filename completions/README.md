@@ -12,7 +12,6 @@ commands are implemented, implement completion for `iquest` general queries.
 
 ```
 - 1065 iadmin
-   948 icd
    748 imeta
    600 iput
    561 ichmod
