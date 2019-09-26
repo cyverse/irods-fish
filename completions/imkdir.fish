@@ -4,4 +4,4 @@
 # TODO make suggest appropriate arguments
 # TODO make suggest multiple arguments, if applicable
 
-complete --command imkdir --no-files --arguments '(__irods_path_suggestions)'
+complete --command imkdir --arguments '(__irods_exec_slow __irods_path_suggestions)' --no-files 

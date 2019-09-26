@@ -4,4 +4,4 @@
 # TODO make suggest appropriate arguments
 # TODO make suggest multiple arguments, if applicable
 
-complete --command irmtrash --no-files --arguments '(__irods_path_suggestions)'
+complete --command irmtrash --arguments '(__irods_exec_slow __irods_path_suggestions)' --no-files 

@@ -21,7 +21,7 @@ complete --command icd --short-option h \
 # TODO restrict to collections
 # TODO restrict to single path
 # icd <collection>
-complete --command icd --arguments '(__irods_path_suggestions)' --no-files
+complete --command icd --arguments '(__irods_exec_slow __irods_path_suggestions)' --no-files
 
 # icd -V <collection>
 complete --command icd --short-option V \

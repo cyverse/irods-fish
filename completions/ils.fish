@@ -78,7 +78,7 @@ function __ils_path_suggestions
   end
   if test (count $suggestions) -eq 0
     if contains -- -r $args
-      set suggestions (__irods_exec_slow __irods_collection_suggestions $args[-1])
+      set suggestions (__irods_collection_suggestions $args[-1])
     else
       set suggestions (__irods_path_suggestions)
     end
@@ -140,7 +140,7 @@ complete --command ils --long-option bundle \
   --condition '__ils_tokenize_cmdline | __irods_missing -h -A -L -l -t -V -v --bundle' \
   --description 'list the subfiles in the bundle file created by iphybun command'
 
-complete --command ils --arguments '(__ils_path_suggestions)' --no-files \
+complete --command ils --arguments '(__irods_exec_slow __ils_path_suggestions)' \
   --condition '__ils_tokenize_cmdline | __irods_missing -h -t'
 
 complete --command ils --no-files

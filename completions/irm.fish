@@ -40,7 +40,7 @@ function __irm_path_suggestions
   set args (__irm_tokenize_cmdline)
   set --erase suggestions
   if contains -- -r $args
-    set suggestions (__irods_exec_slow __irods_collection_suggestions $args[-1])
+    set suggestions (__irods_collection_suggestions $args[-1])
   else
     set suggestions (__irods_path_suggestions)
   end
@@ -73,7 +73,8 @@ complete --command irm --short-option h \
   --description 'shows help'
 
 # irm (<collection>|<data-object>)
-complete --command irm --arguments '(__irm_path_suggestions)' --condition __irm_suggest
+complete --command irm --arguments '(__irods_exec_slow __irm_path_suggestions)' \
+  --condition __irm_suggest
 
 # irm -f (<collection>|<data-object>)
 complete --command irm --short-option f --condition '__irm_suggest -f' \
