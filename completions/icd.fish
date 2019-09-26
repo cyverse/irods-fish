@@ -29,10 +29,7 @@ end
 
 complete --command icd --no-files
 
-# icd -h
-complete --command icd --short-option h \
-  --condition '__irods_no_args_condition (__icd_tokenize_cmdline)' \
-  --description 'shows help'
+__irods_help_completion icd
 
 # icd <collection>
 complete --command icd --arguments '(__irods_exec_slow __irods_collection_suggestions)' \

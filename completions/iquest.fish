@@ -130,13 +130,7 @@ end
 
 complete --command iquest --no-files
 
-#
-# iquest -h
-#
-
-complete --command iquest --short-option h \
-  --condition '__irods_no_args_condition (__iquest_tokenize_cmdline)' \
-  --description 'shows help'
+__irods_help_completion iquest
 
 #
 # iquest [-z <zone>][--no-page][[no-distinct] [uppercase] [<format>]] <general-query>

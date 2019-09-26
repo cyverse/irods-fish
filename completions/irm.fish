@@ -67,10 +67,7 @@ end
 
 complete --command irm --no-files
 
-# irm -h
-complete --command irm --short-option h \
-  --condition '__irods_no_args_condition (__irm_tokenize_cmdline)' \
-  --description 'shows help'
+__irods_help_completion irm
 
 # irm (<collection>|<data-object>)
 complete --command irm --arguments '(__irods_exec_slow __irm_path_suggestions)' \

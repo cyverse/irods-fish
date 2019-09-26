@@ -104,9 +104,7 @@ end
 # Completions
 #
 
-complete --command ils --short-option h \
-  --condition '__irods_no_args_condition (__ils_tokenize_cmdline)' \
-  --description 'shows help'
+__irods_help_completion ils
 
 complete --command ils --short-option A  \
   --condition '__ils_suggest -A --bundle' \

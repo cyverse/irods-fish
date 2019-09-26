@@ -18,10 +18,7 @@ end
 # Completions
 #
 
-# imeta -h
-complete --command imeta --short-option h \
-  --condition '__irods_no_args_condition (__imeta_tokenize_cmdline)' \
-  --description 'shows help'
+__irods_help_completion imeta
 
 # imeta -V
 complete --command imeta --short-option V \

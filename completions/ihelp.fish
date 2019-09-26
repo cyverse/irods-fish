@@ -1,8 +1,8 @@
 # tab completions for ihelp
 
-complete --command ihelp --short-option h \
-  --description 'shows help' \
-  --condition "__irods_no_args_condition (__irods_tokenize_cmdline ah '')"
+complete --command ihelp --no-files
+
+__irods_help_completion ihelp
 
 complete --command ihelp --short-option a \
   --description 'prints the help text for all the iCommands' \
@@ -15,5 +15,3 @@ for helpEntry in (ihelp | string match --entire --regex -- '^[a-z]+ +- ')
     --description (string replace --all --regex '(\(.*?\)|\.$)' '' $entryParts[2]) \
     --condition 'test (count (commandline --cut-at-cursor --tokenize)) -eq 1'
 end
-
-complete --command ihelp --no-files
