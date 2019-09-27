@@ -65,9 +65,8 @@ end
 # Completions
 #
 
-complete --command irm --no-files
-
 __irods_help_completion irm
+__irods_verbose_completion ils '__irm_suggest -V -v'
 
 # irm (<collection>|<data-object>)
 complete --command irm --arguments '(__irods_exec_slow __irm_path_suggestions)' \
@@ -85,14 +84,6 @@ complete --command irm --short-option r --condition '__irm_suggest -r' \
 complete --command irm --short-option U --condition '__irm_suggest -U' \
   --description 'unregister the file or collection'
 
-# irm -V (<collection>|<data-object>)
-complete --command irm --short-option V --condition '__irm_suggest -V -v' \
-  --description 'very verbose'
-
-# irm -v (<collection>|<data-object>)
-complete --command irm --short-option v --condition '__irm_suggest -V -v' \
-  --description 'verbose'
-
 # irm --empty (<collection>|<data-object>)
 complete --command irm --long-option empty --condition '__irm_suggest --empty' \
   --description 'removed a bundle file only if all the subfiles of the bundle have been removed'
@@ -101,3 +92,5 @@ complete --command irm --long-option empty --condition '__irm_suggest --empty' \
 complete --command irm --short-option n --exclusive \
   --condition '__irm_tokenize_cmdline | __irods_missing -h -n' \
   --description 'the replica to remove'
+
+complete --command irm --no-files

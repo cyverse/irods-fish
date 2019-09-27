@@ -105,6 +105,7 @@ end
 #
 
 __irods_help_completion ils
+__irods_verbose_completion ils '__ils_suggest -V -v --bundle'
 
 complete --command ils --short-option A  \
   --condition '__ils_suggest -A --bundle' \
@@ -125,14 +126,6 @@ complete --command ils --short-option r \
 complete --command ils --short-option t --exclusive \
   --condition '__ils_tokenize_cmdline | __irods_missing -h -t --bundle' \
   --description 'use a ticket to access collection information'
-
-complete --command ils --short-option V \
-  --condition '__ils_suggest -V -v --bundle' \
-  --description 'very verbose'
-
-complete --command ils --short-option v \
-  --condition '__ils_suggest -V -v --bundle' \
-  --description 'verbose'
 
 complete --command ils --long-option bundle \
   --condition '__ils_tokenize_cmdline | __irods_missing -h -A -L -l -t -V -v --bundle' \
