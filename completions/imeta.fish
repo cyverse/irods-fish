@@ -10,7 +10,7 @@
 #
 
 function __imeta_tokenize_cmdline
-  __irods_tokenize_cmdline hV ''
+  __irods_tokenize_cmdline hVv ''
 end
 
 
@@ -19,13 +19,7 @@ end
 #
 
 __irods_help_completion imeta
-
-# imeta -V
-complete --command imeta --short-option V \
-  --condition '__imeta_tokenize_cmdline | __irods_missing -h -V' \
-  --description 'very verbose'
-
-# TODO imeta -v
+__irods_verbose_completion imeta '__imeta_tokenize_cmdline | __irods_missing -h -V -v'
 
 # TODO imeta -z <zone>
 
