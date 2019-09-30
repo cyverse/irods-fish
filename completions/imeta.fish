@@ -37,15 +37,15 @@ function __imeta_suggest_cmd
 end
 
 function __imeta_suggest_zone
-  set args (__imeta_tokenize_cmdline)
-  if echo $args | __irods_missing -h add adda
-    if set zIdx (contains --index -- -z $args)
-      __imeta_needs_zone $args; and test "$args[-1]" != -
-    else
-      true
-    end
+  set opts \
+    (fish_opt --short h) (fish_opt --short V) (fish_opt --short v) (fish_opt --short z --required)
+  set argv (commandline --cut-at-cursor --tokenize)
+  set --erase argv[1]
+  if set failMsg (argparse --stop-nonopt --name=imeta $opts -- $argv 2>&1)
+    not set --query _flag_h
+    and not set --query _flag_z
   else
-    false
+    string match --quiet --regex '^imeta: Expected argument for option -z' $failMsg
   end
 end
 
@@ -69,7 +69,6 @@ __irods_help_completion imeta
 # TODO consider converting to using something like __imeta_suggest_cmd
 __irods_verbose_completion imeta '__imeta_tokenize_cmdline | __irods_missing -h -V -v add adda'
 
-# TODO consider converting to using something like __imeta_suggest_cmd
 # imeta -z <zone>
 complete --command imeta --short-option z \
   --arguments '(__irods_exec_slow __imeta_zone_suggestions)' --exclusive \
