@@ -110,11 +110,16 @@ end
 
 function __imeta_suggest_cmd
   function condition --no-scope-shadowing
-    if set --query _flag_h
-      false
-    else
-      test (count $_unparsed_args) -eq 0
-    end
+    test (count $_unparsed_args) -eq 0
+    and not set --query _flag_h
+  end
+  __imeta_suggest condition
+end
+
+function __imeta_suggest_help
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 0
+    and not set --query _flag_h
   end
   __imeta_suggest condition
 end
@@ -157,8 +162,12 @@ end
 
 complete --command imeta --no-files
 
-# TODO make help be suggested always
-__irods_help_completion imeta
+# imeta -h
+complete --command imeta --arguments '-h' --condition __imeta_suggest_help \
+  --description 'shows help'
+
+complete --command imeta --short-option h --condition __imeta_suggest_help \
+  --description 'shows help'
 
 # imeta -V
 complete --command imeta --short-option V --condition __imeta_suggest_verbose \
