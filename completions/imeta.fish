@@ -1,10 +1,6 @@
 # tab completion for imeta
 #
 # TODO determine allowed order or arguments
-# TODO extend to cover options
-# TODO make suggest appropriate arguments
-# TODO make suggest multiple arguments, if applicable
-# TODO wrap all of this in a function that generates the completions, then call the function
 
 #
 # Helper Functions
@@ -108,42 +104,23 @@ end
 # Condition functions
 #
 
-function __imeta_suggest_cmd
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 0
-    and not set --query _flag_h
-  end
-  __imeta_suggest condition
+function __imeta_no_cmd_or_help --no-scope-shadowing
+  test (count $_unparsed_args) -eq 0
+  and not set --query _flag_h
 end
 
-function __imeta_suggest_help
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 0
-    and not set --query _flag_h
-  end
-  __imeta_suggest condition
+function __imeta_verbose_condition --no-scope-shadowing
+  __imeta_no_cmd_or_help
+  and not set --query _flag_V
+  and not set --query _flag_v
 end
 
-function __imeta_suggest_verbose
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 0
-    and not set --query _flag_h
-    and not set --query _flag_V
-    and not set --query _flag_v
+function __imeta_zone_condition --no-scope-shadowing
+  if set --query _flag_z
+    test -z "$_flag_z"
+  else
+    __imeta_no_cmd_or_help
   end
-  __imeta_suggest condition
-end
-
-function __imeta_suggest_zone
-  function condition --no-scope-shadowing
-    if set --query _flag_z
-      test -z $_flag_z
-    else
-      test (count $_unparsed_args) -eq 0
-      and not set --query _flag_h
-    end
-  end
-  __imeta_suggest condition
 end
 
 
@@ -163,18 +140,18 @@ end
 complete --command imeta --no-files
 
 # imeta -h
-complete --command imeta --arguments '-h' --condition __imeta_suggest_help \
+complete --command imeta --arguments '-h' --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'shows help'
 
-complete --command imeta --short-option h --condition __imeta_suggest_help \
+complete --command imeta --short-option h --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'shows help'
 
 # imeta -V
-complete --command imeta --short-option V --condition __imeta_suggest_verbose \
+complete --command imeta --short-option V --condition '__imeta_suggest __imeta_verbose_condition' \
   --description 'very verbose'
 
 # imeta -v
-complete --command imeta --short-option v --condition __imeta_suggest_verbose \
+complete --command imeta --short-option v --condition '__imeta_suggest __imeta_verbose_condition' \
   --description verbose
 
 # imeta -z <zone>
@@ -183,70 +160,69 @@ complete --command imeta --short-option v --condition __imeta_suggest_verbose \
 #     is still a problem after upgrading to fish 3.1+.
 complete --command imeta --short-option z \
   --arguments '(__irods_exec_slow __imeta_zone_suggestions)' --exclusive \
-  --condition __imeta_suggest_zone \
+  --condition '__imeta_suggest __imeta_zone_condition' \
   --description 'work with the specified zone'
 
 # imeta add
-complete --command imeta --arguments add --no-files --condition __imeta_suggest_cmd \
+complete --command imeta --arguments add --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'add new AVU triple'
 
 # TODO imeta add (-d|-C|-R|-u) <entity> <attribute> <value> [<unit>]
-#complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' --no-files
 
 # imeta adda
-complete --command imeta --arguments adda --condition __imeta_suggest_cmd \
+complete --command imeta --arguments adda --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'administratively add new AVU triple'
 
 # TODO imeta adda (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
 
 # imeta addw
-complete --command imeta --arguments addw --condition __imeta_suggest_cmd \
+complete --command imeta --arguments addw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'add new AVU triple using wildcards in name'
 
 # TODO imeta addw (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
 
 # imeta cp
-complete --command imeta --arguments cp --condition __imeta_suggest_cmd \
+complete --command imeta --arguments cp --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'copy AVUs from one item to another'
 
 # TODO imeta cp (-d|-C|-R|-u) (-d|-C|-R|-u) <from-entity> <to-entity>
 
 # imeta ls
-complete --command imeta --arguments ls --condition __imeta_suggest_cmd \
+complete --command imeta --arguments ls --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'list existing AVUs'
 
 # TODO imeta ls (-d|-C|-R|-u) <entity> [<attribute>]
 
 # imeta lsw
-complete --command imeta --arguments lsw --condition __imeta_suggest_cmd \
+complete --command imeta --arguments lsw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'list existing AVUs using wildcards'
 
 # TODO imeta lsw (-d|-C|-R|-u) <entity> [<attribute>]
 
 # imeta mod
-complete --command imeta --arguments mod --condition __imeta_suggest_cmd \
+complete --command imeta --arguments mod --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'modify AVU'
 
 # TODO imeta mod (-d|-C|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
 
 # imeta qu
-complete --command imeta --arguments qu --condition __imeta_suggest_cmd \
+complete --command imeta --arguments qu --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'query entities with matching AVUs'
 
 # TODO imeta qu (-d|-C|-R|-u) <attribute> <op> <value> ...
 
 # imeta set
-complete --command imeta --arguments set --condition __imeta_suggest_cmd \
+complete --command imeta --arguments set --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'assign a single value'
 
 # TODO imeta set (-d|-C|-R|-u) <entity> <attribute> <new-value> [<new-units>]
 
 # imeta rm
-complete --command imeta --arguments rm --condition __imeta_suggest_cmd \
+complete --command imeta --arguments rm --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'remove AVU'
 
 # imeta rmi
-complete --command imeta --arguments rmi --condition __imeta_suggest_cmd \
+complete --command imeta --arguments rmi --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'remove AVU by metadata id'
 
 # TODO imeta rmi (-d|-C|-R|-u) <entity> <metadata-id>
@@ -254,7 +230,7 @@ complete --command imeta --arguments rmi --condition __imeta_suggest_cmd \
 # TODO imeta rm (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
 
 # imeta rmw
-complete --command imeta --arguments rmw --condition __imeta_suggest_cmd \
+complete --command imeta --arguments rmw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'remove AVU using wildcards'
 
 # TODO imeta rmw (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
