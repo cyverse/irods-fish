@@ -54,9 +54,6 @@ function __imeta_tokenize_cmdline
   return 0
 end
 
-# TODO consider interpreting all tokens instead of stopping at first unknown.
-#      This will catch -z after occurring after a command and still be able
-#      to suggest a zone.
 function __imeta_suggest --argument-names condition
   function cmdline_args
     set args (commandline --cut-at-cursor --tokenize) (commandline --cut-at-cursor --current-token)
@@ -97,13 +94,74 @@ function __imeta_suggest --argument-names condition
   end
 end
 
+function __imeta_suggest_add --argument-names condition
+  function add_opts
+    fish_opt --short C
+    fish_opt --short d
+    fish_opt --short R
+    fish_opt --short u
+  end
+  set --erase argv[1]
+  set optSpec (add_opts)
+  set cmdTokens (__imeta_tokenize_cmdline $optSpec -- $argv)
+  set _curr_token $cmdTokens[-1]
+  set --erase cmdTokens[-1]
+  argparse --stop-nonopt --exclusive C,d,R,u --name imeta $optSpec -- $cmdTokens 2>&1 | read failMsg
+  if test -z "$failMsg"
+    set _unparsed_args $argv
+    eval "$condition"
+  else
+    set needsVal (string replace --filter --regex -- '.*Expected argument for option -' '' $failMsg)
+    if test $status -eq 0
+      # Try again, removing the last option to work around the issue where
+      # _curr_token is the missing value argparse is complaining about.
+      set --erase cmdTokens[-1]
+      argparse --stop-nonopt --name imeta $optSpec -- $cmdTokens 2> /dev/null
+      if test $status -ne 0
+        false
+      else
+        eval set _flag_$needsVal
+        set _unparsed_args $argv
+        eval "$condition"
+      end
+    else
+      false
+    end
+  end
+end
+
 
 #
 # Condition functions
 #
 
+function __imeta_add_collection_condition --no-scope-shadowing
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 0
+    and set --query _flag_C
+  end
+  if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
+    false
+  else
+    set --erase _unparsed_args[1]
+    __imeta_suggest_add condition $_unparsed_args $_curr_token
+  end
+end
+
 function __imeta_add_needs_entity_flag --no-scope-shadowing
-  test (count $_unparsed_args) -eq 1 -a "$_unparsed_args[1]" = add
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 0
+    and not set --query _flag_C
+    and not set --query _flag_d
+    and not set --query _flag_R
+    and not set --query _flag_u
+  end
+  if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
+    false
+  else
+    set --erase _unparsed_args[1]
+    __imeta_suggest_add condition $_unparsed_args $_curr_token
+  end
 end
 
 function __imeta_no_cmd_or_help --no-scope-shadowing
@@ -140,10 +198,9 @@ end
 #
 
 function __imeta_mk_add_entity_completions --argument-names opt description
-  complete --command imeta --arguments "-"$opt \
+  complete --command imeta --arguments '-'$opt \
     --condition '__imeta_suggest __imeta_add_needs_entity_flag' \
     --description $description
-
   complete --command imeta --short-option $opt \
     --condition '__imeta_suggest __imeta_add_needs_entity_flag' \
     --description $description
@@ -151,22 +208,17 @@ end
 
 complete --command imeta --no-files
 
-# imeta -h
 complete --command imeta --arguments '-h' --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'shows help'
-
 complete --command imeta --short-option h --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'shows help'
 
-# imeta -V
 complete --command imeta --short-option V --condition '__imeta_suggest __imeta_verbose_condition' \
   --description 'very verbose'
 
-# imeta -v
 complete --command imeta --short-option v --condition '__imeta_suggest __imeta_verbose_condition' \
   --description verbose
 
-# imeta -z <zone>
 # XXX imeta -(v|V)z doesn't make any suggestions. This is a bug in fish. See
 #     https://github.com/fish-shell/fish-shell/issues/5127. Check to see if this
 #     is still a problem after upgrading to fish 3.1+.
@@ -175,21 +227,26 @@ complete --command imeta --short-option z \
   --condition '__imeta_suggest __imeta_zone_condition' \
   --description 'work with the specified zone'
 
-# imeta add
+# add
 complete --command imeta --arguments add --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'add new AVU triple'
 
-# imeta add -C
 __imeta_mk_add_entity_completions C 'to collection'
 
-# imeta add -d
+complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
+  --condition '__imeta_suggest __imeta_add_collection_condition'
+
 __imeta_mk_add_entity_completions d 'to data object'
 
-# imeta add -R
+# TODO imeta add -d <data object> <attribute> <value> [<unit>]
+
 __imeta_mk_add_entity_completions R 'to resource'
 
-# imeta add -u
+# TODO imeta add -R <resource> <attribute> <value> [<unit>]
+
 __imeta_mk_add_entity_completions u 'to user'
+
+# TODO imeta add -u <user> <attribute> <value> [<unit>]
 
 # TODO imeta add (-d|-C|-R|-u) <entity> <attribute> <value> [<unit>]
 
