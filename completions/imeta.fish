@@ -164,6 +164,11 @@ function __imeta_add_needs_resource --no-scope-shadowing
   and set --query _flag_R
 end
 
+function __imeta_add_needs_user --no-scope-shadowing
+  test (count $_unparsed_args) -eq 0
+  and set --query _flag_u
+end
+
 function __imeta_no_cmd_or_help --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and not set --query _flag_h
@@ -192,6 +197,10 @@ function __imeta_resource_suggestions
   __irods_quest '%s' 'select RESC_NAME'
 end
 
+function __imeta_user_suggestions
+  __irods_quest '%s' 'select USER_NAME'
+end
+
 function __imeta_zone_suggestions
   __irods_quest '%s' 'select ZONE_NAME'
 end
@@ -202,7 +211,7 @@ end
 #
 
 function __imeta_mk_add_entity_completions --argument-names opt adminReq description
-  complete --command imeta --arguments '-'$opt \
+  complete --command imeta --arguments "-$opt" \
     --condition "__imeta_suggest __imeta_add_condition $adminReq __imeta_add_needs_entity_flag" \
     --description $description
   complete --command imeta --short-option $opt \
@@ -252,9 +261,10 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_resource_sugges
 
 __imeta_mk_add_entity_completions u 1 'to user'
 
-# TODO imeta add -u <user> <attribute> <value> [<unit>]
+complete --command imeta --arguments '(__irods_exec_slow __imeta_user_suggestions)' \
+  --condition '__imeta_suggest __imeta_add_condition 1 __imeta_add_needs_user'
 
-# imeta adda
+# adda
 complete --command imeta --arguments adda --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'administratively add new AVU triple'
 
