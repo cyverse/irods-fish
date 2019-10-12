@@ -106,27 +106,11 @@ function __imeta_suggest_add --argument-names condition
   set cmdTokens (__imeta_tokenize_cmdline $optSpec -- $argv)
   set _curr_token $cmdTokens[-1]
   set --erase cmdTokens[-1]
-  argparse --stop-nonopt --exclusive C,d,R,u --name imeta $optSpec -- $cmdTokens 2>&1 | read failMsg
-  if test -z "$failMsg"
+  if argparse --stop-nonopt --name imeta $optSpec -- $cmdTokens 2> /dev/null 
     set _unparsed_args $argv
     eval "$condition"
   else
-    set needsVal (string replace --filter --regex -- '.*Expected argument for option -' '' $failMsg)
-    if test $status -eq 0
-      # Try again, removing the last option to work around the issue where
-      # _curr_token is the missing value argparse is complaining about.
-      set --erase cmdTokens[-1]
-      argparse --stop-nonopt --name imeta $optSpec -- $cmdTokens 2> /dev/null
-      if test $status -ne 0
-        false
-      else
-        eval set _flag_$needsVal
-        set _unparsed_args $argv
-        eval "$condition"
-      end
-    else
-      false
-    end
+    false
   end
 end
 
@@ -145,6 +129,21 @@ function __imeta_add_collection_condition --no-scope-shadowing
   else
     set --erase _unparsed_args[1]
     __imeta_suggest_add condition $_unparsed_args $_curr_token
+  end
+end
+
+# TODO refactor the __imeta_add_* functions
+function __imeta_add_data_object_condition --no-scope-shadowing
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 0
+    and set --query _flag_d
+  end
+  if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
+    false
+  else
+    set _unparsed_args $_unparsed_args $_curr_token
+    set --erase _unparsed_args[1]
+    __imeta_suggest_add condition $_unparsed_args 
   end
 end
 
@@ -238,7 +237,9 @@ complete --command imeta --arguments '(__irods_exec_slow __irods_collection_sugg
 
 __imeta_mk_add_entity_completions d 'to data object'
 
-# TODO imeta add -d <data object>
+complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
+  --condition '__imeta_suggest __imeta_add_data_object_condition'
+
 # TODO imeta add -d <data object> <attribute> <value> [<unit>]
 
 __imeta_mk_add_entity_completions R 'to resource'
