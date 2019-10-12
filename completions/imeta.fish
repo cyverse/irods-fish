@@ -117,16 +117,7 @@ function __imeta_suggest_add --argument-names condition
 end
 
 function __imeta_add_condition --no-scope-shadowing \
-    --argument-names adminReq condition
-  function am_admin
-    set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
-    test "$userType" = rodsadmin
-  end
-  if test "$adminReq" -ne 0
-    if not __irods_exec_slow am_admin
-      return 1
-    end
-  end
+    --argument-names condition
   if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
     false
   else
@@ -198,7 +189,10 @@ function __imeta_resource_suggestions
 end
 
 function __imeta_user_suggestions
-  __irods_quest '%s' 'select USER_NAME'
+  set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
+  if test "$userType" = rodsadmin
+    __irods_quest '%s' 'select USER_NAME'
+  end
 end
 
 function __imeta_zone_suggestions
@@ -210,12 +204,12 @@ end
 # Completions
 #
 
-function __imeta_mk_add_entity_completions --argument-names opt adminReq description
+function __imeta_mk_add_entity_completions --argument-names opt description
   complete --command imeta --arguments "-$opt" \
-    --condition "__imeta_suggest __imeta_add_condition $adminReq __imeta_add_needs_entity_flag" \
+    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_entity_flag' \
     --description $description
   complete --command imeta --short-option $opt \
-    --condition "__imeta_suggest __imeta_add_condition $adminReq __imeta_add_needs_entity_flag" \
+    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_entity_flag' \
     --description $description
 end
 
@@ -244,25 +238,25 @@ complete --command imeta --short-option z \
 complete --command imeta --arguments add --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'add new AVU triple'
 
-__imeta_mk_add_entity_completions C 0 'to collection'
+__imeta_mk_add_entity_completions C 'to collection'
 
 complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition 0 __imeta_add_needs_collection'
+  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_collection'
 
-__imeta_mk_add_entity_completions d 0 'to data object'
+__imeta_mk_add_entity_completions d 'to data object'
 
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition 0 __imeta_add_needs_data_object'
+  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_data_object'
 
-__imeta_mk_add_entity_completions R 1 'to resource'
+__imeta_mk_add_entity_completions R 'to resource'
 
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resource_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition 1 __imeta_add_needs_resource'
+  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_resource'
 
-__imeta_mk_add_entity_completions u 1 'to user'
+__imeta_mk_add_entity_completions u 'to user'
 
 complete --command imeta --arguments '(__irods_exec_slow __imeta_user_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition 1 __imeta_add_needs_user'
+  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_user'
 
 # adda
 complete --command imeta --arguments adda --condition '__imeta_suggest __imeta_no_cmd_or_help' \
@@ -270,61 +264,61 @@ complete --command imeta --arguments adda --condition '__imeta_suggest __imeta_n
 
 # TODO imeta adda (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
 
-# imeta addw
+# addw
 complete --command imeta --arguments addw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'add new AVU triple using wildcards in name'
 
 # TODO imeta addw -d <entity> <attribute> <value> [<units>]
 
-# imeta cp
+# cp
 complete --command imeta --arguments cp --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'copy AVUs from one item to another'
 
 # TODO imeta cp (-d|-C|-R|-u) (-d|-C|-R|-u) <from-entity> <to-entity>
 
-# imeta ls
+# ls
 complete --command imeta --arguments ls --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'list existing AVUs'
 
 # TODO imeta ls (-[l]d|-[l]C|-[l]R|-[l]u) <entity> [<attribute>]
 
-# imeta lsw
+# lsw
 complete --command imeta --arguments lsw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'list existing AVUs using wildcards'
 
 # TODO imeta lsw (-[l]d|-[l]C|-[l]R|-[l]u) <entity> [<attribute>]
 
-# imeta mod
+# mod
 complete --command imeta --arguments mod --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'modify AVU'
 
 # TODO imeta mod (-d|-C|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
 
-# imeta qu
+# qu
 complete --command imeta --arguments qu --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'query entities with matching AVUs'
 
 # TODO imeta qu (-d|-C|-R|-u) <attribute> <op> <value> ...
 
-# imeta set
+# set
 complete --command imeta --arguments set --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'assign a single value'
 
 # TODO imeta set (-d|-C|-R|-u) <entity> <attribute> <new-value> [<new-units>]
 
-# imeta rm
+# rm
 complete --command imeta --arguments rm --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'remove AVU'
 
-# imeta rmi
+# TODO imeta rm (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
+
+# rmi
 complete --command imeta --arguments rmi --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'remove AVU by metadata id'
 
 # TODO imeta rmi (-d|-C|-R|-u) <entity> <metadata-id>
 
-# TODO imeta rm (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
-
-# imeta rmw
+# rmw
 complete --command imeta --arguments rmw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'remove AVU using wildcards'
 
