@@ -148,6 +148,11 @@ function __imeta_add_needs_entity_flag --no-scope-shadowing
   and not set --query _flag_u
 end
 
+function __imeta_add_needs_resource --no-scope-shadowing
+  test (count $_unparsed_args) -eq 0
+  and set --query _flag_R
+end
+
 function __imeta_no_cmd_or_help --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and not set --query _flag_h
@@ -171,6 +176,10 @@ end
 #
 # Suggestion functions
 #
+
+function __imeta_resource_suggestions
+  __irods_quest '%s' 'select RESC_NAME'
+end
 
 function __imeta_zone_suggestions
   __irods_quest '%s' 'select ZONE_NAME'
@@ -227,7 +236,8 @@ complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestion
 
 __imeta_mk_add_entity_completions R 'to resource'
 
-# TODO imeta add -R <resource> <attribute> <value> [<unit>]
+complete --command imeta --arguments '(__irods_exec_slow __imeta_resource_suggestions)' \
+  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_resource'
 
 __imeta_mk_add_entity_completions u 'to user'
 
