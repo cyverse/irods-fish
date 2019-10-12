@@ -54,7 +54,7 @@ function __imeta_tokenize_cmdline
   return 0
 end
 
-function __imeta_suggest --argument-names condition
+function __imeta_suggest
   function cmdline_args
     set args (commandline --cut-at-cursor --tokenize) (commandline --cut-at-cursor --current-token)
     set --erase args[1]
@@ -66,6 +66,7 @@ function __imeta_suggest --argument-names condition
     fish_opt --short v
     fish_opt --short z --required
   end
+  set condition $argv
   set optSpec (main_opts)
   set cmdTokens (__imeta_tokenize_cmdline $optSpec -- (cmdline_args))
   set _curr_token $cmdTokens[-1]
@@ -114,57 +115,37 @@ function __imeta_suggest_add --argument-names condition
   end
 end
 
-
-#
-# Condition functions
-#
-
-function __imeta_add_collection_condition --no-scope-shadowing
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 0
-    and set --query _flag_C
-  end
-  if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
-    false
-  else
-    set --erase _unparsed_args[1]
-    __imeta_suggest_add condition $_unparsed_args $_curr_token
-  end
-end
-
-function __imeta_add_condition --argument-names condition
+function __imeta_add_condition --argument-names condition --no-scope-shadowing
   if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
     false
   else
     set _unparsed_args $_unparsed_args $_curr_token
     set --erase _unparsed_args[1]
-    __imeta_suggest_add condition $_unparsed_args 
+    __imeta_suggest_add $condition $_unparsed_args 
   end
 end
 
-# TODO refactor the __imeta_add_* functions
-function __imeta_add_data_object_condition --no-scope-shadowing
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 0
-    and set --query _flag_d
-  end
-  __imeta_add_condition condition
+
+#
+# Condition functions
+#
+
+function __imeta_add_needs_collection --no-scope-shadowing
+  test (count $_unparsed_args) -eq 0
+  and set --query _flag_C
+end
+
+function __imeta_add_needs_data_object --no-scope-shadowing
+  test (count $_unparsed_args) -eq 0
+  and set --query _flag_d
 end
 
 function __imeta_add_needs_entity_flag --no-scope-shadowing
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 0
-    and not set --query _flag_C
-    and not set --query _flag_d
-    and not set --query _flag_R
-    and not set --query _flag_u
-  end
-  if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
-    false
-  else
-    set --erase _unparsed_args[1]
-    __imeta_suggest_add condition $_unparsed_args $_curr_token
-  end
+  test (count $_unparsed_args) -eq 0
+  and not set --query _flag_C
+  and not set --query _flag_d
+  and not set --query _flag_R
+  and not set --query _flag_u
 end
 
 function __imeta_no_cmd_or_help --no-scope-shadowing
@@ -202,10 +183,10 @@ end
 
 function __imeta_mk_add_entity_completions --argument-names opt description
   complete --command imeta --arguments '-'$opt \
-    --condition '__imeta_suggest __imeta_add_needs_entity_flag' \
+    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_entity_flag' \
     --description $description
   complete --command imeta --short-option $opt \
-    --condition '__imeta_suggest __imeta_add_needs_entity_flag' \
+    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_entity_flag' \
     --description $description
 end
 
@@ -237,14 +218,12 @@ complete --command imeta --arguments add --condition '__imeta_suggest __imeta_no
 __imeta_mk_add_entity_completions C 'to collection'
 
 complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_collection_condition'
+  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_collection'
 
 __imeta_mk_add_entity_completions d 'to data object'
 
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_data_object_condition'
-
-# TODO imeta add -d <data object> <attribute> <value> [<unit>]
+  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_data_object'
 
 __imeta_mk_add_entity_completions R 'to resource'
 
