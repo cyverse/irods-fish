@@ -6,7 +6,7 @@
 function __irods_collection_suggestions \
     --description 'generates a list of collection suggestions'
 
-  function __split_path --argument-names path
+  function split_path --argument-names path
     set --erase parts
     if string match --invert --quiet -- '*/*' $path
       set parts[1] ''
@@ -27,7 +27,7 @@ function __irods_collection_suggestions \
     set sugBase (command ipwd)
   end
 
-  set sugParts (__split_path $sugBegin)
+  set sugParts (split_path $sugBegin)
   set sugParent $sugParts[1]
   set sugColl $sugParts[2]
   set parent (__irods_join_path $sugBase $sugParent)
@@ -42,8 +42,7 @@ function __irods_collection_suggestions \
   set collPat (__irods_join_path $parent $relCollPat)
   set filter '^'(__irods_join_path $sugBase '(.*)')
 
-  command iquest --no-page '%s/' \
-       "select COLL_NAME where COLL_PARENT_NAME = '$parent' and COLL_NAME like '$collPat'" \
-    | string match --invert --regex '^CAT_NO_ROWS_FOUND:' \
+  __irods_quest '%s/' \
+      "select COLL_NAME where COLL_PARENT_NAME = '$parent' and COLL_NAME like '$collPat'" \
     | string replace --filter --regex $filter '$1'
 end

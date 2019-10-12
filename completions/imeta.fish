@@ -189,7 +189,7 @@ end
 #
 
 function __imeta_zone_suggestions
-  iquest --no-page -- '%s' 'select ZONE_NAME' | string match --invert 'CAT_NO_ROWS_FOUND:*'
+  __irods_quest '%s' 'select ZONE_NAME'
 end
 
 
@@ -238,6 +238,7 @@ complete --command imeta --arguments '(__irods_exec_slow __irods_collection_sugg
 
 __imeta_mk_add_entity_completions d 'to data object'
 
+# TODO imeta add -d <data object>
 # TODO imeta add -d <data object> <attribute> <value> [<unit>]
 
 __imeta_mk_add_entity_completions R 'to resource'
@@ -247,8 +248,6 @@ __imeta_mk_add_entity_completions R 'to resource'
 __imeta_mk_add_entity_completions u 'to user'
 
 # TODO imeta add -u <user> <attribute> <value> [<unit>]
-
-# TODO imeta add (-d|-C|-R|-u) <entity> <attribute> <value> [<unit>]
 
 # imeta adda
 complete --command imeta --arguments adda --condition '__imeta_suggest __imeta_no_cmd_or_help' \

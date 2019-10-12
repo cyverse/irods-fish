@@ -120,7 +120,7 @@ function __iquest_spec_query_suggestions
 end
 
 function __iquest_zone_suggestions
-  iquest --no-page '%s' 'select ZONE_NAME' | string match --invert 'CAT_NO_ROWS_FOUND:*'
+  __irods_quest '%s' 'select ZONE_NAME'
 end
 
 
