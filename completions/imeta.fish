@@ -132,12 +132,7 @@ function __imeta_add_collection_condition --no-scope-shadowing
   end
 end
 
-# TODO refactor the __imeta_add_* functions
-function __imeta_add_data_object_condition --no-scope-shadowing
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 0
-    and set --query _flag_d
-  end
+function __imeta_add_condition --argument-names condition
   if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
     false
   else
@@ -145,6 +140,15 @@ function __imeta_add_data_object_condition --no-scope-shadowing
     set --erase _unparsed_args[1]
     __imeta_suggest_add condition $_unparsed_args 
   end
+end
+
+# TODO refactor the __imeta_add_* functions
+function __imeta_add_data_object_condition --no-scope-shadowing
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 0
+    and set --query _flag_d
+  end
+  __imeta_add_condition condition
 end
 
 function __imeta_add_needs_entity_flag --no-scope-shadowing
