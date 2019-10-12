@@ -5,7 +5,8 @@
 #
 
 function __imeta_tokenize_cmdline
-  function tokenize_arg --no-scope-shadowing --argument-names arg
+  function tokenize_arg --no-scope-shadowing \
+      --argument-names arg
     if string match --invert --quiet --regex -- '^-[^-]' $arg
       echo $arg
       set matched passthru
@@ -115,7 +116,17 @@ function __imeta_suggest_add --argument-names condition
   end
 end
 
-function __imeta_add_condition --argument-names condition --no-scope-shadowing
+function __imeta_add_condition --no-scope-shadowing \
+    --argument-names adminReq condition
+  function am_admin
+    set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
+    test "$userType" = rodsadmin
+  end
+  if test "$adminReq" -ne 0
+    if not __irods_exec_slow am_admin
+      return 1
+    end
+  end
   if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
     false
   else
@@ -190,12 +201,12 @@ end
 # Completions
 #
 
-function __imeta_mk_add_entity_completions --argument-names opt description
+function __imeta_mk_add_entity_completions --argument-names opt adminReq description
   complete --command imeta --arguments '-'$opt \
-    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_entity_flag' \
+    --condition "__imeta_suggest __imeta_add_condition $adminReq __imeta_add_needs_entity_flag" \
     --description $description
   complete --command imeta --short-option $opt \
-    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_entity_flag' \
+    --condition "__imeta_suggest __imeta_add_condition $adminReq __imeta_add_needs_entity_flag" \
     --description $description
 end
 
@@ -224,22 +235,22 @@ complete --command imeta --short-option z \
 complete --command imeta --arguments add --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'add new AVU triple'
 
-__imeta_mk_add_entity_completions C 'to collection'
+__imeta_mk_add_entity_completions C 0 'to collection'
 
 complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_collection'
+  --condition '__imeta_suggest __imeta_add_condition 0 __imeta_add_needs_collection'
 
-__imeta_mk_add_entity_completions d 'to data object'
+__imeta_mk_add_entity_completions d 0 'to data object'
 
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_data_object'
+  --condition '__imeta_suggest __imeta_add_condition 0 __imeta_add_needs_data_object'
 
-__imeta_mk_add_entity_completions R 'to resource'
+__imeta_mk_add_entity_completions R 1 'to resource'
 
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resource_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_resource'
+  --condition '__imeta_suggest __imeta_add_condition 1 __imeta_add_needs_resource'
 
-__imeta_mk_add_entity_completions u 'to user'
+__imeta_mk_add_entity_completions u 1 'to user'
 
 # TODO imeta add -u <user> <attribute> <value> [<unit>]
 
