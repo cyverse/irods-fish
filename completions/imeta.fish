@@ -116,17 +116,6 @@ function __imeta_suggest_add --argument-names condition
   end
 end
 
-function __imeta_add_condition --no-scope-shadowing \
-    --argument-names condition
-  if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
-    false
-  else
-    set _unparsed_args $_unparsed_args $_curr_token
-    set --erase _unparsed_args[1]
-    __imeta_suggest_add $condition $_unparsed_args 
-  end
-end
-
 function __imeta_am_admin 
   set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
   test "$userType" = rodsadmin
@@ -142,8 +131,27 @@ function __imeta_no_cmd_or_help --no-scope-shadowing
   and not set --query _flag_h
 end
 
-function __imeta_adda_condition --no-scope-shadowing
-  __imeta_no_cmd_or_help
+function __imeta_add_condition --no-scope-shadowing \
+    --argument-names condition
+  if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
+    false
+  else
+    set _unparsed_args $_unparsed_args $_curr_token
+    set --erase _unparsed_args[1]
+    __imeta_suggest_add $condition $_unparsed_args 
+  end
+end
+
+function __imeta_add_needs_flag --no-scope-shadowing
+  test (count $_unparsed_args) -eq 0
+  and not set --query _flag_C
+  and not set --query _flag_d
+  and not set --query _flag_R
+  and not set --query _flag_u
+end
+
+function __imeta_add_needs_admin_flag --no-scope-shadowing
+  __imeta_add_needs_flag
   and __imeta_am_admin
 end
 
@@ -157,31 +165,19 @@ function __imeta_add_needs_data_object --no-scope-shadowing
   and set --query _flag_d
 end
 
-function __imeta_add_needs_entity_flag --no-scope-shadowing
-  test (count $_unparsed_args) -eq 0
-  and not set --query _flag_C
-  and not set --query _flag_d
-  and not set --query _flag_R
-  and not set --query _flag_u
-end
-
 function __imeta_add_needs_resource --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_R
 end
 
-function __imeta_add_needs_resource_flag --no-scope-shadowing
-  __imeta_add_needs_entity_flag
-  and __imeta_am_admin
-end
-
-function __imeta_add_resource_flag_condition
-  __imeta_suggest __imeta_add_condition __imeta_add_needs_resource_flag
-end
-
 function __imeta_add_needs_user --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_u
+end
+
+function __imeta_adda_condition --no-scope-shadowing
+  __imeta_no_cmd_or_help
+  and __imeta_am_admin
 end
 
 function __imeta_verbose_condition --no-scope-shadowing
@@ -208,9 +204,7 @@ function __imeta_resource_suggestions
 end
 
 function __imeta_user_suggestions
-  if __imeta_am_admin
-    __irods_quest '%s' 'select USER_NAME'
-  end
+  __irods_quest '%s' 'select USER_NAME'
 end
 
 function __imeta_zone_suggestions
@@ -222,12 +216,18 @@ end
 # Completions
 #
 
-function __imeta_mk_add_entity_completions --argument-names opt description
+function __imeta_mk_add_admin_flag_completions --argument-names opt description
+  set cond '__irods_exec_slow __imeta_suggest __imeta_add_condition __imeta_add_needs_admin_flag' 
+  complete --command imeta --arguments "-$opt" --condition $cond --description $description
+  complete --command imeta --short-option $opt --condition $cond --description $description
+end
+
+function __imeta_mk_add_flag_completions --argument-names opt description
   complete --command imeta --arguments "-$opt" \
-    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_entity_flag' \
+    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_flag' \
     --description $description
   complete --command imeta --short-option $opt \
-    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_entity_flag' \
+    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_flag' \
     --description $description
 end
 
@@ -256,28 +256,22 @@ complete --command imeta --short-option z \
 complete --command imeta --arguments add --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'add new AVU triple'
 
-__imeta_mk_add_entity_completions C 'to collection'
+__imeta_mk_add_flag_completions C 'to collection'
 
 complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_collection'
 
-__imeta_mk_add_entity_completions d 'to data object'
+__imeta_mk_add_flag_completions d 'to data object'
 
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_data_object'
 
-complete --command imeta --arguments '-R' \
-  --condition '__irods_exec_slow __imeta_add_resource_flag_condition' \
-  --description 'to resource'
-
-complete --command imeta --short-option R \
-  --condition '__irods_exec_slow __imeta_add_resource_flag_condition' \
-  --description 'to resource'
+__imeta_mk_add_admin_flag_completions R 'to resource'
 
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resource_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_resource'
 
-__imeta_mk_add_entity_completions u 'to user'
+__imeta_mk_add_admin_flag_completions u 'to user'
 
 complete --command imeta --arguments '(__irods_exec_slow __imeta_user_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_user'
@@ -349,4 +343,5 @@ complete --command imeta --arguments rmw --condition '__imeta_suggest __imeta_no
 
 # TODO imeta rmw (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
 
-functions --erase __imeta_mk_add_entity_completions
+functions --erase __imeta_mk_add_flag_completions
+functions --erase __imeta_mk_add_admin_flag_completions
