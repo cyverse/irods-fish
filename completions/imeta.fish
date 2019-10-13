@@ -132,6 +132,20 @@ end
 # Condition functions
 #
 
+function __imeta_no_cmd_or_help --no-scope-shadowing
+  test (count $_unparsed_args) -eq 0
+  and not set --query _flag_h
+end
+
+function __imeta_adda_condition --no-scope-shadowing
+  if __imeta_no_cmd_or_help
+    set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
+    test "$userType" = rodsadmin
+  else
+    false
+  end
+end
+
 function __imeta_add_needs_collection --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_C
@@ -158,11 +172,6 @@ end
 function __imeta_add_needs_user --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_u
-end
-
-function __imeta_no_cmd_or_help --no-scope-shadowing
-  test (count $_unparsed_args) -eq 0
-  and not set --query _flag_h
 end
 
 function __imeta_verbose_condition --no-scope-shadowing
@@ -259,7 +268,8 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_user_suggestion
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_user'
 
 # adda
-complete --command imeta --arguments adda --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments adda \
+  --condition '__irods_exec_slow __imeta_suggest __imeta_adda_condition' \
   --description 'administratively add new AVU triple'
 
 # TODO imeta adda (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
