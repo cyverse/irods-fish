@@ -4,6 +4,11 @@
 # Helper Functions
 #
 
+function __imeta_am_admin
+  set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
+  test "$userType" = rodsadmin
+end
+
 function __imeta_tokenize_cmdline
   function tokenize_arg --no-scope-shadowing \
       --argument-names arg
@@ -108,17 +113,12 @@ function __imeta_suggest_add --argument-names condition
   set cmdTokens (__imeta_tokenize_cmdline $optSpec -- $argv)
   set _curr_token $cmdTokens[-1]
   set --erase cmdTokens[-1]
-  if argparse --stop-nonopt --name imeta $optSpec -- $cmdTokens 2> /dev/null 
+  if argparse --stop-nonopt --name imeta $optSpec -- $cmdTokens 2> /dev/null
     set _unparsed_args $argv
     eval "$condition"
   else
     false
   end
-end
-
-function __imeta_am_admin 
-  set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
-  test "$userType" = rodsadmin
 end
 
 
@@ -131,6 +131,20 @@ function __imeta_no_cmd_or_help --no-scope-shadowing
   and not set --query _flag_h
 end
 
+function __imeta_verbose_condition --no-scope-shadowing
+  __imeta_no_cmd_or_help
+  and not set --query _flag_V
+  and not set --query _flag_v
+end
+
+function __imeta_zone_condition --no-scope-shadowing
+  if set --query _flag_z
+    test -z "$_flag_z"
+  else
+    __imeta_no_cmd_or_help
+  end
+end
+
 function __imeta_add_condition --no-scope-shadowing \
     --argument-names condition
   if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
@@ -138,7 +152,7 @@ function __imeta_add_condition --no-scope-shadowing \
   else
     set _unparsed_args $_unparsed_args $_curr_token
     set --erase _unparsed_args[1]
-    __imeta_suggest_add $condition $_unparsed_args 
+    __imeta_suggest_add $condition $_unparsed_args
   end
 end
 
@@ -175,22 +189,19 @@ function __imeta_add_needs_user --no-scope-shadowing
   and set --query _flag_u
 end
 
-function __imeta_adda_condition --no-scope-shadowing
+function __imeta_suggest_adda --no-scope-shadowing
   __imeta_no_cmd_or_help
   and __imeta_am_admin
 end
 
-function __imeta_verbose_condition --no-scope-shadowing
-  __imeta_no_cmd_or_help
-  and not set --query _flag_V
-  and not set --query _flag_v
-end
-
-function __imeta_zone_condition --no-scope-shadowing
-  if set --query _flag_z
-    test -z "$_flag_z"
+function __imeta_adda_condition --no-scope-shadowing \
+    --argument-names condition
+  if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != adda
+    false
   else
-    __imeta_no_cmd_or_help
+    set _unparsed_args $_unparsed_args $_curr_token
+    set --erase _unparsed_args[1]
+    __imeta_suggest_add $condition $_unparsed_args
   end
 end
 
@@ -217,7 +228,7 @@ end
 #
 
 function __imeta_mk_add_admin_flag_completions --argument-names opt description
-  set cond '__irods_exec_slow __imeta_suggest __imeta_add_condition __imeta_add_needs_admin_flag' 
+  set cond '__irods_exec_slow __imeta_suggest __imeta_add_condition __imeta_add_needs_admin_flag'
   complete --command imeta --arguments "-$opt" --condition $cond --description $description
   complete --command imeta --short-option $opt --condition $cond --description $description
 end
@@ -278,10 +289,25 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_user_suggestion
 
 # adda
 complete --command imeta --arguments adda \
-  --condition '__irods_exec_slow __imeta_suggest __imeta_adda_condition' \
+  --condition '__irods_exec_slow __imeta_suggest __imeta_suggest_adda' \
   --description 'administratively add new AVU triple'
 
-# TODO imeta adda (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
+complete --command imeta --arguments '-d' \
+  --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_flag' \
+  --description 'to data object'
+
+complete --command imeta --short-option d \
+  --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_flag' \
+  --description 'to data object'
+
+# TODO imeta adda -d <data object>
+# TODO imeta adda -d <data object> <attribute>
+# TODO imeta adda -d <data object> <attribute> <value>
+# TODO imeta adda -d <data object> <attribute> <value> <units>
+
+# TODO imeta adda -C <collection> <attribute> <value> [<units>]
+# TODO imeta adda -R <resource> <attribute> <value> [<units>]
+# TODO imeta adda -u <user> <attribute> <value> [<units>]
 
 # addw
 complete --command imeta --arguments addw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
