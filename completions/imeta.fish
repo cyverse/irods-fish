@@ -127,6 +127,11 @@ function __imeta_add_condition --no-scope-shadowing \
   end
 end
 
+function __imeta_am_admin 
+  set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
+  test "$userType" = rodsadmin
+end
+
 
 #
 # Condition functions
@@ -138,12 +143,8 @@ function __imeta_no_cmd_or_help --no-scope-shadowing
 end
 
 function __imeta_adda_condition --no-scope-shadowing
-  if __imeta_no_cmd_or_help
-    set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
-    test "$userType" = rodsadmin
-  else
-    false
-  end
+  __imeta_no_cmd_or_help
+  and __imeta_am_admin
 end
 
 function __imeta_add_needs_collection --no-scope-shadowing
@@ -167,6 +168,15 @@ end
 function __imeta_add_needs_resource --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_R
+end
+
+function __imeta_add_needs_resource_flag --no-scope-shadowing
+  __imeta_add_needs_entity_flag
+  and __imeta_am_admin
+end
+
+function __imeta_add_resource_flag_condition
+  __imeta_suggest __imeta_add_condition __imeta_add_needs_resource_flag
 end
 
 function __imeta_add_needs_user --no-scope-shadowing
@@ -198,8 +208,7 @@ function __imeta_resource_suggestions
 end
 
 function __imeta_user_suggestions
-  set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
-  if test "$userType" = rodsadmin
+  if __imeta_am_admin
     __irods_quest '%s' 'select USER_NAME'
   end
 end
@@ -257,7 +266,13 @@ __imeta_mk_add_entity_completions d 'to data object'
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_data_object'
 
-__imeta_mk_add_entity_completions R 'to resource'
+complete --command imeta --arguments '-R' \
+  --condition '__irods_exec_slow __imeta_add_resource_flag_condition' \
+  --description 'to resource'
+
+complete --command imeta --short-option R \
+  --condition '__irods_exec_slow __imeta_add_resource_flag_condition' \
+  --description 'to resource'
 
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resource_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_resource'
