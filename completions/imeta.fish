@@ -174,6 +174,11 @@ function __imeta_add_needs_collection --no-scope-shadowing
   and set --query _flag_C
 end
 
+function __imeta_adda_needs_collection_attr --no-scope-shadowing
+  test (count $_unparsed_args) -eq 1
+  and set --query _flag_C
+end
+
 function __imeta_add_needs_data_object --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_d
@@ -209,6 +214,10 @@ end
 #
 # Suggestion functions
 #
+
+function __imeta_collection_attr_suggestions
+  __irods_quest '%s' 'select META_COLL_ATTR_NAME'
+end
 
 function __imeta_resource_suggestions
   __irods_quest '%s' 'select RESC_NAME'
@@ -299,7 +308,10 @@ __imeta_mk_adda_flag_completions C 'to collection'
 complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_collection'
 
-# TODO imeta adda -C <collection> <attribute>
+complete --command imeta --arguments '(__irods_exec_slow __imeta_collection_attr_suggestions)' \
+  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_collection_attr' \
+  --description 'existing for collections'
+
 # TODO imeta adda -C <collection> <attribute> <value>
 # TODO imeta adda -C <collection> <attribute> <value> <units>
 
