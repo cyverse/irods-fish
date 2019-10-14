@@ -242,6 +242,11 @@ function __imeta_mk_add_flag_completions --argument-names opt description
     '__imeta_suggest __imeta_add_condition __imeta_add_needs_flag'
 end
 
+function __imeta_mk_adda_flag_completions --argument-names opt description
+  __imeta_mk_hyphen_completions $opt $description \
+    '__imeta_suggest __imeta_adda_condition __imeta_add_needs_flag'
+end
+
 complete --command imeta --no-files
 
 __imeta_mk_hyphen_completions h 'shows help' '__imeta_suggest __imeta_no_cmd_or_help'
@@ -289,23 +294,27 @@ complete --command imeta --arguments adda \
   --condition '__irods_exec_slow __imeta_suggest __imeta_suggest_adda' \
   --description 'administratively add new AVU triple'
 
-__imeta_mk_hyphen_completions C 'to collection' \
-  '__imeta_suggest __imeta_adda_condition __imeta_add_needs_flag'
+__imeta_mk_adda_flag_completions C 'to collection'
 
 # TODO imeta adda -C <collection>
 # TODO imeta adda -C <collection> <attribute>
 # TODO imeta adda -C <collection> <attribute> <value>
 # TODO imeta adda -C <collection> <attribute> <value> <units>
 
-__imeta_mk_hyphen_completions d 'to data object' \
-  '__imeta_suggest __imeta_adda_condition __imeta_add_needs_flag'
+__imeta_mk_adda_flag_completions d 'to data object'
 
 # TODO imeta adda -d <data object>
 # TODO imeta adda -d <data object> <attribute>
 # TODO imeta adda -d <data object> <attribute> <value>
 # TODO imeta adda -d <data object> <attribute> <value> <units>
 
-# TODO imeta adda -R <resource> <attribute> <value> [<units>]
+__imeta_mk_adda_flag_completions R 'to resource'
+
+# TODO imeta adda -R <resource>
+# TODO imeta adda -R <resource> <attribute>
+# TODO imeta adda -R <resource> <attribute> <value>
+# TODO imeta adda -R <resource> <attribute> <value> <units>
+
 # TODO imeta adda -u <user> <attribute> <value> [<units>]
 
 # addw
@@ -369,6 +378,7 @@ complete --command imeta --arguments rmw --condition '__imeta_suggest __imeta_no
 # TODO imeta rmw (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
 
 functions --erase \
+  __imeta_mk_adda_flag_completions \
   __imeta_mk_add_flag_completions \
   __imeta_mk_add_admin_flag_completions \
   __imeta_mk_hyphen_completions
