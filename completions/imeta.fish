@@ -296,7 +296,12 @@ complete --command imeta --arguments adda \
 
 __imeta_mk_adda_flag_completions C 'to collection'
 
-# TODO imeta adda -C <collection> <attribute> <value> [<units>]
+complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
+  --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_collection'
+
+# TODO imeta adda -C <collection> <attribute>
+# TODO imeta adda -C <collection> <attribute> <value>
+# TODO imeta adda -C <collection> <attribute> <value> <units>
 
 __imeta_mk_adda_flag_completions d 'to data object'
 
