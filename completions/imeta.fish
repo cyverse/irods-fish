@@ -1,4 +1,5 @@
 # tab completion for imeta
+# TODO verify spaces are handled correctly
 
 #
 # Helper Functions
@@ -174,16 +175,6 @@ function __imeta_add_needs_coll --no-scope-shadowing
   and set --query _flag_C
 end
 
-function __imeta_adda_needs_coll_attr --no-scope-shadowing
-  test (count $_unparsed_args) -eq 1
-  and set --query _flag_C
-end
-
-function __imeta_adda_needs_coll_attr_val --no-scope-shadowing
-  test (count $_unparsed_args) -eq 2
-  and set --query _flag_C
-end
-
 function __imeta_add_needs_data_object --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_d
@@ -215,6 +206,21 @@ function __imeta_adda_condition --no-scope-shadowing \
   end
 end
 
+function __imeta_adda_needs_coll_attr --no-scope-shadowing
+  test (count $_unparsed_args) -eq 1
+  and set --query _flag_C
+end
+
+function __imeta_adda_needs_coll_attr_val --no-scope-shadowing
+  test (count $_unparsed_args) -eq 2
+  and set --query _flag_C
+end
+
+function __imeta_adda_needs_coll_avu --no-scope-shadowing
+  test (count $_unparsed_args) -eq 3
+  and set --query _flag_C
+end
+
 
 #
 # Suggestion functions
@@ -231,6 +237,20 @@ function __imeta_coll_attr_val_suggestions
     __irods_quest '%s' \
       "select META_COLL_ATTR_VALUE
        where META_COLL_ATTR_NAME = '$attr' and META_COLL_ATTR_VALUE like '$valPat'"
+  end
+  __imeta_suggest __imeta_adda_condition mk_suggestions
+end
+
+function __imeta_coll_avu_suggestions
+  function mk_suggestions --no-scope-shadowing
+    set attr $_unparsed_args[2]
+    set val $_unparsed_args[3]
+    set unitPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_COLL_ATTR_UNITS
+       where META_COLL_ATTR_NAME = '$attr'
+         and META_COLL_ATTR_VALUE = '$val'
+         and META_COLL_ATTR_UNITS like '$unitPat'"
   end
   __imeta_suggest __imeta_adda_condition mk_suggestions
 end
@@ -296,6 +316,8 @@ complete --command imeta --arguments add --condition '__imeta_suggest __imeta_no
 
 __imeta_mk_add_flag_completions C 'to collection'
 
+# XXX strip trailing / off collection suggestions. A bug in iRODS 4.1.10
+#     prevents imeta from finding the collection when it ends in /.
 complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_coll'
 
@@ -321,6 +343,8 @@ complete --command imeta --arguments adda \
 
 __imeta_mk_adda_flag_completions C 'to collection'
 
+# XXX strip trailing / off collection suggestions. A bug in iRODS 4.1.10
+#     prevents imeta from finding the collection when it ends in /.
 complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_coll'
 
@@ -331,6 +355,10 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_attr_sugge
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_attr_val_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_attr_val' \
   --description 'existing for attribute'
+
+complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_avu_suggestions)' \
+  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_avu' \
+  --description 'existing for attribute-value'
 
 # TODO imeta adda -C <collection> <attribute> <value> <units>
 
