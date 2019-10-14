@@ -296,24 +296,17 @@ complete --command imeta --arguments adda \
 
 __imeta_mk_adda_flag_completions C 'to collection'
 
-# TODO imeta adda -C <collection>
-# TODO imeta adda -C <collection> <attribute>
-# TODO imeta adda -C <collection> <attribute> <value>
-# TODO imeta adda -C <collection> <attribute> <value> <units>
+# TODO imeta adda -C <collection> <attribute> <value> [<units>]
 
 __imeta_mk_adda_flag_completions d 'to data object'
 
-# TODO imeta adda -d <data object>
-# TODO imeta adda -d <data object> <attribute>
-# TODO imeta adda -d <data object> <attribute> <value>
-# TODO imeta adda -d <data object> <attribute> <value> <units>
+# TODO imeta adda -d <data object> <attribute> <value> [<units>]
 
 __imeta_mk_adda_flag_completions R 'to resource'
 
-# TODO imeta adda -R <resource>
-# TODO imeta adda -R <resource> <attribute>
-# TODO imeta adda -R <resource> <attribute> <value>
-# TODO imeta adda -R <resource> <attribute> <value> <units>
+# TODO imeta adda -R <resource> <attribute> <value> [<units>]
+
+__imeta_mk_adda_flag_completions u 'to_user'
 
 # TODO imeta adda -u <user> <attribute> <value> [<units>]
 
