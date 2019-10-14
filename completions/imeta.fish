@@ -169,13 +169,18 @@ function __imeta_add_needs_admin_flag --no-scope-shadowing
   and __imeta_am_admin
 end
 
-function __imeta_add_needs_collection --no-scope-shadowing
+function __imeta_add_needs_coll --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_C
 end
 
-function __imeta_adda_needs_collection_attr --no-scope-shadowing
+function __imeta_adda_needs_coll_attr --no-scope-shadowing
   test (count $_unparsed_args) -eq 1
+  and set --query _flag_C
+end
+
+function __imeta_adda_needs_coll_attr_val --no-scope-shadowing
+  test (count $_unparsed_args) -eq 2
   and set --query _flag_C
 end
 
@@ -215,8 +220,19 @@ end
 # Suggestion functions
 #
 
-function __imeta_collection_attr_suggestions
+function __imeta_coll_attr_suggestions
   __irods_quest '%s' 'select META_COLL_ATTR_NAME'
+end
+
+function __imeta_coll_attr_val_suggestions
+  function mk_suggestions --no-scope-shadowing
+    set attr $_unparsed_args[2]
+    set valPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_COLL_ATTR_VALUE
+       where META_COLL_ATTR_NAME = '$attr' and META_COLL_ATTR_VALUE like '$valPat'"
+  end
+  __imeta_suggest __imeta_adda_condition mk_suggestions
 end
 
 function __imeta_resource_suggestions
@@ -281,7 +297,7 @@ complete --command imeta --arguments add --condition '__imeta_suggest __imeta_no
 __imeta_mk_add_flag_completions C 'to collection'
 
 complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_collection'
+  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_coll'
 
 __imeta_mk_add_flag_completions d 'to data object'
 
@@ -306,13 +322,16 @@ complete --command imeta --arguments adda \
 __imeta_mk_adda_flag_completions C 'to collection'
 
 complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_collection'
+  --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_coll'
 
-complete --command imeta --arguments '(__irods_exec_slow __imeta_collection_attr_suggestions)' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_collection_attr' \
+complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_attr_suggestions)' \
+  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_attr' \
   --description 'existing for collections'
 
-# TODO imeta adda -C <collection> <attribute> <value>
+complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_attr_val_suggestions)' \
+  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_attr_val' \
+  --description 'existing for attribute'
+
 # TODO imeta adda -C <collection> <attribute> <value> <units>
 
 __imeta_mk_adda_flag_completions d 'to data object'
