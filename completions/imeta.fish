@@ -227,27 +227,24 @@ end
 # Completions
 #
 
+function __imeta_mk_hyphen_completions --argument-names opt description condition
+  complete --command imeta --arguments "-$opt" --condition $condition --description $description
+  complete --command imeta --short-option $opt --condition $condition --description $description
+end
+
 function __imeta_mk_add_admin_flag_completions --argument-names opt description
-  set cond '__irods_exec_slow __imeta_suggest __imeta_add_condition __imeta_add_needs_admin_flag'
-  complete --command imeta --arguments "-$opt" --condition $cond --description $description
-  complete --command imeta --short-option $opt --condition $cond --description $description
+  __imeta_mk_hyphen_completions $opt $description \
+    '__irods_exec_slow __imeta_suggest __imeta_add_condition __imeta_add_needs_admin_flag'
 end
 
 function __imeta_mk_add_flag_completions --argument-names opt description
-  complete --command imeta --arguments "-$opt" \
-    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_flag' \
-    --description $description
-  complete --command imeta --short-option $opt \
-    --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_flag' \
-    --description $description
+  __imeta_mk_hyphen_completions $opt $description \
+    '__imeta_suggest __imeta_add_condition __imeta_add_needs_flag'
 end
 
 complete --command imeta --no-files
 
-complete --command imeta --arguments '-h' --condition '__imeta_suggest __imeta_no_cmd_or_help' \
-  --description 'shows help'
-complete --command imeta --short-option h --condition '__imeta_suggest __imeta_no_cmd_or_help' \
-  --description 'shows help'
+__imeta_mk_hyphen_completions h 'shows help' '__imeta_suggest __imeta_no_cmd_or_help'
 
 complete --command imeta --short-option V --condition '__imeta_suggest __imeta_verbose_condition' \
   --description 'very verbose'
@@ -292,20 +289,22 @@ complete --command imeta --arguments adda \
   --condition '__irods_exec_slow __imeta_suggest __imeta_suggest_adda' \
   --description 'administratively add new AVU triple'
 
-complete --command imeta --arguments '-d' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_flag' \
-  --description 'to data object'
+__imeta_mk_hyphen_completions C 'to collection' \
+  '__imeta_suggest __imeta_adda_condition __imeta_add_needs_flag'
 
-complete --command imeta --short-option d \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_flag' \
-  --description 'to data object'
+# TODO imeta adda -C <collection>
+# TODO imeta adda -C <collection> <attribute>
+# TODO imeta adda -C <collection> <attribute> <value>
+# TODO imeta adda -C <collection> <attribute> <value> <units>
+
+__imeta_mk_hyphen_completions d 'to data object' \
+  '__imeta_suggest __imeta_adda_condition __imeta_add_needs_flag'
 
 # TODO imeta adda -d <data object>
 # TODO imeta adda -d <data object> <attribute>
 # TODO imeta adda -d <data object> <attribute> <value>
 # TODO imeta adda -d <data object> <attribute> <value> <units>
 
-# TODO imeta adda -C <collection> <attribute> <value> [<units>]
 # TODO imeta adda -R <resource> <attribute> <value> [<units>]
 # TODO imeta adda -u <user> <attribute> <value> [<units>]
 
@@ -369,5 +368,7 @@ complete --command imeta --arguments rmw --condition '__imeta_suggest __imeta_no
 
 # TODO imeta rmw (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
 
-functions --erase __imeta_mk_add_flag_completions
-functions --erase __imeta_mk_add_admin_flag_completions
+functions --erase \
+  __imeta_mk_add_flag_completions \
+  __imeta_mk_add_admin_flag_completions \
+  __imeta_mk_hyphen_completions
