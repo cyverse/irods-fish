@@ -272,9 +272,12 @@ function __imeta_coll_suggestions
   __irods_collection_suggestions | string trim --right --chars /
 end
 
-# TODO filter by current token
 function __imeta_data_attr_suggestions
-  __irods_quest '%s' 'select META_DATA_ATTR_NAME'
+  function mk_suggestions --no-scope-shadowing
+    set attrPat $_curr_token%
+    __irods_quest '%s' "select META_DATA_ATTR_NAME where META_DATA_ATTR_NAME like '$attrPat'"
+  end
+  __imeta_suggest __imeta_adda_condition mk_suggestions
 end
 
 function __imeta_data_attr_val_suggestions
