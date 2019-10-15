@@ -122,6 +122,10 @@ function __imeta_suggest_add --argument-names condition
   end
 end
 
+function __imeta_adda_coll_suggestions --argument-names selector
+  __imeta_suggest __imeta_adda_condition $selector
+end
+
 
 #
 # Condition functions
@@ -236,34 +240,28 @@ end
 # Suggestion functions
 #
 
-# TODO filter by current token
-function __imeta_coll_attr_suggestions
-  __irods_quest '%s' 'select META_COLL_ATTR_NAME'
+function __imeta_coll_attrs --no-scope-shadowing
+  set attrPat $_curr_token%
+  __irods_quest '%s' "select META_COLL_ATTR_NAME where META_COLL_ATTR_NAME like '$attrPat'"
 end
 
-function __imeta_coll_attr_val_suggestions
-  function mk_suggestions --no-scope-shadowing
-    set attr $_unparsed_args[2]
-    set valPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_COLL_ATTR_VALUE
-       where META_COLL_ATTR_NAME = '$attr' and META_COLL_ATTR_VALUE like '$valPat'"
-  end
-  __imeta_suggest __imeta_adda_condition mk_suggestions
+function __imeta_coll_attr_vals --no-scope-shadowing
+  set attr $_unparsed_args[2]
+  set valPat $_curr_token%
+  __irods_quest '%s' \
+    "select META_COLL_ATTR_VALUE
+     where META_COLL_ATTR_NAME = '$attr' and META_COLL_ATTR_VALUE like '$valPat'"
 end
 
-function __imeta_coll_avu_suggestions
-  function mk_suggestions --no-scope-shadowing
-    set attr $_unparsed_args[2]
-    set val $_unparsed_args[3]
-    set unitPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_COLL_ATTR_UNITS
-       where META_COLL_ATTR_NAME = '$attr'
-         and META_COLL_ATTR_VALUE = '$val'
-         and META_COLL_ATTR_UNITS like '$unitPat'"
-  end
-  __imeta_suggest __imeta_adda_condition mk_suggestions
+function __imeta_coll_avus --no-scope-shadowing
+  set attr $_unparsed_args[2]
+  set val $_unparsed_args[3]
+  set unitPat $_curr_token%
+  __irods_quest '%s' \
+    "select META_COLL_ATTR_UNITS
+     where META_COLL_ATTR_NAME = '$attr'
+       and META_COLL_ATTR_VALUE = '$val'
+       and META_COLL_ATTR_UNITS like '$unitPat'"
 end
 
 # XXX strip trailing / off collection suggestions. A bug in iRODS 4.1.10
@@ -380,13 +378,16 @@ complete --command imeta --arguments adda \
 __imeta_mk_adda_flag_completions C 'to collection'
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_coll'
-complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_attr_suggestions)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_adda_coll_suggestions __imeta_coll_attrs)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_attr' \
   --description 'existing for collections'
-complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_attr_val_suggestions)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_adda_coll_suggestions __imeta_coll_attr_vals)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_attr_val' \
   --description 'existing for attribute'
-complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_avu_suggestions)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_adda_coll_suggestions __imeta_coll_avus)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_avu' \
   --description 'existing for attribute-value'
 
