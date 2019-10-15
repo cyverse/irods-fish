@@ -226,10 +226,17 @@ function __imeta_adda_needs_data_attr --no-scope-shadowing
   and set --query _flag_d
 end
 
+function __imeta_adda_needs_data_attr_val --no-scope-shadowing
+  test (count $_unparsed_args) -eq 2
+  and set --query _flag_d
+end
+
+
 #
 # Suggestion functions
 #
 
+# TODO filter by current token
 function __imeta_coll_attr_suggestions
   __irods_quest '%s' 'select META_COLL_ATTR_NAME'
 end
@@ -267,8 +274,20 @@ function __imeta_coll_suggestions
   __irods_collection_suggestions | string trim --right --chars /
 end
 
+# TODO filter by current token
 function __imeta_data_attr_suggestions
   __irods_quest '%s' 'select META_DATA_ATTR_NAME'
+end
+
+function __imeta_data_attr_val_suggestions
+  function mk_suggestions --no-scope-shadowing
+    set attr $_unparsed_args[2]
+    set valPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_DATA_ATTR_VALUE
+       where META_DATA_ATTR_NAME = '$attr' and META_DATA_ATTR_VALUE like '$valPat'"
+  end
+  __imeta_suggest __imeta_adda_condition mk_suggestions
 end
 
 function __imeta_resource_suggestions
@@ -327,130 +346,139 @@ complete --command imeta --short-option z \
   --description 'work with the specified zone'
 
 # add
+
 complete --command imeta --arguments add --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'add new AVU triple'
 
+# add -C
 __imeta_mk_add_flag_completions C 'to collection'
-
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_coll'
 
+# add -d
 __imeta_mk_add_flag_completions d 'to data object'
-
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_data'
 
+# add -R
 __imeta_mk_add_admin_flag_completions R 'to resource'
-
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resource_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_resource'
 
+# add -u
 __imeta_mk_add_admin_flag_completions u 'to user'
-
 complete --command imeta --arguments '(__irods_exec_slow __imeta_user_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_user'
 
 # adda
+
 complete --command imeta --arguments adda \
   --condition '__irods_exec_slow __imeta_suggest __imeta_suggest_adda' \
   --description 'administratively add new AVU triple'
 
+# adda -C
 __imeta_mk_adda_flag_completions C 'to collection'
-
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_coll'
-
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_attr_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_attr' \
   --description 'existing for collections'
-
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_attr_val_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_attr_val' \
   --description 'existing for attribute'
-
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_avu_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_avu' \
   --description 'existing for attribute-value'
 
+# adda -d
 __imeta_mk_adda_flag_completions d 'to data object'
-
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_data'
-
 complete --command imeta --arguments '(__irods_exec_slow __imeta_data_attr_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_data_attr' \
   --description 'existing for data objects'
-
-# TODO imeta adda -d <data object> <attribute> <value>
+complete --command imeta --arguments '(__irods_exec_slow __imeta_data_attr_val_suggestions)' \
+  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_data_attr_val' \
+  --description 'existing for attribute'
 # TODO imeta adda -d <data object> <attribute> <value> <units>
 
+# adda -R
 __imeta_mk_adda_flag_completions R 'to resource'
-
 # TODO imeta adda -R <resource> <attribute> <value> [<units>]
 
+# adda -u
 __imeta_mk_adda_flag_completions u 'to_user'
-
 # TODO imeta adda -u <user> <attribute> <value> [<units>]
 
 # addw
+
 complete --command imeta --arguments addw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'add new AVU triple using wildcards in name'
 
 # TODO imeta addw -d <entity> <attribute> <value> [<units>]
 
 # cp
+
 complete --command imeta --arguments cp --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'copy AVUs from one item to another'
 
 # TODO imeta cp (-d|-C|-R|-u) (-d|-C|-R|-u) <from-entity> <to-entity>
 
 # ls
+
 complete --command imeta --arguments ls --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'list existing AVUs'
 
 # TODO imeta ls (-[l]d|-[l]C|-[l]R|-[l]u) <entity> [<attribute>]
 
 # lsw
+
 complete --command imeta --arguments lsw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'list existing AVUs using wildcards'
 
 # TODO imeta lsw (-[l]d|-[l]C|-[l]R|-[l]u) <entity> [<attribute>]
 
 # mod
+
 complete --command imeta --arguments mod --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'modify AVU'
 
 # TODO imeta mod (-d|-C|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
 
 # qu
+
 complete --command imeta --arguments qu --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'query entities with matching AVUs'
 
 # TODO imeta qu (-d|-C|-R|-u) <attribute> <op> <value> ...
 
-# set
-complete --command imeta --arguments set --condition '__imeta_suggest __imeta_no_cmd_or_help' \
-  --description 'assign a single value'
-
-# TODO imeta set (-d|-C|-R|-u) <entity> <attribute> <new-value> [<new-units>]
-
 # rm
+
 complete --command imeta --arguments rm --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'remove AVU'
 
 # TODO imeta rm (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
 
 # rmi
+
 complete --command imeta --arguments rmi --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'remove AVU by metadata id'
 
 # TODO imeta rmi (-d|-C|-R|-u) <entity> <metadata-id>
 
 # rmw
+
 complete --command imeta --arguments rmw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
   --description 'remove AVU using wildcards'
 
 # TODO imeta rmw (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
+
+# set
+
+complete --command imeta --arguments set --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+  --description 'assign a single value'
+
+# TODO imeta set (-d|-C|-R|-u) <entity> <attribute> <new-value> [<new-units>]
 
 functions --erase \
   __imeta_mk_adda_flag_completions \
