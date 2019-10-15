@@ -12,12 +12,12 @@ function __irods_path_suggestions \
   set dirName ''
   if string match --quiet --regex -- / $curArg
     set pathParts (string split --right --max 1 / $curArg)
-    set dirName "$pathParts[1]"/
+    set dirName $pathParts[1]/
   end
 
   set entries (command ils $dirName)
 
-  string replace --regex '^  (C- )?' '' $entries[2..-1] \
+  string replace --filter --regex '^  (C- )?' '' $entries \
     | string replace --regex '^.*/(.*)' '${1}/' \
-    | string replace --regex '^' "$dirName"
+    | string replace --regex '^' $dirName
 end
