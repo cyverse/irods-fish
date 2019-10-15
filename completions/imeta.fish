@@ -255,6 +255,14 @@ function __imeta_coll_avu_suggestions
   __imeta_suggest __imeta_adda_condition mk_suggestions
 end
 
+# XXX strip trailing / off collection suggestions. A bug in iRODS 4.1.10
+#     prevents imeta from finding the collection when it ends in /. See
+#     https://github.com/irods/irods/issues/4559. This is still present in
+#     iRODS 4.2.6.
+function __imeta_coll_suggestions
+  __irods_collection_suggestions | string trim --right --chars /
+end
+
 function __imeta_resource_suggestions
   __irods_quest '%s' 'select RESC_NAME'
 end
@@ -316,9 +324,7 @@ complete --command imeta --arguments add --condition '__imeta_suggest __imeta_no
 
 __imeta_mk_add_flag_completions C 'to collection'
 
-# XXX strip trailing / off collection suggestions. A bug in iRODS 4.1.10
-#     prevents imeta from finding the collection when it ends in /.
-complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
+complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_suggestions)' \
   --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_coll'
 
 __imeta_mk_add_flag_completions d 'to data object'
@@ -343,9 +349,7 @@ complete --command imeta --arguments adda \
 
 __imeta_mk_adda_flag_completions C 'to collection'
 
-# XXX strip trailing / off collection suggestions. A bug in iRODS 4.1.10
-#     prevents imeta from finding the collection when it ends in /.
-complete --command imeta --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
+complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_coll'
 
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_attr_suggestions)' \
@@ -359,8 +363,6 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_attr_val_s
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_avu_suggestions)' \
   --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_avu' \
   --description 'existing for attribute-value'
-
-# TODO imeta adda -C <collection> <attribute> <value> <units>
 
 __imeta_mk_adda_flag_completions d 'to data object'
 
