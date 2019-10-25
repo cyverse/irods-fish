@@ -4,7 +4,7 @@ function __irods_exec_slow \
   # Add hourglass to right of cursor
   printf ' \u23f3\x08\x08\x08' >&2
 
-  eval "$argv"
+  eval (string escape $argv)
   set cmdStatus $status
 
   # Remove hourglass
