@@ -1,5 +1,8 @@
 # tab completion for imeta
 # TODO verify spaces are handled correctly
+# TODO document
+# TODO if using argparse is successfuly, convert all other completions to using it.
+# TODO remove any unused functions/__irods_*.
 
 #
 # Helper Functions
@@ -10,9 +13,19 @@ function __imeta_am_admin
   test "$userType" = rodsadmin
 end
 
+function __imeta_cmdline_args
+  set args (commandline --cut-at-cursor --tokenize) (commandline --cut-at-cursor --current-token)
+  set --erase args[1]
+  string join -- \n $args
+end
+
+function __imeta_eval_with_cmdline --argument-names needs_cmdline
+  set cmdline (__imeta_cmdline_args)
+  eval "$needs_cmdline '$cmdline'"
+end
+
 function __imeta_tokenize_cmdline
-  function tokenize_arg --no-scope-shadowing \
-      --argument-names arg
+  function tokenize_arg --no-scope-shadowing --argument-names arg
     if string match --invert --quiet --regex -- '^-[^-]' $arg
       echo $arg
       set matched passthru
@@ -61,40 +74,28 @@ function __imeta_tokenize_cmdline
   return 0
 end
 
-function __imeta_suggest
-  function cmdline_args
-    set args (commandline --cut-at-cursor --tokenize) (commandline --cut-at-cursor --current-token)
-    set --erase args[1]
-    string join -- \n $args
-  end
-  function main_opts
-    fish_opt --short h
-    fish_opt --short V
-    fish_opt --short v
-    fish_opt --short z --required
-  end
-  set condition $argv
-  set optSpec (main_opts)
-  set cmdTokens (__imeta_tokenize_cmdline $optSpec -- (cmdline_args))
+function __imeta_parse_for --argument-names optSpec consumer cmdline
+  set optSpecArray (string split -- ' ' $optSpec)
+  set cmdTokens (__imeta_tokenize_cmdline $optSpecArray -- (string split -- ' ' $cmdline))
   set _curr_token $cmdTokens[-1]
   set --erase cmdTokens[-1]
-  argparse --stop-nonopt --name imeta $optSpec -- $cmdTokens 2>&1 | read failMsg
+  argparse --stop-nonopt --name imeta $optSpecArray -- $cmdTokens 2>&1 | read failMsg
   if test -z "$failMsg"
     set _unparsed_args $argv
-    eval "$condition"
+    eval "$consumer"
   else
     set needsVal (string replace --filter --regex -- '.*Expected argument for option -' '' $failMsg)
     if test $status -eq 0
       # Try again, removing the last option to work around the issue where
       # _curr_token is the missing value argparse is complaining about.
       set --erase cmdTokens[-1]
-      argparse --stop-nonopt --name imeta $optSpec -- $cmdTokens 2> /dev/null
+      argparse --stop-nonopt --name imeta $optSpecArray -- $cmdTokens 2> /dev/null
       if test $status -ne 0
         false
       else
         eval set _flag_$needsVal
         set _unparsed_args $argv
-        eval "$condition"
+        eval "$consumer"
       end
     else
       false
@@ -102,28 +103,35 @@ function __imeta_suggest
   end
 end
 
-function __imeta_suggest_add --argument-names condition
-  function add_opts
+function __imeta_parse_main_for --argument-names consumer cmdline
+  function opts
+    fish_opt --short h
+    fish_opt --short V
+    fish_opt --short v
+    fish_opt --short z --required
+  end
+  set optSpec (opts)
+  __imeta_parse_for "$optSpec" $consumer $cmdline
+end
+
+function __imeta_parse_cmd_for --argument-names cmd consumer cmdline
+  function cmd_opts
     fish_opt --short C
     fish_opt --short d
     fish_opt --short R
     fish_opt --short u
   end
-  set --erase argv[1]
-  set optSpec (add_opts)
-  set cmdTokens (__imeta_tokenize_cmdline $optSpec -- $argv)
-  set _curr_token $cmdTokens[-1]
-  set --erase cmdTokens[-1]
-  if argparse --stop-nonopt --name imeta $optSpec -- $cmdTokens 2> /dev/null
-    set _unparsed_args $argv
-    eval "$condition"
-  else
-    false
+  function condition --no-scope-shadowing --argument-names cmd consumer
+    if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != "$cmd"
+      false
+    else
+      set _unparsed_args $_unparsed_args $_curr_token
+      set --erase _unparsed_args[1]
+      set optSpec (cmd_opts)
+      __imeta_parse_for "$optSpec" $consumer "$_unparsed_args"
+    end
   end
-end
-
-function __imeta_adda_suggestions --argument-names selector
-  __imeta_suggest __imeta_adda_condition $selector
+  __imeta_parse_main_for "condition $cmd $consumer" $cmdline
 end
 
 
@@ -131,113 +139,147 @@ end
 # Condition functions
 #
 
-function __imeta_no_cmd_or_help --no-scope-shadowing
-  test (count $_unparsed_args) -eq 0
-  and not set --query _flag_h
+# shared condition tests
+
+function __imeta_cmd_has_flag --no-scope-shadowing
+  set --query _flag_C
+  or set --query _flag_d
+  or set --query _flag_R
+  or set --query _flag_u
 end
 
-function __imeta_verbose_condition --no-scope-shadowing
-  __imeta_no_cmd_or_help
-  and not set --query _flag_V
-  and not set --query _flag_v
-end
-
-function __imeta_zone_condition --no-scope-shadowing
-  if set --query _flag_z
-    test -z "$_flag_z"
-  else
-    __imeta_no_cmd_or_help
-  end
-end
-
-function __imeta_add_condition --no-scope-shadowing \
-    --argument-names condition
-  if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != add
-    false
-  else
-    set _unparsed_args $_unparsed_args $_curr_token
-    set --erase _unparsed_args[1]
-    __imeta_suggest_add $condition $_unparsed_args
-  end
-end
-
-function __imeta_add_needs_flag --no-scope-shadowing
-  test (count $_unparsed_args) -eq 0
-  and not set --query _flag_C
-  and not set --query _flag_d
-  and not set --query _flag_R
-  and not set --query _flag_u
-end
-
-function __imeta_add_needs_admin_flag --no-scope-shadowing
-  __imeta_add_needs_flag
-  and __imeta_am_admin
-end
-
-function __imeta_add_needs_coll --no-scope-shadowing
+function __imeta_cmd_needs_coll --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_C
 end
 
-function __imeta_add_needs_data --no-scope-shadowing
+function __imeta_cmd_needs_data --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_d
 end
 
-function __imeta_add_needs_resource --no-scope-shadowing
+function __imeta_cmd_needs_resc --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_R
 end
 
-function __imeta_add_needs_user --no-scope-shadowing
+function __imeta_cmd_needs_user --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_u
 end
 
-function __imeta_suggest_adda --no-scope-shadowing
-  __imeta_no_cmd_or_help
+function __imeta_entity_needs_attr --no-scope-shadowing
+  test (count $_unparsed_args) -eq 1
+  and __imeta_cmd_has_flag
+end
+
+function __imeta_attr_needs_val --no-scope-shadowing
+  test (count $_unparsed_args) -eq 2
+  and __imeta_cmd_has_flag
+end
+
+function __imeta_val_needs_unit --no-scope-shadowing
+  test (count $_unparsed_args) -eq 3
+  and __imeta_cmd_has_flag
+end
+
+function __imeta_no_cmd_args --no-scope-shadowing
+  test (count $_unparsed_args) -eq 0
+  and not __imeta_cmd_has_flag
+end
+
+# main conditions
+
+function __imeta_no_cmd_or_help_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 0
+    and not set --query _flag_h
+  end
+  __imeta_parse_main_for condition $cmdline
+end
+
+function __imeta_verbose_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 0
+    and not set --query _flag_h
+    and not set --query _flag_V
+    and not set --query _flag_v
+  end
+  __imeta_parse_main_for condition $cmdline
+end
+
+function __imeta_zone_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    if set --query _flag_z
+      test -z "$_flag_z"
+    else
+      test (count $_unparsed_args) -eq 0
+      and not set --query _flag_h
+    end
+  end
+  __imeta_parse_main_for condition $cmdline
+end
+
+# add conditions
+
+function __imeta_add_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for add __imeta_no_cmd_args $cmdline
+end
+
+function __imeta_add_admin_flag_cond --argument-names cmdline
+  __imeta_add_flag_cond $cmdline
   and __imeta_am_admin
 end
 
-function __imeta_adda_condition --no-scope-shadowing \
-    --argument-names condition
-  if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != adda
-    false
-  else
-    set _unparsed_args $_unparsed_args $_curr_token
-    set --erase _unparsed_args[1]
-    __imeta_suggest_add $condition $_unparsed_args
-  end
+function __imeta_add_coll_cond --argument-names cmdline
+  __imeta_parse_cmd_for add __imeta_cmd_needs_coll $cmdline
 end
 
-function __imeta_adda_needs_coll_attr --no-scope-shadowing
-  test (count $_unparsed_args) -eq 1
-  and set --query _flag_C
+function __imeta_add_data_cond --argument-names cmdline
+  __imeta_parse_cmd_for add __imeta_cmd_needs_data $cmdline
 end
 
-function __imeta_adda_needs_coll_attr_val --no-scope-shadowing
-  test (count $_unparsed_args) -eq 2
-  and set --query _flag_C
+function __imeta_add_resc_cond --argument-names cmdline
+  __imeta_parse_cmd_for add __imeta_cmd_needs_resc $cmdline
 end
 
-function __imeta_adda_needs_coll_avu --no-scope-shadowing
-  test (count $_unparsed_args) -eq 3
-  and set --query _flag_C
+function __imeta_add_user_cond --argument-names cmdline
+  __imeta_parse_cmd_for add __imeta_cmd_needs_user $cmdline
 end
 
-function __imeta_adda_needs_data_attr --no-scope-shadowing
-  test (count $_unparsed_args) -eq 1
-  and set --query _flag_d
+# adda conditions
+
+function __imeta_adda_cond --argument-names cmdline
+  __imeta_no_cmd_or_help_cond $cmdline
+  and __imeta_am_admin
 end
 
-function __imeta_adda_needs_data_attr_val --no-scope-shadowing
-  test (count $_unparsed_args) -eq 2
-  and set --query _flag_d
+function __imeta_adda_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for adda __imeta_no_cmd_args $cmdline
 end
 
-function __imeta_adda_needs_data_avu --no-scope-shadowing
-  test (count $_unparsed_args) -eq 3
-  and set --query _flag_d
+function __imeta_adda_coll_cond --argument-names cmdline
+  __imeta_parse_cmd_for adda __imeta_cmd_needs_coll $cmdline
+end
+
+function __imeta_adda_data_cond --argument-names cmdline
+  __imeta_parse_cmd_for adda __imeta_cmd_needs_data $cmdline
+end
+
+function __imeta_adda_resc_cond --argument-names cmdline
+  __imeta_parse_cmd_for adda __imeta_cmd_needs_resc $cmdline
+end
+
+function __imeta_adda_attr_cond --argument-names cmdline
+  __imeta_parse_cmd_for adda __imeta_entity_needs_attr $cmdline
+end
+
+function __imeta_adda_val_cond --argument-names cmdline
+  __imeta_parse_cmd_for adda __imeta_attr_needs_val $cmdline
+end
+
+function __imeta_adda_unit_cond --argument-names cmdline
+  __imeta_parse_cmd_for adda __imeta_val_needs_unit $cmdline
 end
 
 
@@ -245,71 +287,89 @@ end
 # Suggestion functions
 #
 
-function __imeta_coll_attrs --no-scope-shadowing
-  set attrPat $_curr_token%
-  __irods_quest '%s' "select META_COLL_ATTR_NAME where META_COLL_ATTR_NAME like '$attrPat'"
-end
-
-function __imeta_coll_attr_vals --no-scope-shadowing
-  set attr $_unparsed_args[2]
-  set valPat $_curr_token%
-  __irods_quest '%s' \
-    "select META_COLL_ATTR_VALUE
-     where META_COLL_ATTR_NAME = '$attr' and META_COLL_ATTR_VALUE like '$valPat'"
-end
-
-function __imeta_coll_avus --no-scope-shadowing
-  set attr $_unparsed_args[2]
-  set val $_unparsed_args[3]
-  set unitPat $_curr_token%
-  __irods_quest '%s' \
-    "select META_COLL_ATTR_UNITS
-     where META_COLL_ATTR_NAME = '$attr'
-       and META_COLL_ATTR_VALUE = '$val'
-       and META_COLL_ATTR_UNITS like '$unitPat'"
-end
-
 # XXX strip trailing / off collection suggestions. A bug in iRODS 4.1.10
 #     prevents imeta from finding the collection when it ends in /. See
 #     https://github.com/irods/irods/issues/4559. This is still present in
 #     iRODS 4.2.6.
-function __imeta_coll_suggestions
+function __imeta_coll_args
   __irods_collection_suggestions | string trim --right --chars /
 end
 
-function __imeta_data_attrs --no-scope-shadowing
-  set attrPat $_curr_token%
-  __irods_quest '%s' "select META_DATA_ATTR_NAME where META_DATA_ATTR_NAME like '$attrPat'"
+function __imeta_coll_attr_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set attrPat $_curr_token%
+    __irods_quest '%s' "select META_COLL_ATTR_NAME where META_COLL_ATTR_NAME like '$attrPat'"
+  end
+  __imeta_parse_cmd_for adda suggestions $cmdline
 end
 
-function __imeta_data_attr_vals --no-scope-shadowing
-  set attr $_unparsed_args[2]
-  set valPat $_curr_token%
-  __irods_quest '%s' \
-    "select META_DATA_ATTR_VALUE
-     where META_DATA_ATTR_NAME = '$attr' and META_DATA_ATTR_VALUE like '$valPat'"
+function __imeta_coll_attr_val_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set attr $_unparsed_args[2]
+    set valPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_COLL_ATTR_VALUE
+       where META_COLL_ATTR_NAME = '$attr' and META_COLL_ATTR_VALUE like '$valPat'"
+  end
+  __imeta_parse_cmd_for adda suggestions $cmdline
 end
 
-function __imeta_data_avus --no-scope-shadowing
-  set attr $_unparsed_args[2]
-  set val $_unparsed_args[3]
-  set unitPat $_curr_token%
-  __irods_quest '%s' \
-    "select META_DATA_ATTR_UNITS
-     where META_DATA_ATTR_NAME = '$attr'
-       and META_DATA_ATTR_VALUE = '$val'
-       and META_DATA_ATTR_UNITS like '$unitPat'"
+function __imeta_coll_attr_val_unit_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set attr $_unparsed_args[2]
+    set val $_unparsed_args[3]
+    set unitPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_COLL_ATTR_UNITS
+       where META_COLL_ATTR_NAME = '$attr'
+         and META_COLL_ATTR_VALUE = '$val'
+         and META_COLL_ATTR_UNITS like '$unitPat'"
+  end
+  __imeta_parse_cmd_for adda suggestions $cmdline
 end
 
-function __imeta_resource_suggestions
+function __imeta_data_attr_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set attrPat $_curr_token%
+    __irods_quest '%s' "select META_DATA_ATTR_NAME where META_DATA_ATTR_NAME like '$attrPat'"
+  end
+  __imeta_parse_cmd_for adda suggestions $cmdline
+end
+
+function __imeta_data_attr_val_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set attr $_unparsed_args[2]
+    set valPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_DATA_ATTR_VALUE
+       where META_DATA_ATTR_NAME = '$attr' and META_DATA_ATTR_VALUE like '$valPat'"
+  end
+  __imeta_parse_cmd_for adda suggestions $cmdline
+end
+
+function __imeta_data_attr_val_unit_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set attr $_unparsed_args[2]
+    set val $_unparsed_args[3]
+    set unitPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_DATA_ATTR_UNITS
+       where META_DATA_ATTR_NAME = '$attr'
+         and META_DATA_ATTR_VALUE = '$val'
+         and META_DATA_ATTR_UNITS like '$unitPat'"
+  end
+  __imeta_parse_cmd_for adda suggestions $cmdline
+end
+
+function __imeta_resc_args
   __irods_quest '%s' 'select RESC_NAME'
 end
 
-function __imeta_user_suggestions
+function __imeta_user_args
   __irods_quest '%s' 'select USER_NAME'
 end
 
-function __imeta_zone_suggestions
+function __imeta_zone_args
   __irods_quest '%s' 'select ZONE_NAME'
 end
 
@@ -325,106 +385,107 @@ end
 
 function __imeta_mk_add_admin_flag_completions --argument-names opt description
   __imeta_mk_hyphen_completions $opt $description \
-    '__irods_exec_slow __imeta_suggest __imeta_add_condition __imeta_add_needs_admin_flag'
+    '__irods_exec_slow __imeta_eval_with_cmdline __imeta_add_admin_flag_cond'
 end
 
 function __imeta_mk_add_flag_completions --argument-names opt description
-  __imeta_mk_hyphen_completions $opt $description \
-    '__imeta_suggest __imeta_add_condition __imeta_add_needs_flag'
+  __imeta_mk_hyphen_completions $opt $description '__imeta_eval_with_cmdline __imeta_add_flag_cond'
 end
 
 function __imeta_mk_adda_flag_completions --argument-names opt description
-  __imeta_mk_hyphen_completions $opt $description \
-    '__imeta_suggest __imeta_adda_condition __imeta_add_needs_flag'
+  __imeta_mk_hyphen_completions $opt $description '__imeta_eval_with_cmdline __imeta_adda_flag_cond'
 end
 
 complete --command imeta --no-files
 
-__imeta_mk_hyphen_completions h 'shows help' '__imeta_suggest __imeta_no_cmd_or_help'
+__imeta_mk_hyphen_completions h 'shows help' '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond'
 
-complete --command imeta --short-option V --condition '__imeta_suggest __imeta_verbose_condition' \
+complete --command imeta --short-option V \
+  --condition '__imeta_eval_with_cmdline __imeta_verbose_cond' \
   --description 'very verbose'
 
-complete --command imeta --short-option v --condition '__imeta_suggest __imeta_verbose_condition' \
+complete --command imeta --short-option v \
+  --condition '__imeta_eval_with_cmdline __imeta_verbose_cond' \
   --description verbose
 
 # XXX imeta -(v|V)z doesn't make any suggestions. This is a bug in fish. See
 #     https://github.com/fish-shell/fish-shell/issues/5127. Check to see if this
 #     is still a problem after upgrading to fish 3.1+.
 complete --command imeta --short-option z \
-  --arguments '(__irods_exec_slow __imeta_zone_suggestions)' --exclusive \
-  --condition '__imeta_suggest __imeta_zone_condition' \
+  --arguments '(__irods_exec_slow __imeta_zone_args)' --exclusive \
+  --condition '__imeta_eval_with_cmdline __imeta_zone_cond' \
   --description 'work with the specified zone'
 
 # add
 
-complete --command imeta --arguments add --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments add \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'add new AVU triple'
 
 # add -C
 __imeta_mk_add_flag_completions C 'to collection'
-complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_coll'
+complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_add_coll_cond'
 
 # add -d
 __imeta_mk_add_flag_completions d 'to data object'
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_data'
+  --condition '__imeta_eval_with_cmdline __imeta_add_data_cond'
 
 # add -R
 __imeta_mk_add_admin_flag_completions R 'to resource'
-complete --command imeta --arguments '(__irods_exec_slow __imeta_resource_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_resource'
+complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_add_resc_cond'
 
 # add -u
 __imeta_mk_add_admin_flag_completions u 'to user'
-complete --command imeta --arguments '(__irods_exec_slow __imeta_user_suggestions)' \
-  --condition '__imeta_suggest __imeta_add_condition __imeta_add_needs_user'
+complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_add_user_cond'
 
 # adda
 
 complete --command imeta --arguments adda \
-  --condition '__irods_exec_slow __imeta_suggest __imeta_suggest_adda' \
+  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_adda_cond' \
   --description 'administratively add new AVU triple'
 
 # adda -C
 __imeta_mk_adda_flag_completions C 'to collection'
-complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_suggestions)' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_coll'
+complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_coll_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_adda_suggestions __imeta_coll_attrs)' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_attr' \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_attr_cond' \
   --description 'existing for collections'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_adda_suggestions __imeta_coll_attr_vals)' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_attr_val' \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_val_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_val_cond' \
   --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_adda_suggestions __imeta_coll_avus)' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_coll_avu' \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_val_unit_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_unit_cond' \
   --description 'existing for attribute-value'
 
 # adda -d
 __imeta_mk_adda_flag_completions d 'to data object'
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_data'
+  --condition '__imeta_eval_with_cmdline __imeta_adda_data_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_adda_suggestions __imeta_data_attrs)' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_data_attr' \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_attr_cond' \
   --description 'existing for data objects'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_adda_suggestions __imeta_data_attr_vals)' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_data_attr_val' \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_val_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_val_cond' \
   --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_adda_suggestions __imeta_data_avus)' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_adda_needs_data_avu' \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_val_unit_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_unit_cond' \
   --description 'existing for attribute-value'
 
 # adda -R
 __imeta_mk_adda_flag_completions R 'to resource'
-complete --command imeta --arguments '(__irods_exec_slow __imeta_resource_suggestions)' \
-  --condition '__imeta_suggest __imeta_adda_condition __imeta_add_needs_resource'
+complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_resc_cond'
 # TODO imeta adda -R <resource> <attribute>
 # TODO imeta adda -R <resource> <attribute> <value>
 # TODO imeta adda -R <resource> <attribute> <value> <units>
@@ -435,70 +496,80 @@ __imeta_mk_adda_flag_completions u 'to_user'
 
 # addw
 
-complete --command imeta --arguments addw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments addw \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'add new AVU triple using wildcards in name'
 
 # TODO imeta addw -d <entity> <attribute> <value> [<units>]
 
 # cp
 
-complete --command imeta --arguments cp --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments cp \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'copy AVUs from one item to another'
 
 # TODO imeta cp (-d|-C|-R|-u) (-d|-C|-R|-u) <from-entity> <to-entity>
 
 # ls
 
-complete --command imeta --arguments ls --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments ls \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'list existing AVUs'
 
 # TODO imeta ls (-[l]d|-[l]C|-[l]R|-[l]u) <entity> [<attribute>]
 
 # lsw
 
-complete --command imeta --arguments lsw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments lsw \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'list existing AVUs using wildcards'
 
 # TODO imeta lsw (-[l]d|-[l]C|-[l]R|-[l]u) <entity> [<attribute>]
 
 # mod
 
-complete --command imeta --arguments mod --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments mod \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'modify AVU'
 
 # TODO imeta mod (-d|-C|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
 
 # qu
 
-complete --command imeta --arguments qu --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments qu \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'query entities with matching AVUs'
 
 # TODO imeta qu (-d|-C|-R|-u) <attribute> <op> <value> ...
 
 # rm
 
-complete --command imeta --arguments rm --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments rm \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'remove AVU'
 
 # TODO imeta rm (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
 
 # rmi
 
-complete --command imeta --arguments rmi --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments rmi \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'remove AVU by metadata id'
 
 # TODO imeta rmi (-d|-C|-R|-u) <entity> <metadata-id>
 
 # rmw
 
-complete --command imeta --arguments rmw --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments rmw \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'remove AVU using wildcards'
 
 # TODO imeta rmw (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
 
 # set
 
-complete --command imeta --arguments set --condition '__imeta_suggest __imeta_no_cmd_or_help' \
+complete --command imeta --arguments set \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'assign a single value'
 
 # TODO imeta set (-d|-C|-R|-u) <entity> <attribute> <new-value> [<new-units>]
