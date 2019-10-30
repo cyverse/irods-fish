@@ -295,6 +295,7 @@ function __imeta_coll_args
   __irods_collection_suggestions | string trim --right --chars /
 end
 
+# TODO make independent of adda
 function __imeta_coll_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
@@ -303,6 +304,7 @@ function __imeta_coll_attr_args --argument-names cmdline
   __imeta_parse_cmd_for adda suggestions $cmdline
 end
 
+# TODO make independent of adda
 function __imeta_coll_attr_val_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
@@ -314,6 +316,7 @@ function __imeta_coll_attr_val_args --argument-names cmdline
   __imeta_parse_cmd_for adda suggestions $cmdline
 end
 
+# TODO make independent of adda
 function __imeta_coll_attr_val_unit_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
@@ -328,6 +331,7 @@ function __imeta_coll_attr_val_unit_args --argument-names cmdline
   __imeta_parse_cmd_for adda suggestions $cmdline
 end
 
+# TODO make independent of adda
 function __imeta_data_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
@@ -336,6 +340,7 @@ function __imeta_data_attr_args --argument-names cmdline
   __imeta_parse_cmd_for adda suggestions $cmdline
 end
 
+# TODO make independent of adda
 function __imeta_data_attr_val_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
@@ -347,6 +352,7 @@ function __imeta_data_attr_val_args --argument-names cmdline
   __imeta_parse_cmd_for adda suggestions $cmdline
 end
 
+# TODO make independent of adda
 function __imeta_data_attr_val_unit_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
@@ -363,6 +369,15 @@ end
 
 function __imeta_resc_args
   __irods_quest '%s' 'select RESC_NAME'
+end
+
+# TODO make independent of adda
+function __imeta_resc_attr_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set attrPat $_curr_token%
+    __irods_quest '%s' "select META_RESC_ATTR_NAME where META_RESC_ATTR_NAME like '$attrPat'"
+  end
+  __imeta_parse_cmd_for adda suggestions $cmdline
 end
 
 function __imeta_user_args
@@ -452,14 +467,17 @@ complete --command imeta --arguments adda \
 __imeta_mk_adda_flag_completions C 'to collection'
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_cond'
+# TODO make condition on being a collection
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_attr_cond' \
   --description 'existing for collections'
+# TODO make condition on being a collection
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_val_cond' \
   --description 'existing for attribute'
+  # TODO make condition on being a collection
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_unit_cond' \
@@ -469,14 +487,17 @@ complete --command imeta \
 __imeta_mk_adda_flag_completions d 'to data object'
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_cond'
+# TODO make condition on being a data object
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_attr_cond' \
   --description 'existing for data objects'
+# TODO make condition on being a data object
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_val_cond' \
   --description 'existing for attribute'
+# TODO make condition on being a data object
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_unit_cond' \
@@ -486,7 +507,11 @@ complete --command imeta \
 __imeta_mk_adda_flag_completions R 'to resource'
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_resc_cond'
-# TODO imeta adda -R <resource> <attribute>
+# TODO make condition on being a resource
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_attr_cond' \
+  --description 'existing for resources'
 # TODO imeta adda -R <resource> <attribute> <value>
 # TODO imeta adda -R <resource> <attribute> <value> <units>
 
