@@ -139,7 +139,7 @@ function __imeta_parse_any_cmd_for --argument-names consumer cmdline
 end
 
 function __imeta_parse_cmd_for --argument-names consumer cmd cmdline
-  function condition --no-scope-shadowing --argument-names cmd consumer
+  function cmd_condition --no-scope-shadowing --argument-names cmd consumer
     if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != "$cmd"
       false
     else
@@ -148,7 +148,7 @@ function __imeta_parse_cmd_for --argument-names consumer cmd cmdline
       __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
     end
   end
-  __imeta_parse_main_for "condition $cmd $consumer" $cmdline
+  __imeta_parse_main_for "cmd_condition $cmd $consumer" $cmdline
 end
 
 
@@ -158,11 +158,12 @@ end
 
 # shared condition tests
 
-function __imeta_cmd_has_flag --no-scope-shadowing
-  set --query _flag_C
-  or set --query _flag_d
-  or set --query _flag_R
-  or set --query _flag_u
+function __imeta_no_cmd_args --no-scope-shadowing
+  test (count $_unparsed_args) -eq 0
+  and not set --query _flag_C
+  and not set --query _flag_d
+  and not set --query _flag_R
+  and not set --query _flag_u
 end
 
 function __imeta_cmd_needs_coll --no-scope-shadowing
@@ -183,31 +184,6 @@ end
 function __imeta_cmd_needs_user --no-scope-shadowing
   test (count $_unparsed_args) -eq 0
   and set --query _flag_u
-end
-
-function __imeta_entity_needs_attr --no-scope-shadowing
-  test (count $_unparsed_args) -eq 1
-  and __imeta_cmd_has_flag
-end
-
-function __imeta_coll_needs_attr --no-scope-shadowing
-  test (count $_unparsed_args) -eq 1
-  and set --query _flag_C
-end
-
-function __imeta_attr_needs_val --no-scope-shadowing
-  test (count $_unparsed_args) -eq 2
-  and __imeta_cmd_has_flag
-end
-
-function __imeta_val_needs_unit --no-scope-shadowing
-  test (count $_unparsed_args) -eq 3
-  and __imeta_cmd_has_flag
-end
-
-function __imeta_no_cmd_args --no-scope-shadowing
-  test (count $_unparsed_args) -eq 0
-  and not __imeta_cmd_has_flag
 end
 
 # main conditions
@@ -284,28 +260,68 @@ function __imeta_adda_coll_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_coll adda $cmdline
 end
 
+function __imeta_adda_coll_attr_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 1
+    and set --query _flag_C
+  end
+  __imeta_parse_cmd_for condition adda $cmdline
+end
+
+function __imeta_adda_coll_attr_val_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 2
+    and set --query _flag_C
+  end
+  __imeta_parse_cmd_for condition adda $cmdline
+end
+
+function __imeta_adda_coll_avu_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 3
+    and set --query _flag_C
+  end
+  __imeta_parse_cmd_for condition adda $cmdline
+end
+
 function __imeta_adda_data_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_data adda $cmdline
+end
+
+function __imeta_adda_data_attr_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 1
+    and set --query _flag_d
+  end
+  __imeta_parse_cmd_for condition adda $cmdline
+end
+
+function __imeta_adda_data_attr_val_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 2
+    and set --query _flag_d
+  end
+  __imeta_parse_cmd_for condition adda $cmdline
+end
+
+function __imeta_adda_data_avu_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 3
+    and set --query _flag_d
+  end
+  __imeta_parse_cmd_for condition adda $cmdline
 end
 
 function __imeta_adda_resc_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_resc adda $cmdline
 end
 
-function __imeta_adda_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_entity_needs_attr adda $cmdline
-end
-
-function __imeta_adda_coll_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_coll_needs_attr adda $cmdline
-end
-
-function __imeta_adda_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_attr_needs_val adda $cmdline
-end
-
-function __imeta_adda_unit_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_val_needs_unit adda $cmdline
+function __imeta_adda_resc_attr_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 1
+    and set --query _flag_R
+  end
+  __imeta_parse_cmd_for condition adda $cmdline
 end
 
 
@@ -486,50 +502,43 @@ complete --command imeta --arguments adda \
 __imeta_mk_adda_flag_completions C 'to collection'
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_cond'
-# TODO make condition on being a collection
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_attr_cond' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_cond' \
   --description 'existing for collections'
-# TODO make condition on being a collection
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_val_cond' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_val_cond' \
   --description 'existing for attribute'
-  # TODO make condition on being a collection
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_unit_cond' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_coll_avu_cond' \
   --description 'existing for attribute-value'
 
 # adda -d
 __imeta_mk_adda_flag_completions d 'to data object'
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_cond'
-# TODO make condition on being a data object
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_attr_cond' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_data_attr_cond' \
   --description 'existing for data objects'
-# TODO make condition on being a data object
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_val_cond' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_data_attr_val_cond' \
   --description 'existing for attribute'
-# TODO make condition on being a data object
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_unit_cond' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_data_avu_cond' \
   --description 'existing for attribute-value'
 
 # adda -R
 __imeta_mk_adda_flag_completions R 'to resource'
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_resc_cond'
-# TODO make condition on being a resource
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_attr_cond' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_resc_attr_cond' \
   --description 'existing for resources'
 # TODO imeta adda -R <resource> <attribute> <value>
 # TODO imeta adda -R <resource> <attribute> <value> <units>
