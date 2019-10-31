@@ -114,21 +114,38 @@ function __imeta_parse_main_for --argument-names consumer cmdline
   __imeta_parse_for "$optSpec" $consumer $cmdline
 end
 
-function __imeta_parse_cmd_for --argument-names cmd consumer cmdline
-  function cmd_opts
+function __imeta_parse_cmd_args_for --argument-names consumer cmdline
+  function opts
     fish_opt --short C
     fish_opt --short d
     fish_opt --short R
     fish_opt --short u
   end
+  set optSpec (opts)
+  __imeta_parse_for "$optSpec" $consumer $cmdline
+end
+
+function __imeta_parse_any_cmd_for --argument-names consumer cmdline
+  function condition --no-scope-shadowing --argument-names consumer
+    if test (count $_unparsed_args) -eq 0
+      false
+    else
+      set _unparsed_args $_unparsed_args $_curr_token
+      set --erase _unparsed_args[1]
+      __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
+    end
+  end
+  __imeta_parse_main_for "condition $consumer" $cmdline
+end
+
+function __imeta_parse_cmd_for --argument-names consumer cmd cmdline
   function condition --no-scope-shadowing --argument-names cmd consumer
     if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != "$cmd"
       false
     else
       set _unparsed_args $_unparsed_args $_curr_token
       set --erase _unparsed_args[1]
-      set optSpec (cmd_opts)
-      __imeta_parse_for "$optSpec" $consumer "$_unparsed_args"
+      __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
     end
   end
   __imeta_parse_main_for "condition $cmd $consumer" $cmdline
@@ -171,6 +188,11 @@ end
 function __imeta_entity_needs_attr --no-scope-shadowing
   test (count $_unparsed_args) -eq 1
   and __imeta_cmd_has_flag
+end
+
+function __imeta_coll_needs_attr --no-scope-shadowing
+  test (count $_unparsed_args) -eq 1
+  and set --query _flag_C
 end
 
 function __imeta_attr_needs_val --no-scope-shadowing
@@ -223,7 +245,7 @@ end
 # add conditions
 
 function __imeta_add_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for add __imeta_no_cmd_args $cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args add $cmdline
 end
 
 function __imeta_add_admin_flag_cond --argument-names cmdline
@@ -232,19 +254,19 @@ function __imeta_add_admin_flag_cond --argument-names cmdline
 end
 
 function __imeta_add_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for add __imeta_cmd_needs_coll $cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_coll add $cmdline
 end
 
 function __imeta_add_data_cond --argument-names cmdline
-  __imeta_parse_cmd_for add __imeta_cmd_needs_data $cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_data add $cmdline
 end
 
 function __imeta_add_resc_cond --argument-names cmdline
-  __imeta_parse_cmd_for add __imeta_cmd_needs_resc $cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_resc add $cmdline
 end
 
 function __imeta_add_user_cond --argument-names cmdline
-  __imeta_parse_cmd_for add __imeta_cmd_needs_user $cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_user add $cmdline
 end
 
 # adda conditions
@@ -255,31 +277,35 @@ function __imeta_adda_cond --argument-names cmdline
 end
 
 function __imeta_adda_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for adda __imeta_no_cmd_args $cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args adda $cmdline
 end
 
 function __imeta_adda_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for adda __imeta_cmd_needs_coll $cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_coll adda $cmdline
 end
 
 function __imeta_adda_data_cond --argument-names cmdline
-  __imeta_parse_cmd_for adda __imeta_cmd_needs_data $cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_data adda $cmdline
 end
 
 function __imeta_adda_resc_cond --argument-names cmdline
-  __imeta_parse_cmd_for adda __imeta_cmd_needs_resc $cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_resc adda $cmdline
 end
 
 function __imeta_adda_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for adda __imeta_entity_needs_attr $cmdline
+  __imeta_parse_cmd_for __imeta_entity_needs_attr adda $cmdline
+end
+
+function __imeta_adda_coll_attr_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_coll_needs_attr adda $cmdline
 end
 
 function __imeta_adda_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for adda __imeta_attr_needs_val $cmdline
+  __imeta_parse_cmd_for __imeta_attr_needs_val adda $cmdline
 end
 
 function __imeta_adda_unit_cond --argument-names cmdline
-  __imeta_parse_cmd_for adda __imeta_val_needs_unit $cmdline
+  __imeta_parse_cmd_for __imeta_val_needs_unit adda $cmdline
 end
 
 
@@ -295,16 +321,14 @@ function __imeta_coll_args
   __irods_collection_suggestions | string trim --right --chars /
 end
 
-# TODO make independent of adda
 function __imeta_coll_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
     __irods_quest '%s' "select META_COLL_ATTR_NAME where META_COLL_ATTR_NAME like '$attrPat'"
   end
-  __imeta_parse_cmd_for adda suggestions $cmdline
+  __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-# TODO make independent of adda
 function __imeta_coll_attr_val_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
@@ -313,10 +337,9 @@ function __imeta_coll_attr_val_args --argument-names cmdline
       "select META_COLL_ATTR_VALUE
        where META_COLL_ATTR_NAME = '$attr' and META_COLL_ATTR_VALUE like '$valPat'"
   end
-  __imeta_parse_cmd_for adda suggestions $cmdline
+  __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-# TODO make independent of adda
 function __imeta_coll_attr_val_unit_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
@@ -328,19 +351,17 @@ function __imeta_coll_attr_val_unit_args --argument-names cmdline
          and META_COLL_ATTR_VALUE = '$val'
          and META_COLL_ATTR_UNITS like '$unitPat'"
   end
-  __imeta_parse_cmd_for adda suggestions $cmdline
+  __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-# TODO make independent of adda
 function __imeta_data_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
     __irods_quest '%s' "select META_DATA_ATTR_NAME where META_DATA_ATTR_NAME like '$attrPat'"
   end
-  __imeta_parse_cmd_for adda suggestions $cmdline
+  __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-# TODO make independent of adda
 function __imeta_data_attr_val_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
@@ -349,10 +370,9 @@ function __imeta_data_attr_val_args --argument-names cmdline
       "select META_DATA_ATTR_VALUE
        where META_DATA_ATTR_NAME = '$attr' and META_DATA_ATTR_VALUE like '$valPat'"
   end
-  __imeta_parse_cmd_for adda suggestions $cmdline
+  __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-# TODO make independent of adda
 function __imeta_data_attr_val_unit_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
@@ -364,20 +384,19 @@ function __imeta_data_attr_val_unit_args --argument-names cmdline
          and META_DATA_ATTR_VALUE = '$val'
          and META_DATA_ATTR_UNITS like '$unitPat'"
   end
-  __imeta_parse_cmd_for adda suggestions $cmdline
+  __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_resc_args
   __irods_quest '%s' 'select RESC_NAME'
 end
 
-# TODO make independent of adda
 function __imeta_resc_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
     __irods_quest '%s' "select META_RESC_ATTR_NAME where META_RESC_ATTR_NAME like '$attrPat'"
   end
-  __imeta_parse_cmd_for adda suggestions $cmdline
+  __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_user_args
