@@ -651,7 +651,10 @@ complete --command imeta --arguments cp \
 __imeta_mk_hyphen_completions C 'from collection' '__imeta_eval_with_cmdline __imeta_cp_flag_cond'
 # TODO imeta cp -C (-d|-C|-R|-u) <from-collection> <to-entity>
 
+# cp -d
+__imeta_mk_hyphen_completions d 'from data object' '__imeta_eval_with_cmdline __imeta_cp_flag_cond'
 # TODO imeta cp -d (-d|-C|-R|-u) <from-data-object> <to-entity>
+
 # TODO imeta cp -R (-d|-C|-R|-u) <from-resource> <to-entity>
 # TODO imeta cp -u (-d|-C|-R|-u) <from-user> <to-entity>
 
