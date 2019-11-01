@@ -322,6 +322,12 @@ function __imeta_adda_user_avu_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 3' adda $cmdline
 end
 
+# addw conditions
+
+function __imeta_addw_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args addw $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -627,8 +633,7 @@ complete --command imeta \
 complete --command imeta --arguments addw \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'add new AVU triple using wildcards in name'
-
-# TODO imeta addw -d <entity> <attribute> <value> [<units>]
+__imeta_mk_hyphen_completions d 'to data object' '__imeta_eval_with_cmdline __imeta_addw_flag_cond'
 
 # cp
 
