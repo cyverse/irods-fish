@@ -519,6 +519,11 @@ function __imeta_mk_adda_flag_completions --argument-names opt description
   __imeta_mk_hyphen_completions $opt $description '__imeta_eval_with_cmdline __imeta_adda_flag_cond'
 end
 
+function __imeta_mk_cp_admin_flag_completions --argument-names opt description
+  __imeta_mk_hyphen_completions $opt $description \
+    '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_flag_cond'
+end
+
 function __imeta_mk_cp_flag_completions --argument-names opt description
   __imeta_mk_hyphen_completions $opt $description '__imeta_eval_with_cmdline __imeta_cp_flag_cond'
 end
@@ -665,13 +670,11 @@ __imeta_mk_cp_flag_completions d 'from data object'
 # TODO imeta cp -d (-d|-C|-R|-u) <from-data-object> <to-entity>
 
 # cp -R
-__imeta_mk_hyphen_completions R 'from resource' \
-  '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_flag_cond'
+__imeta_mk_cp_admin_flag_completions R 'from resource'
 # TODO imeta cp -R (-d|-C|-R|-u) <from-resource> <to-entity>
 
 # cp -u
-__imeta_mk_hyphen_completions u 'from user' \
-  '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_flag_cond'
+__imeta_mk_cp_admin_flag_completions u 'from user'
 # TODO imeta cp -u (-d|-C|-R|-u) <from-user> <to-entity>
 
 # ls
