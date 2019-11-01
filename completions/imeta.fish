@@ -330,13 +330,23 @@ end
 
 # cp conditions
 
-function __imeta_cp_flag_cond --argument-names cmdline
+function __imeta_cp_src_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args cp $cmdline
 end
 
-function __imeta_cp_admin_flag_cond --argument-names cmdline
-  __imeta_cp_flag_cond $cmdline
+function __imeta_cp_admin_src_flag_cond --argument-names cmdline
+  __imeta_cp_src_flag_cond $cmdline
   and __imeta_am_admin
+end
+
+function __imeta_cp_dest_flag_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_flag_C) -eq 1 -a (count $_unparsed_args) -eq 0
+    and not set --query _flag_d
+    and not set --query _flag_R
+    and not set --query _flag_u
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
 end
 
 
@@ -519,13 +529,14 @@ function __imeta_mk_adda_flag_completions --argument-names opt description
   __imeta_mk_hyphen_completions $opt $description '__imeta_eval_with_cmdline __imeta_adda_flag_cond'
 end
 
-function __imeta_mk_cp_admin_flag_completions --argument-names opt description
+function __imeta_mk_cp_admin_src_flag_completions --argument-names opt description
   __imeta_mk_hyphen_completions $opt $description \
-    '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_flag_cond'
+    '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_src_flag_cond'
 end
 
-function __imeta_mk_cp_flag_completions --argument-names opt description
-  __imeta_mk_hyphen_completions $opt $description '__imeta_eval_with_cmdline __imeta_cp_flag_cond'
+function __imeta_mk_cp_src_flag_completions --argument-names opt description
+  __imeta_mk_hyphen_completions $opt $description \
+    '__imeta_eval_with_cmdline __imeta_cp_src_flag_cond'
 end
 
 complete --command imeta --no-files
@@ -662,19 +673,31 @@ complete --command imeta --arguments cp \
   --description 'copy AVUs from one item to another'
 
 # cp -C
-__imeta_mk_cp_flag_completions C 'from collection'
-# TODO imeta cp -C (-d|-C|-R|-u) <from-collection> <to-entity>
+__imeta_mk_cp_src_flag_completions C 'from collection'
+
+# cp -C -C
+complete --command imeta --arguments '-C' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_flag_cond' \
+  --description 'to collection'
+complete --command imeta --short-option C \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_flag_cond' \
+  --description 'to collection'
+# TODO imeta cp -C -C <from-collection> <to-collection>
+
+# * TODO imeta cp -C -d <from-collection> <to-data-object>
+# * TODO imeta cp -C -R <from-collection> <to-resource>
+# * TODO imeta cp -C -u <from-collection> <to-user>
 
 # cp -d
-__imeta_mk_cp_flag_completions d 'from data object'
+__imeta_mk_cp_src_flag_completions d 'from data object'
 # TODO imeta cp -d (-d|-C|-R|-u) <from-data-object> <to-entity>
 
 # cp -R
-__imeta_mk_cp_admin_flag_completions R 'from resource'
+__imeta_mk_cp_admin_src_flag_completions R 'from resource'
 # TODO imeta cp -R (-d|-C|-R|-u) <from-resource> <to-entity>
 
 # cp -u
-__imeta_mk_cp_admin_flag_completions u 'from user'
+__imeta_mk_cp_admin_src_flag_completions u 'from user'
 # TODO imeta cp -u (-d|-C|-R|-u) <from-user> <to-entity>
 
 # ls
