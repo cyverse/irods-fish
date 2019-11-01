@@ -514,6 +514,10 @@ function __imeta_mk_adda_flag_completions --argument-names opt description
   __imeta_mk_hyphen_completions $opt $description '__imeta_eval_with_cmdline __imeta_adda_flag_cond'
 end
 
+function __imeta_mk_cp_flag_completions --argument-names opt description
+  __imeta_mk_hyphen_completions $opt $description '__imeta_eval_with_cmdline __imeta_cp_flag_cond'
+end
+
 complete --command imeta --no-files
 
 __imeta_mk_hyphen_completions h 'shows help' '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond'
@@ -648,11 +652,11 @@ complete --command imeta --arguments cp \
   --description 'copy AVUs from one item to another'
 
 # cp -C
-__imeta_mk_hyphen_completions C 'from collection' '__imeta_eval_with_cmdline __imeta_cp_flag_cond'
+__imeta_mk_cp_flag_completions C 'from collection'
 # TODO imeta cp -C (-d|-C|-R|-u) <from-collection> <to-entity>
 
 # cp -d
-__imeta_mk_hyphen_completions d 'from data object' '__imeta_eval_with_cmdline __imeta_cp_flag_cond'
+__imeta_mk_cp_flag_completions d 'from data object'
 # TODO imeta cp -d (-d|-C|-R|-u) <from-data-object> <to-entity>
 
 # TODO imeta cp -R (-d|-C|-R|-u) <from-resource> <to-entity>
@@ -723,6 +727,7 @@ complete --command imeta --arguments set \
 # TODO imeta set (-d|-C|-R|-u) <entity> <attribute> <new-value> [<new-units>]
 
 functions --erase \
+  __imeta_mk_cp_flag_completions \
   __imeta_mk_adda_flag_completions \
   __imeta_mk_add_flag_completions \
   __imeta_mk_add_admin_flag_completions \
