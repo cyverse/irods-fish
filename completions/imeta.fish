@@ -260,6 +260,7 @@ function __imeta_adda_coll_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_coll adda $cmdline
 end
 
+# TODO factor out common logic for avu conditions
 function __imeta_adda_coll_attr_cond --argument-names cmdline
   function condition --no-scope-shadowing
     test (count $_unparsed_args) -eq 1
@@ -332,6 +333,14 @@ function __imeta_adda_resc_attr_val_cond --argument-names cmdline
   __imeta_parse_cmd_for condition adda $cmdline
 end
 
+function __imeta_adda_resc_avu_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 3
+    and set --query _flag_R
+  end
+  __imeta_parse_cmd_for condition adda $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -345,6 +354,7 @@ function __imeta_coll_args
   __irods_collection_suggestions | string trim --right --chars /
 end
 
+# TODO factor out common attr suggestions logic
 function __imeta_coll_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
@@ -353,6 +363,7 @@ function __imeta_coll_attr_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
+# TODO factor out common val suggestions logic
 function __imeta_coll_attr_val_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
@@ -364,6 +375,7 @@ function __imeta_coll_attr_val_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
+# TODO factor out common unit suggestions logic
 function __imeta_coll_attr_val_unit_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
@@ -430,6 +442,20 @@ function __imeta_resc_attr_val_args --argument-names cmdline
     __irods_quest '%s' \
       "select META_RESC_ATTR_VALUE
        where META_RESC_ATTR_NAME = '$attr' and META_RESC_ATTR_VALUE like '$valPat'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_resc_attr_val_unit_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set attr $_unparsed_args[2]
+    set val $_unparsed_args[3]
+    set unitPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_RESC_ATTR_UNITS
+       where META_RESC_ATTR_NAME = '$attr'
+         and META_RESC_ATTR_VALUE = '$val'
+         and META_RESC_ATTR_UNITS like '$unitPat'"
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
@@ -563,7 +589,10 @@ complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_resc_attr_val_cond' \
   --description 'existing for attribute'
-# TODO imeta adda -R <resource> <attribute> <value> <units>
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_attr_val_unit_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_resc_avu_cond' \
+  --description 'existing for attribute-value'
 
 # adda -u
 __imeta_mk_adda_flag_completions u 'to_user'
