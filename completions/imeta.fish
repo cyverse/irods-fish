@@ -328,6 +328,12 @@ function __imeta_addw_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args addw $cmdline
 end
 
+# cp conditions
+
+function __imeta_cp_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args cp $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -641,7 +647,13 @@ complete --command imeta --arguments cp \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'copy AVUs from one item to another'
 
-# TODO imeta cp (-d|-C|-R|-u) (-d|-C|-R|-u) <from-entity> <to-entity>
+# cp -C
+__imeta_mk_hyphen_completions C 'from collection' '__imeta_eval_with_cmdline __imeta_cp_flag_cond'
+# TODO imeta cp -C (-d|-C|-R|-u) <from-collection> <to-entity>
+
+# TODO imeta cp -d (-d|-C|-R|-u) <from-data-object> <to-entity>
+# TODO imeta cp -R (-d|-C|-R|-u) <from-resource> <to-entity>
+# TODO imeta cp -u (-d|-C|-R|-u) <from-user> <to-entity>
 
 # ls
 
