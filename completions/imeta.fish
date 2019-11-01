@@ -148,7 +148,8 @@ function __imeta_parse_cmd_for --argument-names consumer cmd cmdline
       __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
     end
   end
-  __imeta_parse_main_for "cmd_condition $cmd $consumer" $cmdline
+  set escConsumer (string escape $consumer)
+  __imeta_parse_main_for "cmd_condition $cmd $escConsumer" $cmdline
 end
 
 
@@ -166,24 +167,25 @@ function __imeta_no_cmd_args --no-scope-shadowing
   and not set --query _flag_u
 end
 
+function __imeta_cmd_has_flag_with_num_args --no-scope-shadowing --argument-names flag argCnt
+  set --query $flag
+  and test (count $_unparsed_args) -eq "$argCnt"
+end
+
 function __imeta_cmd_needs_coll --no-scope-shadowing
-  test (count $_unparsed_args) -eq 0
-  and set --query _flag_C
+  __imeta_cmd_has_flag_with_num_args _flag_C 0
 end
 
 function __imeta_cmd_needs_data --no-scope-shadowing
-  test (count $_unparsed_args) -eq 0
-  and set --query _flag_d
+  __imeta_cmd_has_flag_with_num_args _flag_d 0
 end
 
 function __imeta_cmd_needs_resc --no-scope-shadowing
-  test (count $_unparsed_args) -eq 0
-  and set --query _flag_R
+  __imeta_cmd_has_flag_with_num_args _flag_R 0
 end
 
 function __imeta_cmd_needs_user --no-scope-shadowing
-  test (count $_unparsed_args) -eq 0
-  and set --query _flag_u
+  __imeta_cmd_has_flag_with_num_args _flag_u 0
 end
 
 # main conditions
@@ -260,29 +262,16 @@ function __imeta_adda_coll_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_coll adda $cmdline
 end
 
-# TODO factor out common logic for avu conditions
 function __imeta_adda_coll_attr_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 1
-    and set --query _flag_C
-  end
-  __imeta_parse_cmd_for condition adda $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' adda $cmdline
 end
 
 function __imeta_adda_coll_attr_val_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 2
-    and set --query _flag_C
-  end
-  __imeta_parse_cmd_for condition adda $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 2' adda $cmdline
 end
 
 function __imeta_adda_coll_avu_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 3
-    and set --query _flag_C
-  end
-  __imeta_parse_cmd_for condition adda $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' adda $cmdline
 end
 
 function __imeta_adda_data_cond --argument-names cmdline
@@ -290,27 +279,15 @@ function __imeta_adda_data_cond --argument-names cmdline
 end
 
 function __imeta_adda_data_attr_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 1
-    and set --query _flag_d
-  end
-  __imeta_parse_cmd_for condition adda $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' adda $cmdline
 end
 
 function __imeta_adda_data_attr_val_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 2
-    and set --query _flag_d
-  end
-  __imeta_parse_cmd_for condition adda $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 2' adda $cmdline
 end
 
 function __imeta_adda_data_avu_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 3
-    and set --query _flag_d
-  end
-  __imeta_parse_cmd_for condition adda $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 3' adda $cmdline
 end
 
 function __imeta_adda_resc_cond --argument-names cmdline
@@ -318,27 +295,15 @@ function __imeta_adda_resc_cond --argument-names cmdline
 end
 
 function __imeta_adda_resc_attr_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 1
-    and set --query _flag_R
-  end
-  __imeta_parse_cmd_for condition adda $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' adda $cmdline
 end
 
 function __imeta_adda_resc_attr_val_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 2
-    and set --query _flag_R
-  end
-  __imeta_parse_cmd_for condition adda $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 2' adda $cmdline
 end
 
 function __imeta_adda_resc_avu_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 3
-    and set --query _flag_R
-  end
-  __imeta_parse_cmd_for condition adda $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 3' adda $cmdline
 end
 
 
@@ -354,7 +319,6 @@ function __imeta_coll_args
   __irods_collection_suggestions | string trim --right --chars /
 end
 
-# TODO factor out common attr suggestions logic
 function __imeta_coll_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
@@ -363,7 +327,6 @@ function __imeta_coll_attr_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-# TODO factor out common val suggestions logic
 function __imeta_coll_attr_val_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
@@ -375,7 +338,6 @@ function __imeta_coll_attr_val_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-# TODO factor out common unit suggestions logic
 function __imeta_coll_attr_val_unit_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
