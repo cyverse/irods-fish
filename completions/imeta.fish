@@ -306,6 +306,10 @@ function __imeta_adda_resc_avu_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 3' adda $cmdline
 end
 
+function __imeta_adda_user_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_user adda $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -558,7 +562,11 @@ complete --command imeta \
 
 # adda -u
 __imeta_mk_adda_flag_completions u 'to_user'
-# TODO imeta adda -u <user> <attribute> <value> [<units>]
+complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_user_cond'
+# TODO imeta adda -u <user> <attribute>
+# TODO imeta adda -u <user> <attribute> <value>
+# TODO imeta adda -u <user> <attribute> <value> <units>
 
 # addw
 
