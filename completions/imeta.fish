@@ -349,6 +349,11 @@ function __imeta_cp_dest_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
+function __imeta_cp_admin_dest_flag_cond --argument-names cmdline
+  __imeta_cp_dest_flag_cond $cmdline
+  and __imeta_am_admin
+end
+
 
 #
 # Suggestion functions
@@ -664,6 +669,7 @@ complete --command imeta \
 complete --command imeta --arguments addw \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'add new AVU triple using wildcards in name'
+
 __imeta_mk_hyphen_completions d 'to data object' '__imeta_eval_with_cmdline __imeta_addw_flag_cond'
 
 # cp
@@ -693,7 +699,15 @@ complete --command imeta --short-option d \
   --description 'to data object'
 # * TODO imeta cp -C -d <from-collection> <to-data-object>
 
+# cp -C -R
+complete --command imeta --arguments '-R' \
+  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_dest_flag_cond' \
+  --description 'to resource'
+complete --command imeta --short-option R \
+  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_dest_flag_cond' \
+  --description 'to resource'
 # * TODO imeta cp -C -R <from-collection> <to-resource>
+
 # * TODO imeta cp -C -u <from-collection> <to-user>
 
 # cp -d
