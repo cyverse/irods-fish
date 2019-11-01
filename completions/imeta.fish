@@ -314,6 +314,10 @@ function __imeta_adda_user_attr_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' adda $cmdline
 end
 
+function __imeta_adda_user_attr_val_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 2' adda $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -438,6 +442,17 @@ function __imeta_user_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
     __irods_quest '%s' "select META_USER_ATTR_NAME where META_USER_ATTR_NAME like '$attrPat'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_user_attr_val_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set attr $_unparsed_args[2]
+    set valPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_USER_ATTR_VALUE
+       where META_USER_ATTR_NAME = '$attr' and META_USER_ATTR_VALUE like '$valPat'"
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
@@ -580,7 +595,10 @@ complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_user_attr_cond' \
   --description 'existing for users'
-# TODO imeta adda -u <user> <attribute> <value>
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_attr_val_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_adda_user_attr_val_cond' \
+  --description 'existing for attribute'
 # TODO imeta adda -u <user> <attribute> <value> <units>
 
 # addw
