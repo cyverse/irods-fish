@@ -669,6 +669,9 @@ __imeta_mk_hyphen_completions R 'from resource' \
   '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_flag_cond'
 # TODO imeta cp -R (-d|-C|-R|-u) <from-resource> <to-entity>
 
+# cp -u
+__imeta_mk_hyphen_completions u 'from user' \
+  '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_flag_cond'
 # TODO imeta cp -u (-d|-C|-R|-u) <from-user> <to-entity>
 
 # ls
