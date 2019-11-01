@@ -334,6 +334,11 @@ function __imeta_cp_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args cp $cmdline
 end
 
+function __imeta_cp_admin_flag_cond --argument-names cmdline
+  __imeta_cp_flag_cond $cmdline
+  and __imeta_am_admin
+end
+
 
 #
 # Suggestion functions
@@ -659,7 +664,11 @@ __imeta_mk_cp_flag_completions C 'from collection'
 __imeta_mk_cp_flag_completions d 'from data object'
 # TODO imeta cp -d (-d|-C|-R|-u) <from-data-object> <to-entity>
 
+# cp -R
+__imeta_mk_hyphen_completions R 'from resource' \
+  '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_flag_cond'
 # TODO imeta cp -R (-d|-C|-R|-u) <from-resource> <to-entity>
+
 # TODO imeta cp -u (-d|-C|-R|-u) <from-user> <to-entity>
 
 # ls
