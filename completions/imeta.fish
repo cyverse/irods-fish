@@ -684,7 +684,15 @@ complete --command imeta --short-option C \
   --description 'to collection'
 # TODO imeta cp -C -C <from-collection> <to-collection>
 
+# cp -C -d
+complete --command imeta --arguments '-d' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_flag_cond' \
+  --description 'to data object'
+complete --command imeta --short-option d \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_flag_cond' \
+  --description 'to data object'
 # * TODO imeta cp -C -d <from-collection> <to-data-object>
+
 # * TODO imeta cp -C -R <from-collection> <to-resource>
 # * TODO imeta cp -C -u <from-collection> <to-user>
 
