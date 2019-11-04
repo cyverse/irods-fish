@@ -212,6 +212,13 @@ function __imeta_cmd_needs_user --no-scope-shadowing
   __imeta_cmd_has_flag_with_num_args _flag_u 0
 end
 
+function __imeta_cmd_has_only_coll_flags --no-scope-shadowing --argument-names flagCnt argCnt
+  test (count $_flag_C) -eq "$flagCnt" -a (count $_unparsed_args) -eq "$argCnt"
+  and not set --query _flag_d
+  and not set --query _flag_R
+  and not set --query _flag_u
+end
+
 # main conditions
 
 function __imeta_no_cmd_or_help_cond --argument-names cmdline
@@ -364,14 +371,7 @@ function __imeta_cp_admin_src_flag_cond --argument-names cmdline
 end
 
 function __imeta_cp_dest_flag_cond --argument-names cmdline
-  # TODO factor out common condition logic
-  function condition --no-scope-shadowing
-    test (count $_flag_C) -eq 1 -a (count $_unparsed_args) -eq 0
-    and not set --query _flag_d
-    and not set --query _flag_R
-    and not set --query _flag_u
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_only_coll_flags 1 0' cp $cmdline
 end
 
 function __imeta_cp_admin_dest_flag_cond --argument-names cmdline
@@ -380,23 +380,11 @@ function __imeta_cp_admin_dest_flag_cond --argument-names cmdline
 end
 
 function __imeta_cp_src_coll_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_flag_C) -eq 2 -a (count $_unparsed_args) -eq 0
-    and not set --query _flag_d
-    and not set --query _flag_R
-    and not set --query _flag_u
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_only_coll_flags 2 0' cp $cmdline
 end
 
 function __imeta_cp_dest_coll_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_flag_C) -eq 2 -a (count $_unparsed_args) -eq 1
-    and not set --query _flag_d
-    and not set --query _flag_R
-    and not set --query _flag_u
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_only_coll_flags 2 1' cp $cmdline
 end
 
 
