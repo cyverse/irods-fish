@@ -74,12 +74,16 @@ function __imeta_tokenize_cmdline
   return 0
 end
 
-function __imeta_parse_for --argument-names optSpec consumer cmdline
+function __imeta_parse_for --argument-names optSpec exclusive consumer cmdline
   set optSpecArray (string split -- ' ' $optSpec)
   set cmdTokens (__imeta_tokenize_cmdline $optSpecArray -- (string split -- ' ' $cmdline))
   set _curr_token $cmdTokens[-1]
   set --erase cmdTokens[-1]
-  argparse --stop-nonopt --name imeta $optSpecArray -- $cmdTokens 2>&1 | read failMsg
+  set exclusizeOpt ''
+  if test -n "$exclusive"
+    set exclusiveOpt '--exclusive' $exclusive
+  end
+  argparse --stop-nonopt $exclusiveOpt --name imeta $optSpecArray -- $cmdTokens 2>&1 | read failMsg
   if test -z "$failMsg"
     set _unparsed_args $argv
     eval "$consumer"
@@ -111,7 +115,7 @@ function __imeta_parse_main_for --argument-names consumer cmdline
     fish_opt --short z --required
   end
   set optSpec (opts)
-  __imeta_parse_for "$optSpec" $consumer $cmdline
+  __imeta_parse_for "$optSpec" '' $consumer $cmdline
 end
 
 function __imeta_parse_cmd_args_for --argument-names consumer cmdline
@@ -122,7 +126,18 @@ function __imeta_parse_cmd_args_for --argument-names consumer cmdline
     fish_opt --short u
   end
   set optSpec (opts)
-  __imeta_parse_for "$optSpec" $consumer $cmdline
+  __imeta_parse_for "$optSpec" C,d,R,u $consumer $cmdline
+end
+
+function __imeta_parse_cp_args_for --argument-names consumer cmdline
+  function opts
+    fish_opt --short C
+    fish_opt --short d
+    fish_opt --short R
+    fish_opt --short u
+  end
+  set optSpec (opts)
+  __imeta_parse_for "$optSpec" '' $consumer $cmdline
 end
 
 function __imeta_parse_any_cmd_for --argument-names consumer cmdline
@@ -130,9 +145,14 @@ function __imeta_parse_any_cmd_for --argument-names consumer cmdline
     if test (count $_unparsed_args) -eq 0
       false
     else
+      set cmd $_unparsed_args[1]
       set _unparsed_args $_unparsed_args $_curr_token
       set --erase _unparsed_args[1]
-      __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
+      if test "$cmd" = cp
+        __imeta_parse_cp_args_for $consumer "$_unparsed_args"
+      else
+        __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
+      end
     end
   end
   __imeta_parse_main_for "condition $consumer" $cmdline
@@ -145,7 +165,11 @@ function __imeta_parse_cmd_for --argument-names consumer cmd cmdline
     else
       set _unparsed_args $_unparsed_args $_curr_token
       set --erase _unparsed_args[1]
-      __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
+      if test "$cmd" = cp
+        __imeta_parse_cp_args_for $consumer "$_unparsed_args"
+      else
+        __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
+      end
     end
   end
   set escConsumer (string escape $consumer)
@@ -580,8 +604,6 @@ complete --command imeta --arguments add \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'add new AVU triple'
 
-# TODO make flags exclusive
-
 # add -C
 __imeta_mk_add_flag_completions C 'to collection'
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
@@ -607,8 +629,6 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
 complete --command imeta --arguments adda \
   --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_adda_cond' \
   --description 'administratively add new AVU triple'
-
-# TODO make flags exclusive
 
 # adda -C
 __imeta_mk_adda_flag_completions C 'to collection'
