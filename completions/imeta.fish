@@ -364,6 +364,7 @@ function __imeta_cp_admin_src_flag_cond --argument-names cmdline
 end
 
 function __imeta_cp_dest_flag_cond --argument-names cmdline
+  # TODO factor out common condition logic
   function condition --no-scope-shadowing
     test (count $_flag_C) -eq 1 -a (count $_unparsed_args) -eq 0
     and not set --query _flag_d
@@ -388,6 +389,16 @@ function __imeta_cp_src_coll_cond --argument-names cmdline
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
+function __imeta_cp_dest_coll_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_flag_C) -eq 2 -a (count $_unparsed_args) -eq 1
+    and not set --query _flag_d
+    and not set --query _flag_R
+    and not set --query _flag_u
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -399,6 +410,14 @@ end
 #     iRODS 4.2.6.
 function __imeta_coll_args
   __irods_collection_suggestions | string trim --right --chars /
+end
+
+function __imeta_dest_coll_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set srcColl $_unparsed_args[1]
+    __imeta_coll_args  | string match --all --invert $srcColl
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_coll_attr_args --argument-names cmdline
@@ -722,9 +741,13 @@ complete --command imeta --arguments '-C' \
 complete --command imeta --short-option C \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_flag_cond' \
   --description 'to collection'
-  complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
-    --condition '__imeta_eval_with_cmdline __imeta_cp_src_coll_cond'
-# TODO imeta cp -C -C <from-collection> <to-collection>
+complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_src_coll_cond' \
+  --description 'source collection'
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_dest_coll_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_coll_cond' \
+  --description 'destination collection'
 
 # cp -C -d
 complete --command imeta --arguments '-d' \
