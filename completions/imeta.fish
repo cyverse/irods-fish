@@ -136,8 +136,38 @@ function __imeta_parse_cp_args_for --argument-names consumer cmdline
     fish_opt --short R
     fish_opt --short u
   end
-  set optSpec (opts)
-  __imeta_parse_for "$optSpec" '' $consumer $cmdline
+  set cmdTokens (__imeta_tokenize_cmdline (opts) -- (string split -- ' ' $cmdline))
+  set _curr_token $cmdTokens[-1]
+  set --erase cmdTokens[-1]
+  set numTokens (count $cmdTokens)
+  if test "$numTokens" -ge 1
+    switch $cmdTokens[1]
+      case -C
+        set _flag_C 1
+      case -d
+        set _flag_d 1
+      case -R
+        set _flag_R 1
+      case -u
+        set _flag_u 1
+    end
+    set --erase cmdTokens[1]
+  end
+  if test "$numTokens" -ge 1
+    switch $cmdTokens[1]
+      case -C
+        set _flag_C $_flag_C 2
+      case -d
+        set _flag_d $_flag_d 2
+      case -R
+        set _flag_R $_flag_R 2
+      case -u
+        set _flag_u $_flag_u 2
+    end
+    set --erase cmdTokens[1]
+  end
+  set _unparsed_args $cmdTokens
+  eval "$consumer"
 end
 
 function __imeta_parse_any_cmd_for --argument-names consumer cmdline
@@ -380,7 +410,17 @@ function __imeta_cp_admin_dest_flag_cond --argument-names cmdline
 end
 
 function __imeta_cp_src_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_only_coll_flags 2 0' cp $cmdline
+  function condition --no-scope-shadowing
+    if test "$_flag_C[1]" -eq 1 -a (count $_unparsed_args) -eq 0
+      test (count $_flag_C) -eq 2
+      or set --query _flag_d
+      or set --query _flag_R
+      or set --query _flag_u
+    else
+      false
+    end
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_dest_coll_cond --argument-names cmdline
@@ -721,6 +761,9 @@ complete --command imeta --arguments cp \
 
 # cp -C
 __imeta_mk_cp_src_flag_completions C 'from collection'
+complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_src_coll_cond' \
+  --description 'source collection'
 
 # cp -C -C
 complete --command imeta --arguments '-C' \
@@ -729,9 +772,6 @@ complete --command imeta --arguments '-C' \
 complete --command imeta --short-option C \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_flag_cond' \
   --description 'to collection'
-complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_src_coll_cond' \
-  --description 'source collection'
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_dest_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_coll_cond' \
