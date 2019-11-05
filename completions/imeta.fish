@@ -851,12 +851,12 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
 
 # cp -d
 __imeta_mk_flag_completions d 'from data object' __imeta_cp_src_flag_cond
-
-# cp -d -C
-__imeta_mk_flag_completions C 'to collection' __imeta_cp_data_dest_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_src_data_cond' \
   --description 'source data object'
+
+# cp -d -C
+__imeta_mk_flag_completions C 'to collection' __imeta_cp_data_dest_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_data_to_coll_cond' \
   --description 'destination collection'
