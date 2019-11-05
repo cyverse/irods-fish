@@ -493,6 +493,13 @@ function __imeta_cp_data_to_coll_cond --argument-names cmdline
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
+function __imeta_cp_data_to_data_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_flag_d) -eq 2 -a (count $_unparsed_args) -eq 1
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -509,7 +516,7 @@ end
 function __imeta_cp_coll_to_coll_dest_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set srcColl $_unparsed_args[1]
-    __imeta_coll_args  | string match --all --invert $srcColl
+    __imeta_coll_args | string match --all --invert $srcColl
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
@@ -543,6 +550,14 @@ function __imeta_coll_attr_val_unit_args --argument-names cmdline
        where META_COLL_ATTR_NAME = '$attr'
          and META_COLL_ATTR_VALUE = '$val'
          and META_COLL_ATTR_UNITS like '$unitPat'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_cp_data_to_data_dest_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set srcData $_unparsed_args[1]
+    __irods_path_suggestions | string match --all --invert $srcData
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
@@ -863,7 +878,10 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
 
 # cp -d -d
 __imeta_mk_flag_completions d 'to data object' __imeta_cp_data_dest_flag_cond
-# TODO imeta cp -d -d <from-data-object> <to-data-object>
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_data_to_data_dest_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_data_to_data_cond' \
+  --description 'destination collection'
 
 # cp -d -R
 __imeta_mk_slow_flag_completions R 'to resource' __imeta_cp_admin_data_dest_flag_cond
