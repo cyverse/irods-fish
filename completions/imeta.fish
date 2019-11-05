@@ -431,7 +431,7 @@ end
 
 function __imeta_cp_coll_to_coll_cond --argument-names cmdline
   function condition --no-scope-shadowing
-    test (count $_flag_C) -eq 2 -a (count $_unparsed_args) -eq 1
+    test "$_flag_C[1]" = 1 -a "$_flag_C[2]" = 2 -a (count $_unparsed_args) -eq 1
   end
   __imeta_parse_cmd_for condition cp $cmdline
 end
@@ -495,7 +495,7 @@ end
 
 function __imeta_cp_data_to_data_cond --argument-names cmdline
   function condition --no-scope-shadowing
-    test (count $_flag_d) -eq 2 -a (count $_unparsed_args) -eq 1
+    test "$_flag_d[1]" = 1 -a "$_flag_d[2]" = 2 -a (count $_unparsed_args) -eq 1
   end
   __imeta_parse_cmd_for condition cp $cmdline
 end
