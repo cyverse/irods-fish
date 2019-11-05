@@ -585,8 +585,15 @@ function __imeta_data_attr_val_unit_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-function __imeta_resc_args
-  __irods_quest '%s' 'select RESC_NAME'
+function __imeta_resc_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set ignored ''
+    if test (count $_flag_R) -eq 2 -a (count $_unparsed_args) -eq 1
+      set ignored $_unparsed_args[1]
+    end
+    __irods_quest '%s' "select RESC_NAME where RESC_NAME != '$ignored'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_resc_attr_args --argument-names cmdline
@@ -729,7 +736,8 @@ complete --command imeta \
 
 # add -R
 __imeta_mk_slow_flag_completions R 'to resource' __imeta_add_admin_flag_cond
-complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_add_resc_cond'
 
 # add -u
@@ -781,7 +789,8 @@ complete --command imeta \
 
 # adda -R
 __imeta_mk_flag_completions R 'to resource' __imeta_adda_flag_cond
-complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_resc_cond'
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_attr_args)' \
@@ -850,7 +859,8 @@ complete --command imeta \
 
 # cp -C -R
 __imeta_mk_slow_flag_completions R 'to resource' __imeta_cp_admin_coll_dest_flag_cond
-complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_resc_cond' \
   --description 'destination resource'
 
@@ -879,11 +889,14 @@ __imeta_mk_flag_completions d 'to data object' __imeta_cp_data_dest_flag_cond
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_data_cond' \
-  --description 'destination collection'
+  --description 'destination data object'
 
 # cp -d -R
 __imeta_mk_slow_flag_completions R 'to resource' __imeta_cp_admin_data_dest_flag_cond
-# TODO imeta cp -d -R <from-data-object> <to-resource>
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_to_resc_cond' \
+  --description 'destination resource'
 
 # cp -d -u
 __imeta_mk_slow_flag_completions u 'to user' __imeta_cp_admin_data_dest_flag_cond
