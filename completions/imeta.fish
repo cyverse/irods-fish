@@ -139,8 +139,7 @@ function __imeta_parse_cp_args_for --argument-names consumer cmdline
   set cmdTokens (__imeta_tokenize_cmdline (opts) -- (string split -- ' ' $cmdline))
   set _curr_token $cmdTokens[-1]
   set --erase cmdTokens[-1]
-  set numTokens (count $cmdTokens)
-  if test "$numTokens" -ge 1
+  if test (count $cmdTokens) -ge 1
     switch $cmdTokens[1]
       case -C
         set _flag_C 1
@@ -150,21 +149,29 @@ function __imeta_parse_cp_args_for --argument-names consumer cmdline
         set _flag_R 1
       case -u
         set _flag_u 1
+      case '*'
+        set unknown_flag $cmdTokens[1]
     end
-    set --erase cmdTokens[1]
-  end
-  if test "$numTokens" -ge 1
-    switch $cmdTokens[1]
-      case -C
-        set _flag_C $_flag_C 2
-      case -d
-        set _flag_d $_flag_d 2
-      case -R
-        set _flag_R $_flag_R 2
-      case -u
-        set _flag_u $_flag_u 2
+    if not set --query unknown_flag
+      set --erase cmdTokens[1]
+      if test (count $cmdTokens) -ge 1
+        switch $cmdTokens[1]
+          case -C
+            set _flag_C $_flag_C 2
+          case -d
+            set _flag_d $_flag_d 2
+          case -R
+            set _flag_R $_flag_R 2
+          case -u
+            set _flag_u $_flag_u 2
+          case '*'
+            set unknown_flag $cmdTokens[1]
+        end
+        if not set --query unknown_flag
+          set --erase cmdTokens[1]
+        end
+      end
     end
-    set --erase cmdTokens[1]
   end
   set _unparsed_args $cmdTokens
   eval "$consumer"
@@ -240,13 +247,6 @@ end
 
 function __imeta_cmd_needs_user --no-scope-shadowing
   __imeta_cmd_has_flag_with_num_args _flag_u 0
-end
-
-function __imeta_cmd_has_only_coll_flags --no-scope-shadowing --argument-names flagCnt argCnt
-  test (count $_flag_C) -eq "$flagCnt" -a (count $_unparsed_args) -eq "$argCnt"
-  and not set --query _flag_d
-  and not set --query _flag_R
-  and not set --query _flag_u
 end
 
 # main conditions
@@ -401,7 +401,13 @@ function __imeta_cp_admin_src_flag_cond --argument-names cmdline
 end
 
 function __imeta_cp_dest_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_only_coll_flags 1 0' cp $cmdline
+  function condition --no-scope-shadowing
+    test (count $_flag_C) -eq 1 -a (count $_unparsed_args) -eq 0
+    and not set --query _flag_d
+    and not set --query _flag_R
+    and not set --query _flag_u
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_admin_dest_flag_cond --argument-names cmdline
@@ -411,7 +417,7 @@ end
 
 function __imeta_cp_src_coll_cond --argument-names cmdline
   function condition --no-scope-shadowing
-    if test "$_flag_C[1]" -eq 1 -a (count $_unparsed_args) -eq 0
+    if test "$_flag_C[1]" = 1 -a (count $_unparsed_args) -eq 0
       test (count $_flag_C) -eq 2
       or set --query _flag_d
       or set --query _flag_R
@@ -424,9 +430,18 @@ function __imeta_cp_src_coll_cond --argument-names cmdline
 end
 
 function __imeta_cp_dest_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_only_coll_flags 2 1' cp $cmdline
+  function condition --no-scope-shadowing
+    test (count $_flag_C) -eq 2 -a (count $_unparsed_args) -eq 1
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
 end
 
+function __imeta_cp_dest_data_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test "$_flag_C[1]" = 1 -a "$_flag_d[1]" = 2 -a (count $_unparsed_args) -eq 1
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
+end
 
 #
 # Suggestion functions
@@ -784,7 +799,9 @@ complete --command imeta --arguments '-d' \
 complete --command imeta --short-option d \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_flag_cond' \
   --description 'to data object'
-# TODO imeta cp -C -d <from-collection> <to-data-object>
+complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_data_cond' \
+  --description 'destination data object'
 
 # cp -C -R
 complete --command imeta --arguments '-R' \
