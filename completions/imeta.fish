@@ -467,28 +467,21 @@ end
 
 function __imeta_cp_to_data_cond --argument-names cmdline
   function condition --no-scope-shadowing
-    test "$_flag_d[1]" = 2 -a (count $_unparsed_args) -eq 1
+    test "$_flag_d[-1]" = 2 -a (count $_unparsed_args) -eq 1
   end
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_to_resc_cond --argument-names cmdline
   function condition --no-scope-shadowing
-    test "$_flag_R[1]" = 2 -a (count $_unparsed_args) -eq 1
+    test "$_flag_R[-1]" = 2 -a (count $_unparsed_args) -eq 1
   end
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_to_user_cond --argument-names cmdline
   function condition --no-scope-shadowing
-    test "$_flag_u[1]" = 2 -a (count $_unparsed_args) -eq 1
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
-end
-
-function __imeta_cp_data_to_data_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test "$_flag_d[1]" = 1 -a "$_flag_d[2]" = 2 -a (count $_unparsed_args) -eq 1
+    test "$_flag_u[-1]" = 2 -a (count $_unparsed_args) -eq 1
   end
   __imeta_parse_cmd_for condition cp $cmdline
 end
@@ -548,10 +541,13 @@ function __imeta_coll_attr_val_unit_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-function __imeta_cp_data_to_data_dest_args --argument-names cmdline
+function __imeta_data_args --argument-names cmdline
   function suggestions --no-scope-shadowing
-    set srcData $_unparsed_args[1]
-    __irods_path_suggestions | string match --all --invert $srcData
+    set ignored ''
+    if test (count $_flag_d) -eq 2 -a (count $_unparsed_args) -eq 1
+      set ignored $_unparsed_args[1]
+    end
+    __irods_path_suggestions | string match --all --invert $ignored
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
@@ -727,7 +723,8 @@ complete --command imeta \
 
 # add -d
 __imeta_mk_flag_completions d 'to data object' __imeta_add_flag_cond
-complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_add_data_cond'
 
 # add -R
@@ -766,7 +763,8 @@ complete --command imeta \
 
 # adda -d
 __imeta_mk_flag_completions d 'to data object' __imeta_adda_flag_cond
-complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_cond'
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_args)' \
@@ -845,7 +843,8 @@ complete --command imeta \
 
 # cp -C -d
 __imeta_mk_flag_completions d 'to data object' __imeta_cp_coll_dest_flag_cond
-complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_data_cond' \
   --description 'destination data object'
 
@@ -863,7 +862,8 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
 
 # cp -d
 __imeta_mk_flag_completions d 'from data object' __imeta_cp_src_flag_cond
-complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_src_data_cond' \
   --description 'source data object'
 
@@ -876,10 +876,9 @@ complete --command imeta \
 
 # cp -d -d
 __imeta_mk_flag_completions d 'to data object' __imeta_cp_data_dest_flag_cond
-# TODO replace __imeta_cp_data_to_data_cond with __imeta_cp_to_data_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_data_to_data_dest_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_data_to_data_cond' \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_to_data_cond' \
   --description 'destination collection'
 
 # cp -d -R
