@@ -830,8 +830,12 @@ __imeta_mk_flag_completions d 'from data object' __imeta_cp_src_flag_cond
 __imeta_mk_flag_completions C 'to collection' __imeta_cp_data_dest_flag_cond
 # TODO imeta cp -d -C <from-data-object> <to-collection>
 
+# cp -d -d
+__imeta_mk_flag_completions d 'to data object' __imeta_cp_data_dest_flag_cond
 # TODO imeta cp -d -d <from-data-object> <to-data-object>
+
 # TODO imeta cp -d -R <from-data-object> <to-resource>
+
 # TODO imeta cp -d -u <from-data-object> <to-user>
 
 # cp -R
