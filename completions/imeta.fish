@@ -506,7 +506,7 @@ function __imeta_coll_args
   __irods_collection_suggestions | string trim --right --chars /
 end
 
-function __imeta_dest_coll_args --argument-names cmdline
+function __imeta_cp_coll_to_coll_dest_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set srcColl $_unparsed_args[1]
     __imeta_coll_args  | string match --all --invert $srcColl
@@ -827,7 +827,7 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
 # cp -C -C
 __imeta_mk_flag_completions C 'to collection' __imeta_cp_coll_dest_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_dest_coll_args)' \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_coll_to_coll_dest_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_coll_to_coll_cond' \
   --description 'destination collection'
 
