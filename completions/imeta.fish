@@ -812,13 +812,13 @@ complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestion
   --description 'destination data object'
 
 # cp -C -R
-__imeta_mk_slow_flag_completions R 'to resource' __imeta_cp_coll_dest_flag_cond
+__imeta_mk_slow_flag_completions R 'to resource' __imeta_cp_admin_coll_dest_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_resc_cond' \
   --description 'destination resource'
 
 # cp -C -u
-__imeta_mk_slow_flag_completions u 'to user' __imeta_cp_coll_dest_flag_cond
+__imeta_mk_slow_flag_completions u 'to user' __imeta_cp_admin_coll_dest_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_user_cond' \
   --description 'destination user'
