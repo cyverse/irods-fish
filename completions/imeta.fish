@@ -400,7 +400,7 @@ function __imeta_cp_admin_src_flag_cond --argument-names cmdline
   and __imeta_am_admin
 end
 
-function __imeta_cp_dest_flag_cond --argument-names cmdline
+function __imeta_cp_coll_dest_flag_cond --argument-names cmdline
   function condition --no-scope-shadowing
     test (count $_flag_C) -eq 1 -a (count $_unparsed_args) -eq 0
     and not set --query _flag_d
@@ -410,8 +410,8 @@ function __imeta_cp_dest_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
-function __imeta_cp_admin_dest_flag_cond --argument-names cmdline
-  __imeta_cp_dest_flag_cond $cmdline
+function __imeta_cp_admin_coll_dest_flag_cond --argument-names cmdline
+  __imeta_cp_coll_dest_flag_cond $cmdline
   and __imeta_am_admin
 end
 
@@ -453,6 +453,16 @@ end
 function __imeta_cp_dest_user_cond --argument-names cmdline
   function condition --no-scope-shadowing
     test "$_flag_C[1]" = 1 -a "$_flag_u[1]" = 2 -a (count $_unparsed_args) -eq 1
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
+end
+
+function __imeta_cp_data_dest_flag_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_flag_d) -eq 1 -a (count $_unparsed_args) -eq 0
+    and not set --query _flag_C
+    and not set --query _flag_R
+    and not set --query _flag_u
   end
   __imeta_parse_cmd_for condition cp $cmdline
 end
@@ -796,11 +806,12 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
   --description 'source collection'
 
 # cp -C -C
+# TODO factor out common condition logic for cp (-C|-d) ? completion
 complete --command imeta --arguments '-C' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_flag_cond' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_coll_dest_flag_cond' \
   --description 'to collection'
 complete --command imeta --short-option C \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_flag_cond' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_coll_dest_flag_cond' \
   --description 'to collection'
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_dest_coll_args)' \
@@ -809,10 +820,10 @@ complete --command imeta \
 
 # cp -C -d
 complete --command imeta --arguments '-d' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_flag_cond' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_coll_dest_flag_cond' \
   --description 'to data object'
 complete --command imeta --short-option d \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_flag_cond' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_coll_dest_flag_cond' \
   --description 'to data object'
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_data_cond' \
@@ -820,10 +831,10 @@ complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestion
 
 # cp -C -R
 complete --command imeta --arguments '-R' \
-  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_dest_flag_cond' \
+  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_coll_dest_flag_cond' \
   --description 'to resource'
 complete --command imeta --short-option R \
-  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_dest_flag_cond' \
+  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_coll_dest_flag_cond' \
   --description 'to resource'
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_resc_cond' \
@@ -831,10 +842,10 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
 
 # cp -C -u
 complete --command imeta --arguments '-u' \
-  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_dest_flag_cond' \
+  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_coll_dest_flag_cond' \
   --description 'to user'
 complete --command imeta --short-option u \
-  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_dest_flag_cond' \
+  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_coll_dest_flag_cond' \
   --description 'to user'
 complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_user_cond' \
@@ -842,7 +853,19 @@ complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
 
 # cp -d
 __imeta_mk_cp_src_flag_completions d 'from data object'
-# TODO imeta cp -d (-d|-C|-R|-u) <from-data-object> <to-entity>
+
+# cp -d -C
+complete --command imeta --arguments '-C' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_data_dest_flag_cond' \
+  --description 'to collection'
+complete --command imeta --short-option C \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_data_dest_flag_cond' \
+  --description 'to collection'
+# TODO imeta cp -d -C <from-data-object> <to-collection>
+
+# TODO imeta cp -d -d <from-data-object> <to-data-object>
+# TODO imeta cp -d -R <from-data-object> <to-resource>
+# TODO imeta cp -d -u <from-data-object> <to-user>
 
 # cp -R
 __imeta_mk_cp_admin_src_flag_completions R 'from resource'
