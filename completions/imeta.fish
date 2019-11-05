@@ -443,6 +443,14 @@ function __imeta_cp_dest_data_cond --argument-names cmdline
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
+function __imeta_cp_dest_resc_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test "$_flag_C[1]" = 1 -a "$_flag_R[1]" = 2 -a (count $_unparsed_args) -eq 1
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
+end
+
+
 #
 # Suggestion functions
 #
@@ -810,7 +818,9 @@ complete --command imeta --arguments '-R' \
 complete --command imeta --short-option R \
   --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_dest_flag_cond' \
   --description 'to resource'
-# TODO imeta cp -C -R <from-collection> <to-resource>
+complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_resc_cond' \
+  --description 'destination resource'
 
 # cp -C -u
 complete --command imeta --arguments '-u' \
