@@ -467,6 +467,10 @@ function __imeta_cp_data_dest_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
+function __imeta_cp_admin_data_dest_flag_cond --argument-names cmdline
+  __imeta_cp_data_dest_flag_cond $cmdline
+  and __imeta_am_admin
+end
 
 #
 # Suggestion functions
@@ -834,6 +838,8 @@ __imeta_mk_flag_completions C 'to collection' __imeta_cp_data_dest_flag_cond
 __imeta_mk_flag_completions d 'to data object' __imeta_cp_data_dest_flag_cond
 # TODO imeta cp -d -d <from-data-object> <to-data-object>
 
+# cp -d -R
+__imeta_mk_slow_flag_completions R 'to resource' __imeta_cp_admin_data_dest_flag_cond
 # TODO imeta cp -d -R <from-data-object> <to-resource>
 
 # TODO imeta cp -d -u <from-data-object> <to-user>
