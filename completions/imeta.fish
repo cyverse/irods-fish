@@ -450,6 +450,13 @@ function __imeta_cp_dest_resc_cond --argument-names cmdline
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
+function __imeta_cp_dest_user_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test "$_flag_C[1]" = 1 -a "$_flag_u[1]" = 2 -a (count $_unparsed_args) -eq 1
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -829,7 +836,9 @@ complete --command imeta --arguments '-u' \
 complete --command imeta --short-option u \
   --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_dest_flag_cond' \
   --description 'to user'
-# TODO imeta cp -C -u <from-collection> <to-user>
+complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_dest_user_cond' \
+  --description 'destination user'
 
 # cp -d
 __imeta_mk_cp_src_flag_completions d 'from data object'
