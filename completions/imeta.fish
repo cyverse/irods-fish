@@ -472,6 +472,21 @@ function __imeta_cp_admin_data_dest_flag_cond --argument-names cmdline
   and __imeta_am_admin
 end
 
+function __imeta_cp_src_data_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    if test "$_flag_d[1]" = 1 -a (count $_unparsed_args) -eq 0
+      test (count $_flag_d) -eq 2
+      or set --query _flag_C
+      or set --query _flag_R
+      or set --query _flag_u
+    else
+      false
+    end
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
+end
+
+
 #
 # Suggestion functions
 #
@@ -832,6 +847,9 @@ __imeta_mk_flag_completions d 'from data object' __imeta_cp_src_flag_cond
 
 # cp -d -C
 __imeta_mk_flag_completions C 'to collection' __imeta_cp_data_dest_flag_cond
+complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_src_data_cond' \
+  --description 'source collection'
 # TODO imeta cp -d -C <from-data-object> <to-collection>
 
 # cp -d -d
