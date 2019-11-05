@@ -637,37 +637,30 @@ end
 # Completions
 #
 
-function __imeta_mk_hyphen_completions --argument-names opt description condition
-  complete --command imeta --arguments "-$opt" --condition $condition --description $description
-  complete --command imeta --short-option $opt --condition $condition --description $description
+function __imeta_mk_flag_completions --argument-names opt description condition
+  complete --command imeta --arguments "-$opt" \
+    --condition "__imeta_eval_with_cmdline $condition" \
+    --description $description
+
+  complete --command imeta --short-option $opt \
+    --condition "__imeta_eval_with_cmdline $condition" \
+    --description $description
 end
 
-function __imeta_mk_add_admin_flag_completions --argument-names opt description
-  __imeta_mk_hyphen_completions $opt $description \
-    '__irods_exec_slow __imeta_eval_with_cmdline __imeta_add_admin_flag_cond'
+function __imeta_mk_slow_flag_completions --argument-names opt description condition
+  complete --command imeta --arguments "-$opt" \
+    --condition "__irods_exec_slow __imeta_eval_with_cmdline $condition" \
+    --description $description
+
+  complete --command imeta --short-option $opt \
+    --condition "__irods_exec_slow __imeta_eval_with_cmdline $condition" \
+    --description $description
 end
 
-function __imeta_mk_add_flag_completions --argument-names opt description
-  __imeta_mk_hyphen_completions $opt $description '__imeta_eval_with_cmdline __imeta_add_flag_cond'
-end
-
-function __imeta_mk_adda_flag_completions --argument-names opt description
-  __imeta_mk_hyphen_completions $opt $description '__imeta_eval_with_cmdline __imeta_adda_flag_cond'
-end
-
-function __imeta_mk_cp_admin_src_flag_completions --argument-names opt description
-  __imeta_mk_hyphen_completions $opt $description \
-    '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_src_flag_cond'
-end
-
-function __imeta_mk_cp_src_flag_completions --argument-names opt description
-  __imeta_mk_hyphen_completions $opt $description \
-    '__imeta_eval_with_cmdline __imeta_cp_src_flag_cond'
-end
 
 complete --command imeta --no-files
 
-__imeta_mk_hyphen_completions h 'shows help' '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond'
+__imeta_mk_flag_completions h 'shows help' __imeta_no_cmd_or_help_cond
 
 complete --command imeta --short-option V \
   --condition '__imeta_eval_with_cmdline __imeta_verbose_cond' \
@@ -692,22 +685,22 @@ complete --command imeta --arguments add \
   --description 'add new AVU triple'
 
 # add -C
-__imeta_mk_add_flag_completions C 'to collection'
+__imeta_mk_flag_completions C 'to collection' __imeta_add_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_add_coll_cond'
 
 # add -d
-__imeta_mk_add_flag_completions d 'to data object'
+__imeta_mk_flag_completions d 'to data object' __imeta_add_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
   --condition '__imeta_eval_with_cmdline __imeta_add_data_cond'
 
 # add -R
-__imeta_mk_add_admin_flag_completions R 'to resource'
+__imeta_mk_slow_flag_completions R 'to resource' __imeta_add_admin_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_add_resc_cond'
 
 # add -u
-__imeta_mk_add_admin_flag_completions u 'to user'
+__imeta_mk_slow_flag_completions u 'to user' __imeta_add_admin_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_add_user_cond'
 
@@ -718,7 +711,7 @@ complete --command imeta --arguments adda \
   --description 'administratively add new AVU triple'
 
 # adda -C
-__imeta_mk_adda_flag_completions C 'to collection'
+__imeta_mk_flag_completions C 'to collection' __imeta_adda_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_cond'
 complete --command imeta \
@@ -735,7 +728,7 @@ complete --command imeta \
   --description 'existing for attribute-value'
 
 # adda -d
-__imeta_mk_adda_flag_completions d 'to data object'
+__imeta_mk_flag_completions d 'to data object' __imeta_adda_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_cond'
 complete --command imeta \
@@ -752,7 +745,7 @@ complete --command imeta \
   --description 'existing for attribute-value'
 
 # adda -R
-__imeta_mk_adda_flag_completions R 'to resource'
+__imeta_mk_flag_completions R 'to resource' __imeta_adda_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_resc_cond'
 complete --command imeta \
@@ -769,7 +762,7 @@ complete --command imeta \
   --description 'existing for attribute-value'
 
 # adda -u
-__imeta_mk_adda_flag_completions u 'to_user'
+__imeta_mk_flag_completions u 'to user' __imeta_adda_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_user_cond'
 complete --command imeta \
@@ -791,7 +784,7 @@ complete --command imeta --arguments addw \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'add new AVU triple using wildcards in name'
 
-__imeta_mk_hyphen_completions d 'to data object' '__imeta_eval_with_cmdline __imeta_addw_flag_cond'
+__imeta_mk_flag_completions d 'to data object' __imeta_addw_flag_cond
 
 # cp
 
@@ -800,67 +793,41 @@ complete --command imeta --arguments cp \
   --description 'copy AVUs from one item to another'
 
 # cp -C
-__imeta_mk_cp_src_flag_completions C 'from collection'
+__imeta_mk_flag_completions C 'from collection' __imeta_cp_src_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_src_coll_cond' \
   --description 'source collection'
 
 # cp -C -C
-# TODO factor out common condition logic for cp (-C|-d) ? completion
-complete --command imeta --arguments '-C' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_coll_dest_flag_cond' \
-  --description 'to collection'
-complete --command imeta --short-option C \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_coll_dest_flag_cond' \
-  --description 'to collection'
+__imeta_mk_flag_completions C 'to collection' __imeta_cp_coll_dest_flag_cond
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_dest_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_coll_cond' \
   --description 'destination collection'
 
 # cp -C -d
-complete --command imeta --arguments '-d' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_coll_dest_flag_cond' \
-  --description 'to data object'
-complete --command imeta --short-option d \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_coll_dest_flag_cond' \
-  --description 'to data object'
+__imeta_mk_flag_completions d 'to data object' __imeta_cp_coll_dest_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __irods_path_suggestions)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_data_cond' \
   --description 'destination data object'
 
 # cp -C -R
-complete --command imeta --arguments '-R' \
-  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_coll_dest_flag_cond' \
-  --description 'to resource'
-complete --command imeta --short-option R \
-  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_coll_dest_flag_cond' \
-  --description 'to resource'
+__imeta_mk_slow_flag_completions R 'to resource' __imeta_cp_coll_dest_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_resc_cond' \
   --description 'destination resource'
 
 # cp -C -u
-complete --command imeta --arguments '-u' \
-  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_coll_dest_flag_cond' \
-  --description 'to user'
-complete --command imeta --short-option u \
-  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_cp_admin_coll_dest_flag_cond' \
-  --description 'to user'
+__imeta_mk_slow_flag_completions u 'to user' __imeta_cp_coll_dest_flag_cond
 complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_dest_user_cond' \
   --description 'destination user'
 
 # cp -d
-__imeta_mk_cp_src_flag_completions d 'from data object'
+__imeta_mk_flag_completions d 'from data object' __imeta_cp_src_flag_cond
 
 # cp -d -C
-complete --command imeta --arguments '-C' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_data_dest_flag_cond' \
-  --description 'to collection'
-complete --command imeta --short-option C \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_data_dest_flag_cond' \
-  --description 'to collection'
+__imeta_mk_flag_completions C 'to collection' __imeta_cp_data_dest_flag_cond
 # TODO imeta cp -d -C <from-data-object> <to-collection>
 
 # TODO imeta cp -d -d <from-data-object> <to-data-object>
@@ -868,11 +835,11 @@ complete --command imeta --short-option C \
 # TODO imeta cp -d -u <from-data-object> <to-user>
 
 # cp -R
-__imeta_mk_cp_admin_src_flag_completions R 'from resource'
+__imeta_mk_slow_flag_completions R 'from resource' __imeta_cp_admin_src_flag_cond
 # TODO imeta cp -R (-d|-C|-R|-u) <from-resource> <to-entity>
 
 # cp -u
-__imeta_mk_cp_admin_src_flag_completions u 'from user'
+__imeta_mk_slow_flag_completions u 'from user' __imeta_cp_admin_src_flag_cond
 # TODO imeta cp -u (-d|-C|-R|-u) <from-user> <to-entity>
 
 # ls
@@ -939,9 +906,4 @@ complete --command imeta --arguments set \
 
 # TODO imeta set (-d|-C|-R|-u) <entity> <attribute> <new-value> [<new-units>]
 
-functions --erase \
-  __imeta_mk_cp_flag_completions \
-  __imeta_mk_adda_flag_completions \
-  __imeta_mk_add_flag_completions \
-  __imeta_mk_add_admin_flag_completions \
-  __imeta_mk_hyphen_completions
+functions --erase __imeta_mk_slow_flag_completions __imeta_mk_flag_completions
