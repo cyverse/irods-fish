@@ -932,7 +932,10 @@ __imeta_mk_slow_flag_completions R 'from resource' __imeta_cp_admin_src_flag_con
 __imeta_mk_flag_completions C 'to collection' __imeta_cp_resc_dest_flag_cond
 # TODO imeta cp -R -C <from-resource> <to-collection>
 
+# cp -R -d
+__imeta_mk_flag_completions d 'to data object' __imeta_cp_resc_dest_flag_cond
 # TODO imeta cp -R -d <from-resource> <to-data-object>
+
 # TODO imeta cp -R -R <from-resource> <to-resource>
 # TODO imeta cp -R -u <from-resource> <to-user>
 
