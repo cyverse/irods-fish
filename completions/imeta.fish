@@ -629,8 +629,15 @@ function __imeta_resc_attr_val_unit_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-function __imeta_user_args
-  __irods_quest '%s' 'select USER_NAME'
+function __imeta_user_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set ignored ''
+    if test (count $_flag_u) -eq 2 -a (count $_unparsed_args) -eq 1
+      set ignored $_unparsed_args[1]
+    end
+    __irods_quest '%s' "select USER_NAME where USER_NAME != '$ignored'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_user_attr_args --argument-names cmdline
@@ -742,7 +749,8 @@ complete --command imeta \
 
 # add -u
 __imeta_mk_slow_flag_completions u 'to user' __imeta_add_admin_flag_cond
-complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_add_user_cond'
 
 # adda
@@ -807,7 +815,8 @@ complete --command imeta \
 
 # adda -u
 __imeta_mk_flag_completions u 'to user' __imeta_adda_flag_cond
-complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_user_cond'
 complete --command imeta \
   --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_attr_args)' \
@@ -866,7 +875,8 @@ complete --command imeta \
 
 # cp -C -u
 __imeta_mk_slow_flag_completions u 'to user' __imeta_cp_admin_coll_dest_flag_cond
-complete --command imeta --arguments '(__irods_exec_slow __imeta_user_args)' \
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_user_cond' \
   --description 'destination user'
 
@@ -900,7 +910,10 @@ complete --command imeta \
 
 # cp -d -u
 __imeta_mk_slow_flag_completions u 'to user' __imeta_cp_admin_data_dest_flag_cond
-# TODO imeta cp -d -u <from-data-object> <to-user>
+complete --command imeta \
+  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_to_user_cond' \
+  --description 'destination user'
 
 # cp -R
 __imeta_mk_slow_flag_completions R 'from resource' __imeta_cp_admin_src_flag_cond
