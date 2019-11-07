@@ -719,10 +719,7 @@ end
 
 complete --command imeta --no-files
 
-# TODO imeta help [<cmd>]
-
 __imeta_mk_flag_completions h 'shows help' __imeta_no_cmd_or_help_cond
-
 complete --command imeta --short-option V \
   --condition '__imeta_eval_with_cmdline __imeta_verbose_cond' \
   --description 'very verbose'
@@ -1020,5 +1017,11 @@ complete --command imeta --arguments set \
 
 # TODO imeta set (-C|-d|-R|-u) <entity> <attribute> <new-value> [<new-units>]
 
+# help
+
+complete --command imeta --arguments help \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
+  --description 'shows help'
+# * TODO imeta help <cmd>
 
 functions --erase __imeta_mk_slow_flag_completions __imeta_mk_flag_completions
