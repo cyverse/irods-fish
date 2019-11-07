@@ -11,6 +11,11 @@ the iCommands in this order, deferring those marked with `-` to the end. After e
 commands are implemented, implement completion for `iquest` general queries.
 
 ```
+✓      icd
+✓      ihelp
+✓      ils
+✓      iquest
+✓      irm
 - 1065 iadmin
    748 imeta
    600 iput

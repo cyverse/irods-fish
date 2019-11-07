@@ -697,6 +697,7 @@ function __imeta_mk_flag_completions --argument-names opt description condition
     --condition "__imeta_eval_with_cmdline $condition" \
     --description $description
 
+# TODO verify that short-option completion is needed if an argument one already exists
   complete --command imeta --short-option $opt \
     --condition "__imeta_eval_with_cmdline $condition" \
     --description $description
@@ -714,6 +715,8 @@ end
 
 
 complete --command imeta --no-files
+
+# TODO imeta help [<cmd>]
 
 __imeta_mk_flag_completions h 'shows help' __imeta_no_cmd_or_help_cond
 
@@ -927,6 +930,7 @@ complete --command imeta \
 
 # cp -R
 __imeta_mk_slow_flag_completions R 'from resource' __imeta_cp_admin_src_flag_cond
+# TODO imeta cp -R (-C|-d|-R|-u) <from-resource>>
 
 # cp -R -C
 __imeta_mk_flag_completions C 'to collection' __imeta_cp_resc_dest_flag_cond
@@ -946,7 +950,7 @@ __imeta_mk_flag_completions u 'to user' __imeta_cp_resc_dest_flag_cond
 
 # cp -u
 __imeta_mk_slow_flag_completions u 'from user' __imeta_cp_admin_src_flag_cond
-# TODO imeta cp -u (-d|-C|-R|-u) <from-user> <to-entity>
+# TODO imeta cp -u (-C|-d|-R|-u) <from-user> <to-entity>
 
 # ls
 
@@ -954,7 +958,8 @@ complete --command imeta --arguments ls \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'list existing AVUs'
 
-# TODO imeta ls (-[l]d|-[l]C|-[l]R|-[l]u) <entity> [<attribute>]
+# TODO learn what the l means
+# TODO imeta ls (-C|-[l]d|-R|-u) <entity> [<attribute>]
 
 # lsw
 
@@ -962,7 +967,7 @@ complete --command imeta --arguments lsw \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'list existing AVUs using wildcards'
 
-# TODO imeta lsw (-[l]d|-[l]C|-[l]R|-[l]u) <entity> [<attribute>]
+# TODO imeta lsw (-C|-[l]d|-R|-u) <entity>
 
 # mod
 
@@ -970,7 +975,7 @@ complete --command imeta --arguments mod \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'modify AVU'
 
-# TODO imeta mod (-d|-C|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
+# TODO imeta mod (-C|-d|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
 
 # qu
 
@@ -986,7 +991,7 @@ complete --command imeta --arguments rm \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'remove AVU'
 
-# TODO imeta rm (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
+# TODO imeta rm (-C|-d|-R|-u) <entity> <attribute> <value> [<units>]
 
 # rmi
 
@@ -994,7 +999,7 @@ complete --command imeta --arguments rmi \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'remove AVU by metadata id'
 
-# TODO imeta rmi (-d|-C|-R|-u) <entity> <metadata-id>
+# TODO imeta rmi (-C|-d|-R|-u) <entity> <metadata-id>
 
 # rmw
 
@@ -1002,7 +1007,7 @@ complete --command imeta --arguments rmw \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'remove AVU using wildcards'
 
-# TODO imeta rmw (-d|-C|-R|-u) <entity> <attribute> <value> [<units>]
+# TODO imeta rmw (-C|-d|-R|-u) <entity> <attribute> <value> [<units>]
 
 # set
 
@@ -1010,7 +1015,7 @@ complete --command imeta --arguments set \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'assign a single value'
 
-# TODO imeta set (-d|-C|-R|-u) <entity> <attribute> <new-value> [<new-units>]
+# TODO imeta set (-C|-d|-R|-u) <entity> <attribute> <new-value> [<new-units>]
 
 
 functions --erase __imeta_mk_slow_flag_completions __imeta_mk_flag_completions
