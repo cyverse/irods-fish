@@ -692,12 +692,15 @@ end
 # Completions
 #
 
+# Having an argument completion for a flag, makes completions suggest a flag
+# even when the current token is "", i.e., when no hyphen is present. Having
+# an argument completion instead of a short option completion results in the
+# suggestions being unordered, so both completions are needed.
 function __imeta_mk_flag_completions --argument-names opt description condition
   complete --command imeta --arguments "-$opt" \
     --condition "__imeta_eval_with_cmdline $condition" \
     --description $description
 
-# TODO verify that short-option completion is needed if an argument one already exists
   complete --command imeta --short-option $opt \
     --condition "__imeta_eval_with_cmdline $condition" \
     --description $description
