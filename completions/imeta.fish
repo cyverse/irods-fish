@@ -259,6 +259,17 @@ function __imeta_no_cmd_or_help_cond --argument-names cmdline
   __imeta_parse_main_for condition $cmdline
 end
 
+function __imeta_help_needs_cmd --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 1 -a "$_unparsed_args[1]" = help
+    and not set --query _flag_h
+    and not set --query _flag_V
+    and not set --query _flag_v
+    and not set --query _flag_z
+  end
+  __imeta_parse_main_for condition $cmdline
+end
+
 function __imeta_verbose_cond --argument-names cmdline
   function condition --no-scope-shadowing
     test (count $_unparsed_args) -eq 0
@@ -719,11 +730,26 @@ end
 
 complete --command imeta --no-files
 
+complete --command imeta --arguments help \
+  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
+  --description 'shows help'
+# TODO imeta help adda
+# TODO imeta help addw
+# TODO imeta help ls
+# TODO imeta help lsw
+# TODO imeta help mod
+# TODO imeta help qu
+# TODO imeta help set
+# TODO imeta help rm
+# TODO imeta help rmi
+# TODO imeta help rmw
+# TODO imeta help upper
+
 __imeta_mk_flag_completions h 'shows help' __imeta_no_cmd_or_help_cond
+
 complete --command imeta --short-option V \
   --condition '__imeta_eval_with_cmdline __imeta_verbose_cond' \
   --description 'very verbose'
-
 complete --command imeta --short-option v \
   --condition '__imeta_eval_with_cmdline __imeta_verbose_cond' \
   --description verbose
@@ -738,6 +764,9 @@ complete --command imeta --short-option z \
 
 # add
 
+complete --command imeta --arguments add \
+  --condition '__imeta_eval_with_cmdline __imeta_help_needs_cmd' \
+  --description 'add new AVU triple'
 complete --command imeta --arguments add \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'add new AVU triple'
@@ -957,8 +986,6 @@ __imeta_mk_slow_flag_completions u 'from user' __imeta_cp_admin_src_flag_cond
 complete --command imeta --arguments ls \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'list existing AVUs'
-
-# TODO learn what the l means
 # TODO imeta ls (-C|-[l]d|-R|-u) <entity> [<attribute>]
 
 # lsw
@@ -966,7 +993,6 @@ complete --command imeta --arguments ls \
 complete --command imeta --arguments lsw \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'list existing AVUs using wildcards'
-
 # TODO imeta lsw (-C|-[l]d|-R|-u) <entity>
 
 # mod
@@ -974,7 +1000,6 @@ complete --command imeta --arguments lsw \
 complete --command imeta --arguments mod \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'modify AVU'
-
 # TODO imeta mod (-C|-d|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
 
 # qu
@@ -982,7 +1007,6 @@ complete --command imeta --arguments mod \
 complete --command imeta --arguments qu \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'query entities with matching AVUs'
-
 # TODO imeta qu (-d|-C|-R|-u) <attribute> <op> <value> ...
 
 # rm
@@ -990,7 +1014,6 @@ complete --command imeta --arguments qu \
 complete --command imeta --arguments rm \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'remove AVU'
-
 # TODO imeta rm (-C|-d|-R|-u) <entity> <attribute> <value> [<units>]
 
 # rmi
@@ -998,7 +1021,6 @@ complete --command imeta --arguments rm \
 complete --command imeta --arguments rmi \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'remove AVU by metadata id'
-
 # TODO imeta rmi (-C|-d|-R|-u) <entity> <metadata-id>
 
 # rmw
@@ -1006,7 +1028,6 @@ complete --command imeta --arguments rmi \
 complete --command imeta --arguments rmw \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'remove AVU using wildcards'
-
 # TODO imeta rmw (-C|-d|-R|-u) <entity> <attribute> <value> [<units>]
 
 # set
@@ -1014,14 +1035,7 @@ complete --command imeta --arguments rmw \
 complete --command imeta --arguments set \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'assign a single value'
-
 # TODO imeta set (-C|-d|-R|-u) <entity> <attribute> <new-value> [<new-units>]
 
-# help
-
-complete --command imeta --arguments help \
-  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
-  --description 'shows help'
-# * TODO imeta help <cmd>
 
 functions --erase __imeta_mk_slow_flag_completions __imeta_mk_flag_completions
