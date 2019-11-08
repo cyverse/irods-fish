@@ -732,7 +732,6 @@ complete --command imeta --no-files
 complete --command imeta --arguments help \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'shows help'
-# TODO imeta help ls
 # TODO imeta help lsw
 # TODO imeta help mod
 # TODO imeta help qu
@@ -970,9 +969,7 @@ __imeta_mk_flag_completions u 'from user' '__irods_exec_slow __imeta_cp_admin_sr
 
 # ls
 
-complete --command imeta --arguments ls \
-  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
-  --description 'list existing AVUs'
+__imeta_mk_cmd_completion ls 'list existing AVUs' __imeta_no_cmd_or_help_cond
 # TODO imeta ls (-C|-[l]d|-R|-u) <entity> [<attribute>]
 
 # lsw
