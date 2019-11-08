@@ -703,6 +703,15 @@ end
 # Completions
 #
 
+function __imeta_mk_cmd_completion --argument-names cmd description condition
+  complete --command imeta --arguments $cmd \
+    --condition '__imeta_eval_with_cmdline __imeta_help_needs_cmd' \
+    --description $description
+  complete --command imeta --arguments $cmd \
+    --condition "__imeta_eval_with_cmdline $condition" \
+    --description $description
+end
+
 # Having an argument completion for a flag, makes completions suggest a flag
 # even when the current token is "", i.e., when no hyphen is present. Having
 # an argument completion instead of a short option completion results in the
@@ -754,12 +763,7 @@ complete --command imeta --short-option z \
 
 # add
 
-complete --command imeta --arguments add \
-  --condition '__imeta_eval_with_cmdline __imeta_help_needs_cmd' \
-  --description 'add new AVU triple'
-complete --command imeta --arguments add \
-  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
-  --description 'add new AVU triple'
+__imeta_mk_cmd_completion add 'add new AVU triple' __imeta_no_cmd_or_help_cond
 
 # add -C
 __imeta_mk_flag_completions C 'to collection' __imeta_add_flag_cond
@@ -787,12 +791,8 @@ complete --command imeta \
 
 # adda
 
-complete --command imeta --arguments adda \
-  --condition '__imeta_eval_with_cmdline __imeta_help_needs_cmd' \
-  --description 'administratively add new AVU triple'
-complete --command imeta --arguments adda \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_adda_cond' \
-  --description 'administratively add new AVU triple'
+__imeta_mk_cmd_completion adda 'administratively add new AVU triple' \
+  '__irods_exec_slow __imeta_adda_cond'
 
 # adda -C
 __imeta_mk_flag_completions C 'to collection' __imeta_adda_flag_cond
@@ -1031,4 +1031,4 @@ complete --command imeta --arguments set \
 # TODO imeta set (-C|-d|-R|-u) <entity> <attribute> <new-value> [<new-units>]
 
 
-functions --erase __imeta_mk_flag_completions
+functions --erase __imeta_mk_flag_completions __imeta_mk_cmd_completion
