@@ -732,10 +732,10 @@ complete --command imeta --no-files
 complete --command imeta --arguments help \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'shows help'
-# TODO imeta help set
 # TODO imeta help rm
 # TODO imeta help rmi
 # TODO imeta help rmw
+# TODO imeta help set
 # TODO imeta help upper
 
 __imeta_mk_flag_completions h 'shows help' __imeta_no_cmd_or_help_cond
@@ -986,9 +986,7 @@ __imeta_mk_cmd_completion qu 'query entities with matching AVUs' __imeta_no_cmd_
 
 # rm
 
-complete --command imeta --arguments rm \
-  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
-  --description 'remove AVU'
+__imeta_mk_cmd_completion rm 'remove AVU' __imeta_no_cmd_or_help_cond
 # TODO imeta rm (-C|-d|-R|-u) <entity> <attribute> <value> [<units>]
 
 # rmi
