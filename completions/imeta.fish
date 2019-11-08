@@ -733,8 +733,8 @@ complete --command imeta --no-files
 complete --command imeta --arguments help \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'shows help'
-# TODO imeta help adda
 # TODO imeta help addw
+# TODO imeta help cp
 # TODO imeta help ls
 # TODO imeta help lsw
 # TODO imeta help mod
@@ -797,6 +797,9 @@ complete --command imeta \
 
 # adda
 
+complete --command imeta --arguments adda \
+  --condition '__imeta_eval_with_cmdline __imeta_help_needs_cmd' \
+  --description 'administratively add new AVU triple'
 complete --command imeta --arguments adda \
   --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_adda_cond' \
   --description 'administratively add new AVU triple'
