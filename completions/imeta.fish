@@ -732,7 +732,6 @@ complete --command imeta --no-files
 complete --command imeta --arguments help \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'shows help'
-# TODO imeta help set
 # TODO imeta help upper
 
 __imeta_mk_flag_completions h 'shows help' __imeta_no_cmd_or_help_cond
@@ -998,9 +997,7 @@ __imeta_mk_cmd_completion rmw 'remove AVU using wildcards' __imeta_no_cmd_or_hel
 
 # set
 
-complete --command imeta --arguments set \
-  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
-  --description 'assign a single value'
+__imeta_mk_cmd_completion set 'assign a single value' __imeta_no_cmd_or_help_cond
 # TODO imeta set (-C|-d|-R|-u) <entity> <attribute> <new-value> [<new-units>]
 
 
