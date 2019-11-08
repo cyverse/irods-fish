@@ -19,9 +19,9 @@ function __imeta_cmdline_args
   string join -- \n $args
 end
 
-function __imeta_eval_with_cmdline --argument-names needs_cmdline
+function __imeta_eval_with_cmdline
   set cmdline (__imeta_cmdline_args)
-  eval "$needs_cmdline '$cmdline'"
+  eval (string escape $argv "$cmdline")
 end
 
 function __imeta_tokenize_cmdline
