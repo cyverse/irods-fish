@@ -732,7 +732,6 @@ complete --command imeta --no-files
 complete --command imeta --arguments help \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'shows help'
-# TODO imeta help cp
 # TODO imeta help ls
 # TODO imeta help lsw
 # TODO imeta help mod
@@ -873,9 +872,7 @@ __imeta_mk_flag_completions d 'to data object' __imeta_addw_flag_cond
 
 # cp
 
-complete --command imeta --arguments cp \
-  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
-  --description 'copy AVUs from one item to another'
+__imeta_mk_cmd_completion cp 'copy AVUs from one item to another' __imeta_no_cmd_or_help_cond
 
 # cp -C
 __imeta_mk_flag_completions C 'from collection' __imeta_cp_src_flag_cond
