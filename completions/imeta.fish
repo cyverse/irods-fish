@@ -764,25 +764,25 @@ complete --command imeta --arguments add \
 # add -C
 __imeta_mk_flag_completions C 'to collection' __imeta_add_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_add_coll_cond'
 
 # add -d
 __imeta_mk_flag_completions d 'to data object' __imeta_add_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_add_data_cond'
 
 # add -R
 __imeta_mk_flag_completions R 'to resource' '__irods_exec_slow __imeta_add_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_add_resc_cond'
 
 # add -u
 __imeta_mk_flag_completions u 'to user' '__irods_exec_slow __imeta_add_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_add_user_cond'
 
 # adda
@@ -791,78 +791,78 @@ complete --command imeta --arguments adda \
   --condition '__imeta_eval_with_cmdline __imeta_help_needs_cmd' \
   --description 'administratively add new AVU triple'
 complete --command imeta --arguments adda \
-  --condition '__irods_exec_slow __imeta_eval_with_cmdline __imeta_adda_cond' \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_adda_cond' \
   --description 'administratively add new AVU triple'
 
 # adda -C
 __imeta_mk_flag_completions C 'to collection' __imeta_adda_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_cond' \
   --description 'existing for collections'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_val_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_val_cond' \
   --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_attr_val_unit_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_avu_cond' \
   --description 'existing for attribute-value'
 
 # adda -d
 __imeta_mk_flag_completions d 'to data object' __imeta_adda_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_attr_cond' \
   --description 'existing for data objects'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_val_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_attr_val_cond' \
   --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_attr_val_unit_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_avu_cond' \
   --description 'existing for attribute-value'
 
 # adda -R
 __imeta_mk_flag_completions R 'to resource' __imeta_adda_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_resc_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_attr_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_resc_attr_cond' \
   --description 'existing for resources'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_attr_val_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_resc_attr_val_cond' \
   --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_attr_val_unit_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_resc_avu_cond' \
   --description 'existing for attribute-value'
 
 # adda -u
 __imeta_mk_flag_completions u 'to user' __imeta_adda_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_user_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_attr_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_user_attr_cond' \
   --description 'existing for users'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_attr_val_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_user_attr_val_cond' \
   --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_attr_val_unit_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_user_avu_cond' \
   --description 'existing for attribute-value'
 
@@ -883,70 +883,70 @@ complete --command imeta --arguments cp \
 # cp -C
 __imeta_mk_flag_completions C 'from collection' __imeta_cp_src_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_src_coll_cond' \
   --description 'source collection'
 
 # cp -C -C
 __imeta_mk_flag_completions C 'to collection' __imeta_cp_coll_dest_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_coll_cond' \
   --description 'destination collection'
 
 # cp -C -d
 __imeta_mk_flag_completions d 'to data object' __imeta_cp_coll_dest_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_data_cond' \
   --description 'destination data object'
 
 # cp -C -R
 __imeta_mk_flag_completions R 'to resource' '__irods_exec_slow __imeta_cp_admin_coll_dest_flag_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_resc_cond' \
   --description 'destination resource'
 
 # cp -C -u
 __imeta_mk_flag_completions u 'to user' '__irods_exec_slow __imeta_cp_admin_coll_dest_flag_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_user_cond' \
   --description 'destination user'
 
 # cp -d
 __imeta_mk_flag_completions d 'from data object' __imeta_cp_src_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_src_data_cond' \
   --description 'source data object'
 
 # cp -d -C
 __imeta_mk_flag_completions C 'to collection' __imeta_cp_data_dest_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_coll_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_coll_cond' \
   --description 'destination collection'
 
 # cp -d -d
 __imeta_mk_flag_completions d 'to data object' __imeta_cp_data_dest_flag_cond
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_data_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_data_cond' \
   --description 'destination data object'
 
 # cp -d -R
 __imeta_mk_flag_completions R 'to resource' '__irods_exec_slow __imeta_cp_admin_data_dest_flag_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_resc_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_resc_cond' \
   --description 'destination resource'
 
 # cp -d -u
 __imeta_mk_flag_completions u 'to user' '__irods_exec_slow __imeta_cp_admin_data_dest_flag_cond'
 complete --command imeta \
-  --arguments '(__irods_exec_slow __imeta_eval_with_cmdline __imeta_user_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_to_user_cond' \
   --description 'destination user'
 
