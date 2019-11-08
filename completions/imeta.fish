@@ -732,7 +732,6 @@ complete --command imeta --no-files
 complete --command imeta --arguments help \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'shows help'
-# TODO imeta help mod
 # TODO imeta help qu
 # TODO imeta help set
 # TODO imeta help rm
@@ -978,9 +977,7 @@ __imeta_mk_cmd_completion lsw 'list existing AVUs using wildcards' __imeta_no_cm
 
 # mod
 
-complete --command imeta --arguments mod \
-  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
-  --description 'modify AVU'
+__imeta_mk_cmd_completion mod 'modify AVU' __imeta_no_cmd_or_help_cond
 # TODO imeta mod (-C|-d|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
 
 # qu
