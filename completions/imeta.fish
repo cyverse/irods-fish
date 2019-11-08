@@ -732,7 +732,6 @@ complete --command imeta --no-files
 complete --command imeta --arguments help \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'shows help'
-# TODO imeta help lsw
 # TODO imeta help mod
 # TODO imeta help qu
 # TODO imeta help set
@@ -974,9 +973,7 @@ __imeta_mk_cmd_completion ls 'list existing AVUs' __imeta_no_cmd_or_help_cond
 
 # lsw
 
-complete --command imeta --arguments lsw \
-  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
-  --description 'list existing AVUs using wildcards'
+__imeta_mk_cmd_completion lsw 'list existing AVUs using wildcards' __imeta_no_cmd_or_help_cond
 # TODO imeta lsw (-C|-[l]d|-R|-u) <entity>
 
 # mod
