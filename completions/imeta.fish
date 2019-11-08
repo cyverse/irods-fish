@@ -732,7 +732,6 @@ complete --command imeta --no-files
 complete --command imeta --arguments help \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'shows help'
-# TODO imeta help addw
 # TODO imeta help cp
 # TODO imeta help ls
 # TODO imeta help lsw
@@ -868,10 +867,8 @@ complete --command imeta \
 
 # addw
 
-complete --command imeta --arguments addw \
-  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
-  --description 'add new AVU triple using wildcards in name'
-
+__imeta_mk_cmd_completion addw 'add new AVU triple using wildcards in name' \
+  __imeta_no_cmd_or_help_cond
 __imeta_mk_flag_completions d 'to data object' __imeta_addw_flag_cond
 
 # cp
