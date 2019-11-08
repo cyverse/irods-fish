@@ -732,7 +732,9 @@ complete --command imeta --no-files
 complete --command imeta --arguments help \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'shows help'
-# TODO imeta help upper
+complete --command imeta --arguments upper \
+  --condition '__imeta_eval_with_cmdline __imeta_help_needs_cmd' \
+  --description 'toggle between upper case mode for queries'
 
 __imeta_mk_flag_completions h 'shows help' __imeta_no_cmd_or_help_cond
 
