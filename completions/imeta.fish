@@ -732,7 +732,6 @@ complete --command imeta --no-files
 complete --command imeta --arguments help \
   --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
   --description 'shows help'
-# TODO imeta help qu
 # TODO imeta help set
 # TODO imeta help rm
 # TODO imeta help rmi
@@ -982,9 +981,7 @@ __imeta_mk_cmd_completion mod 'modify AVU' __imeta_no_cmd_or_help_cond
 
 # qu
 
-complete --command imeta --arguments qu \
-  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
-  --description 'query entities with matching AVUs'
+__imeta_mk_cmd_completion qu 'query entities with matching AVUs' __imeta_no_cmd_or_help_cond
 # TODO imeta qu (-d|-C|-R|-u) <attribute> <op> <value> ...
 
 # rm
