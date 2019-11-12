@@ -493,6 +493,16 @@ function __imeta_cp_src_resc_cond --argument-names cmdline
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
+function __imeta_cp_user_dest_flag_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_flag_u) -eq 1 -a (count $_unparsed_args) -eq 0
+    and not set --query _flag_C
+    and not set --query _flag_d
+    and not set --query _flag_R
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
+end
+
 function __imeta_cp_to_coll_cond --argument-names cmdline
   function condition --no-scope-shadowing
     test "$_flag_C[-1]" = 2 -a (count $_unparsed_args) -eq 1
@@ -906,7 +916,11 @@ __imeta_mk_flag_completions d 'to data object' __imeta_cp_resc_dest_flag_cond
 __imeta_mk_flag_completions R 'to resource' __imeta_cp_resc_dest_flag_cond
 __imeta_mk_flag_completions u 'to user' __imeta_cp_resc_dest_flag_cond
 
-# TODO imeta cp -u (-C|-d|-R|-u)
+# cp -u (-C|-d|-R|-u)
+__imeta_mk_flag_completions C 'to collection' __imeta_cp_user_dest_flag_cond
+# TODO imeta cp -u -d
+# TODO imeta cp -u -R
+# TODO imeta cp -u -u
 
 # cp (-C|-d|-R|-u) (-C|-d|-R|-u) <from-entity>
 complete --command imeta \
