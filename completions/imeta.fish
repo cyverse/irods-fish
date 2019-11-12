@@ -882,102 +882,64 @@ __imeta_mk_flag_completions d 'to data object' __imeta_addw_flag_cond
 
 __imeta_mk_cmd_completion cp 'copy AVUs from one item to another' __imeta_no_cmd_or_help_cond
 
-# cp -C
+# cp (-C|-d|-R|-u)
 __imeta_mk_flag_completions C 'from collection' __imeta_cp_src_flag_cond
+__imeta_mk_flag_completions d 'from data object' __imeta_cp_src_flag_cond
+__imeta_mk_flag_completions R 'from resource' '__irods_exec_slow __imeta_cp_admin_src_flag_cond'
+__imeta_mk_flag_completions u 'from user' '__irods_exec_slow __imeta_cp_admin_src_flag_cond'
+
+# cp -C (-C|-d|-R|-u)
+__imeta_mk_flag_completions C 'to collection' __imeta_cp_coll_dest_flag_cond
+__imeta_mk_flag_completions d 'to data object' __imeta_cp_coll_dest_flag_cond
+__imeta_mk_flag_completions R 'to resource' '__irods_exec_slow __imeta_cp_admin_coll_dest_flag_cond'
+__imeta_mk_flag_completions u 'to user' '__irods_exec_slow __imeta_cp_admin_coll_dest_flag_cond'
+
+# cp -d (-C|-d|-R|-u)
+__imeta_mk_flag_completions C 'to collection' __imeta_cp_data_dest_flag_cond
+__imeta_mk_flag_completions d 'to data object' __imeta_cp_data_dest_flag_cond
+__imeta_mk_flag_completions R 'to resource' '__irods_exec_slow __imeta_cp_admin_data_dest_flag_cond'
+__imeta_mk_flag_completions u 'to user' '__irods_exec_slow __imeta_cp_admin_data_dest_flag_cond'
+
+# cp -R (-C|-d|-R|-u)
+__imeta_mk_flag_completions C 'to collection' __imeta_cp_resc_dest_flag_cond
+__imeta_mk_flag_completions d 'to data object' __imeta_cp_resc_dest_flag_cond
+__imeta_mk_flag_completions R 'to resource' __imeta_cp_resc_dest_flag_cond
+__imeta_mk_flag_completions u 'to user' __imeta_cp_resc_dest_flag_cond
+
+# TODO imeta cp -u (-C|-d|-R|-u)
+
+# cp (-C|-d|-R|-u) (-C|-d|-R|-u) <from-entity>
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_src_coll_cond' \
   --description 'source collection'
-
-# cp -C -C
-__imeta_mk_flag_completions C 'to collection' __imeta_cp_coll_dest_flag_cond
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_coll_cond' \
-  --description 'destination collection'
-
-# cp -C -d
-__imeta_mk_flag_completions d 'to data object' __imeta_cp_coll_dest_flag_cond
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_data_cond' \
-  --description 'destination data object'
-
-# cp -C -R
-__imeta_mk_flag_completions R 'to resource' '__irods_exec_slow __imeta_cp_admin_coll_dest_flag_cond'
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_resc_cond' \
-  --description 'destination resource'
-
-# cp -C -u
-__imeta_mk_flag_completions u 'to user' '__irods_exec_slow __imeta_cp_admin_coll_dest_flag_cond'
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_user_cond' \
-  --description 'destination user'
-
-# cp -d
-__imeta_mk_flag_completions d 'from data object' __imeta_cp_src_flag_cond
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_src_data_cond' \
   --description 'source data object'
-
-# cp -d -C
-__imeta_mk_flag_completions C 'to collection' __imeta_cp_data_dest_flag_cond
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_coll_cond' \
-  --description 'destination collection'
-
-# cp -d -d
-__imeta_mk_flag_completions d 'to data object' __imeta_cp_data_dest_flag_cond
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_data_cond' \
-  --description 'destination data object'
-
-# cp -d -R
-__imeta_mk_flag_completions R 'to resource' '__irods_exec_slow __imeta_cp_admin_data_dest_flag_cond'
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_resc_cond' \
-  --description 'destination resource'
-
-# cp -d -u
-__imeta_mk_flag_completions u 'to user' '__irods_exec_slow __imeta_cp_admin_data_dest_flag_cond'
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_user_cond' \
-  --description 'destination user'
-
-# cp -R
-__imeta_mk_flag_completions R 'from resource' '__irods_exec_slow __imeta_cp_admin_src_flag_cond'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_src_resc_cond' \
   --description 'source resource'
+# TODO imeta cp -u (-C|-d|-R|-u) <from-user>
 
-# cp -R -C
-__imeta_mk_flag_completions C 'to collection' __imeta_cp_resc_dest_flag_cond
-# TODO imeta cp -R -C <from-resource> <to-collection>
-
-# cp -R -d
-__imeta_mk_flag_completions d 'to data object' __imeta_cp_resc_dest_flag_cond
-# TODO imeta cp -R -d <from-resource> <to-data-object>
-
-# cp -R -R
-__imeta_mk_flag_completions R 'to resource' __imeta_cp_resc_dest_flag_cond
-# TODO imeta cp -R -R <from-resource> <to-resource>
-
-# cp -R -u
-__imeta_mk_flag_completions u 'to user' __imeta_cp_resc_dest_flag_cond
-# TODO imeta cp -R -u <from-resource> <to-user>
-
-# cp -u
-__imeta_mk_flag_completions u 'from user' '__irods_exec_slow __imeta_cp_admin_src_flag_cond'
-# TODO imeta cp -u (-C|-d|-R|-u) <from-user> <to-entity>
+# cp (-C|-d|-R|-u) (-C|-d|-R|-u) <from-entity> <to-entity>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_to_coll_cond' \
+  --description 'destination collection'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_to_data_cond' \
+  --description 'destination data object'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_to_resc_cond' \
+  --description 'destination resource'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_to_user_cond' \
+  --description 'destination user'
 
 # ls
 
