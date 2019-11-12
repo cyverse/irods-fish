@@ -919,7 +919,7 @@ __imeta_mk_flag_completions u 'to user' __imeta_cp_resc_dest_flag_cond
 # cp -u (-C|-d|-R|-u)
 __imeta_mk_flag_completions C 'to collection' __imeta_cp_user_dest_flag_cond
 __imeta_mk_flag_completions d 'to data object' __imeta_cp_user_dest_flag_cond
-# TODO imeta cp -u -R
+__imeta_mk_flag_completions R 'to resource' __imeta_cp_user_dest_flag_cond
 # TODO imeta cp -u -u
 
 # cp (-C|-d|-R|-u) (-C|-d|-R|-u) <from-entity>
