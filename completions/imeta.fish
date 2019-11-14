@@ -551,6 +551,11 @@ function __imeta_ls_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args ls $cmdline
 end
 
+function __imeta_ls_admin_flag_cond --argument-names cmdline
+  __imeta_ls_flag_cond $cmdline
+  and __imeta_am_admin
+end
+
 
 #
 # Suggestion functions
@@ -993,7 +998,10 @@ complete --command imeta --arguments '-ld' \
   --description 'of data object, show set time'
 # TODO imeta ls -[l]d <data-object> [<attribute>]
 
+# ls -R
+__imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_ls_admin_flag_cond'
 # TODO imeta ls -R <resource> [<attribute>]
+
 # TODO imeta ls -u <user> [<attribute>]
 
 # lsw
