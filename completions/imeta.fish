@@ -983,14 +983,15 @@ complete --command imeta \
 __imeta_mk_cmd_completion ls 'list existing AVUs' __imeta_no_cmd_or_help_cond
 
 # ls -C 
-__imeta_mk_flag_completions C 'from collection' __imeta_ls_flag_cond
+__imeta_mk_flag_completions C 'of collection' __imeta_ls_flag_cond
 # TODO imeta ls -C <collection> [<attribute>]
 
 # ls -[l]d
-__imeta_mk_flag_completions d 'from data object' __imeta_ls_flag_cond
-# TODO imeta ls -ld
+__imeta_mk_flag_completions d 'of data object' __imeta_ls_flag_cond
+complete --command imeta --arguments '-ld' \
+  --condition '__imeta_eval_with_cmdline __imeta_ls_flag_cond' \
+  --description 'of data object, show set time'
 # TODO imeta ls -[l]d <data-object> [<attribute>]
-
 
 # TODO imeta ls -R <resource> [<attribute>]
 # TODO imeta ls -u <user> [<attribute>]
