@@ -986,7 +986,12 @@ __imeta_mk_cmd_completion ls 'list existing AVUs' __imeta_no_cmd_or_help_cond
 __imeta_mk_flag_completions C 'from collection' __imeta_ls_flag_cond
 # TODO imeta ls -C <collection> [<attribute>]
 
+# ls -[l]d
+__imeta_mk_flag_completions d 'from data object' __imeta_ls_flag_cond
+# TODO imeta ls -ld
 # TODO imeta ls -[l]d <data-object> [<attribute>]
+
+
 # TODO imeta ls -R <resource> [<attribute>]
 # TODO imeta ls -u <user> [<attribute>]
 
