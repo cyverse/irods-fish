@@ -503,6 +503,20 @@ function __imeta_cp_user_dest_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
+function __imeta_cp_src_user_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    if test "$_flag_u[1]" = 1 -a (count $_unparsed_args) -eq 0
+      test (count $_flag_u) -eq 2
+      or set --query _flag_C
+      or set --query _flag_d
+      or set --query _flag_R
+    else
+      false
+    end
+  end
+  __imeta_parse_cmd_for condition cp $cmdline
+end
+
 function __imeta_cp_to_coll_cond --argument-names cmdline
   function condition --no-scope-shadowing
     test "$_flag_C[-1]" = 2 -a (count $_unparsed_args) -eq 1
@@ -935,7 +949,10 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_cp_src_resc_cond' \
   --description 'source resource'
-# TODO imeta cp -u (-C|-d|-R|-u) <from-user>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_cp_src_user_cond' \
+  --description 'source resource'
 
 # cp (-C|-d|-R|-u) (-C|-d|-R|-u) <from-entity> <to-entity>
 complete --command imeta \
