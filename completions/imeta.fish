@@ -545,6 +545,12 @@ function __imeta_cp_to_user_cond --argument-names cmdline
   __imeta_parse_cmd_for condition cp $cmdline
 end
 
+# ls conditions
+
+function __imeta_ls_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args ls $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -975,7 +981,14 @@ complete --command imeta \
 # ls
 
 __imeta_mk_cmd_completion ls 'list existing AVUs' __imeta_no_cmd_or_help_cond
-# TODO imeta ls (-C|-[l]d|-R|-u) <entity> [<attribute>]
+
+# ls -C 
+__imeta_mk_flag_completions C 'from collection' __imeta_ls_flag_cond
+# TODO imeta ls -C <collection> [<attribute>]
+
+# TODO imeta ls -[l]d <data-object> [<attribute>]
+# TODO imeta ls -R <resource> [<attribute>]
+# TODO imeta ls -u <user> [<attribute>]
 
 # lsw
 
