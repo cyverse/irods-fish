@@ -1002,6 +1002,8 @@ complete --command imeta --arguments '-ld' \
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_ls_admin_flag_cond'
 # TODO imeta ls -R <resource> [<attribute>]
 
+# ls -u
+__imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_ls_admin_flag_cond'
 # TODO imeta ls -u <user> [<attribute>]
 
 # lsw
