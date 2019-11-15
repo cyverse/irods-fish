@@ -1,9 +1,9 @@
 # This function generates a set of collections in iRODS visible to the current
-# user that begin with token currently being editted on the command line. If the
-# token is the beginning of a relative path or there isn't one, the suggested
-# paths will all be relative the user's current working collection.
+# user that begin with the provided argument. If the token is the beginning of
+# a relative path or there isn't one, the suggested paths will all be relative
+# the user's current working collection.
 
-function __irods_collection_suggestions \
+function __irods_collection_suggestions --argument-names sugBegin \
     --description 'generates a list of collection suggestions'
 
   function split_path --argument-names path
@@ -19,8 +19,6 @@ function __irods_collection_suggestions \
     end
     printf '%s\n%s\n' $parts[1] $parts[2]
   end
-
-  set sugBegin (commandline --current-token)
 
   set sugBase ''
   if not __irods_is_path_absolute $sugBegin

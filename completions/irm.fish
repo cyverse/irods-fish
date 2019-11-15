@@ -40,7 +40,7 @@ function __irm_path_suggestions
   set args (__irm_tokenize_cmdline)
   set --erase suggestions
   if contains -- -r $args
-    set suggestions (__irods_collection_suggestions)
+    set suggestions (__irods_collection_suggestions $args[-1])
   else
     set suggestions (__irods_path_suggestions)
   end

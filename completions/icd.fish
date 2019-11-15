@@ -21,7 +21,8 @@ end
 __irods_help_completion icd
 __irods_verbose_completion icd "__irods_tokenize_cmdline hVv '' | __irods_missing -h -V -v"
 
-complete --command icd --arguments '(__irods_exec_slow __irods_collection_suggestions)' \
+complete --command icd \
+  --arguments '(__irods_exec_slow __irods_collection_suggestions (commandline --current-token))' \
   --condition __icd_suggest_path
 
 complete --command icd --no-files

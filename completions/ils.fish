@@ -78,7 +78,7 @@ function __ils_path_suggestions
   end
   if test (count $suggestions) -eq 0
     if contains -- -r $args
-      set suggestions (__irods_collection_suggestions)
+      set suggestions (__irods_collection_suggestions $args[-1])
     else
       set suggestions (__irods_path_suggestions)
     end

@@ -575,7 +575,7 @@ function __imeta_coll_args --argument-names cmdline
     if test (count $_flag_C) -eq 2 -a (count $_unparsed_args) -eq 1
       set ignored $_unparsed_args[1]
     end
-    __irods_collection_suggestions \
+    __irods_collection_suggestions $_curr_token \
       | string trim --right --chars / \
       | string match --all --invert $ignored
   end
