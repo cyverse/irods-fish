@@ -595,14 +595,13 @@ function __imeta_any_coll_attr_args --argument-names cmdline
 end
 
 function __imeta_given_coll_attr_args --argument-names cmdline
-  printf '__imeta_given_coll_attr_args cmdline="%s"\n' $cmdline >&2
   function suggestions --no-scope-shadowing
-    printf '__imeta_given_coll_attr_args.suggestions called\n' >&2
-    # TODO resolve full name of collection
     set coll $_unparsed_args[1]
     set attrPat $_curr_token%
+    set absColl (__irods_absolute_path $coll)
     __irods_quest '%s' \
-      "select META_COLL_ATTR_NAME where COLL_NAME = '$coll' and META_COLL_ATTR_NAME like '$attrPat'" >&2
+      "select META_COLL_ATTR_NAME
+       where COLL_NAME = '$absColl' and META_COLL_ATTR_NAME like '$attrPat'"
   end
 __imeta_parse_any_cmd_for suggestions $cmdline
 end
