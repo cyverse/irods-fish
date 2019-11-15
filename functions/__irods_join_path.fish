@@ -1,4 +1,4 @@
-# Givne a list of path segments as its arguments, this function concatenates
+# Given a list of path segments as its arguments, this function concatenates
 # them into single path. Any duplicate "/" are replaced by a single "/".
 
 function __irods_join_path \

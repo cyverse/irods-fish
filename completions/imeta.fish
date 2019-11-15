@@ -560,6 +560,10 @@ function __imeta_ls_coll_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_coll ls $cmdline
 end
 
+function __imeta_ls_coll_attr_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' ls $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -582,12 +586,25 @@ function __imeta_coll_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-function __imeta_coll_attr_args --argument-names cmdline
+function __imeta_any_coll_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
     __irods_quest '%s' "select META_COLL_ATTR_NAME where META_COLL_ATTR_NAME like '$attrPat'"
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_given_coll_attr_args --argument-names cmdline
+  printf '__imeta_given_coll_attr_args cmdline="%s"\n' $cmdline >&2
+  function suggestions --no-scope-shadowing
+    printf '__imeta_given_coll_attr_args.suggestions called\n' >&2
+    # TODO resolve full name of collection
+    set coll $_unparsed_args[1]
+    set attrPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_COLL_ATTR_NAME where COLL_NAME = '$coll' and META_COLL_ATTR_NAME like '$attrPat'" >&2
+  end
+__imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_coll_attr_val_args --argument-names cmdline
@@ -845,7 +862,7 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_attr_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_cond' \
   --description 'existing for collections'
 complete --command imeta \
@@ -996,7 +1013,9 @@ __imeta_mk_flag_completions C 'of collection' __imeta_ls_flag_cond
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_ls_coll_cond'
-# TODO imeta ls -C <collection> <attribute>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_ls_coll_attr_cond'
 
 # ls -[l]d
 __imeta_mk_flag_completions d 'of data object' __imeta_ls_flag_cond
