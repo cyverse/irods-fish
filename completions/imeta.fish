@@ -564,6 +564,10 @@ function __imeta_ls_coll_attr_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' ls $cmdline
 end
 
+function __imeta_ls_data_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_data ls $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1021,6 +1025,10 @@ __imeta_mk_flag_completions d 'of data object' __imeta_ls_flag_cond
 complete --command imeta --arguments '-ld' \
   --condition '__imeta_eval_with_cmdline __imeta_ls_flag_cond' \
   --description 'of data object, show set time'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_ls_data_cond'
+# TODO imeta ls -ld <data-object>
 # TODO imeta ls -[l]d <data-object> <attribute>
 
 # ls -R
