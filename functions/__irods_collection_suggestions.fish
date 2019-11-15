@@ -5,14 +5,6 @@
 
 function __irods_collection_suggestions --argument-names sugBegin \
     --description 'generates a list of collection suggestions'
-    
-  function mk_abs_path --argument-names coll
-    if __irods_is_path_absolute $coll
-      echo $coll
-    else
-      __irods_join_path (command ipwd) $coll
-    end
-  end
 
   function split_path --argument-names path
     set --erase parts
@@ -33,7 +25,7 @@ function __irods_collection_suggestions --argument-names sugBegin \
     set sugBase (command ipwd)
   end
 
-  set sugParts (split_path (mk_abs_path $sugBegin))
+  set sugParts (split_path (__irods_absolute_path $sugBegin))
   set sugParent $sugParts[1]
   set sugColl $sugParts[2]
 
@@ -48,6 +40,6 @@ function __irods_collection_suggestions --argument-names sugBegin \
   set filter '^'(__irods_join_path $sugBase '(.*)')
 
   __irods_quest '%s/' \
-      "select COLL_NAME where COLL_PARENT_NAME = '$parent' and COLL_NAME like '$collPat'" \
+      "select COLL_NAME where COLL_PARENT_NAME = '$sugParent' and COLL_NAME like '$collPat'" \
     | string replace --filter --regex $filter '$1'
 end
