@@ -177,6 +177,33 @@ function __imeta_parse_cp_args_for --argument-names consumer cmdline
   eval "$consumer"
 end
 
+function __imeta_parse_ls_args_for --argument-names consumer cmdline
+  set cmdTokens (string split -- ' ' $cmdline)
+  set _curr_token $cmdTokens[-1]
+  set --erase cmdTokens[-1]
+  if test (count $cmdTokens) -ge 1
+    switch $cmdTokens[1]
+      case -C
+        set _flag_C -C
+      case -d
+        set _flag_d -d
+      case -ld
+        set _flag_d -ld
+      case -R
+        set _flag_R -R
+      case -u
+        set _flag_u -u
+      case '*'
+        set unknown_flag $cmdTokens[1]
+    end
+    if not set --query unknown_flag
+      set --erase cmdTokens[1]
+    end
+  end
+  set _unparsed_args $cmdTokens
+  eval "$consumer"
+end
+
 function __imeta_parse_any_cmd_for --argument-names consumer cmdline
   function condition --no-scope-shadowing --argument-names consumer
     if test (count $_unparsed_args) -eq 0
@@ -185,10 +212,13 @@ function __imeta_parse_any_cmd_for --argument-names consumer cmdline
       set cmd $_unparsed_args[1]
       set _unparsed_args $_unparsed_args $_curr_token
       set --erase _unparsed_args[1]
-      if test "$cmd" = cp
-        __imeta_parse_cp_args_for $consumer "$_unparsed_args"
-      else
-        __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
+      switch $cmd
+        case cp
+          __imeta_parse_cp_args_for $consumer "$_unparsed_args"
+        case ls
+          __imeta_parse_ls_args_for $consumer "$_unparsed_args"
+        case '*'
+          __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
       end
     end
   end
@@ -202,10 +232,13 @@ function __imeta_parse_cmd_for --argument-names consumer cmd cmdline
     else
       set _unparsed_args $_unparsed_args $_curr_token
       set --erase _unparsed_args[1]
-      if test "$cmd" = cp
-        __imeta_parse_cp_args_for $consumer "$_unparsed_args"
-      else
-        __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
+      switch $cmd
+        case cp
+          __imeta_parse_cp_args_for $consumer "$_unparsed_args"
+        case ls
+          __imeta_parse_ls_args_for $consumer "$_unparsed_args"
+        case '*'
+          __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
       end
     end
   end
@@ -1028,7 +1061,6 @@ complete --command imeta --arguments '-ld' \
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_ls_data_cond'
-# TODO imeta ls -ld <data-object>
 # TODO imeta ls -[l]d <data-object> <attribute>
 
 # ls -R
