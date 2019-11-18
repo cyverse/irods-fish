@@ -601,6 +601,10 @@ function __imeta_ls_data_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_data ls $cmdline
 end
 
+function __imeta_ls_data_attr_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' ls $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -679,10 +683,23 @@ function __imeta_data_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-function __imeta_data_attr_args --argument-names cmdline
+function __imeta_any_data_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
     __irods_quest '%s' "select META_DATA_ATTR_NAME where META_DATA_ATTR_NAME like '$attrPat'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_given_data_attr_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set pathParts (__irods_split_path (__irods_absolute_path $_unparsed_args[1]))
+    set attrPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_DATA_ATTR_NAME
+       where COLL_NAME = '$pathParts[1]'
+         and DATA_NAME = '$pathParts[2]'
+         and META_DATA_ATTR_NAME like '$attrPat'"
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
@@ -826,7 +843,6 @@ function __imeta_mk_flag_completions --argument-names opt description condition
   complete --command imeta --arguments "-$opt" \
     --condition "__imeta_eval_with_cmdline $condition" \
     --description $description
-
   complete --command imeta --short-option $opt \
     --condition "__imeta_eval_with_cmdline $condition" \
     --description $description
@@ -916,7 +932,7 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_attr_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_data_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_attr_cond' \
   --description 'existing for data objects'
 complete --command imeta \
@@ -1061,7 +1077,9 @@ complete --command imeta --arguments '-ld' \
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_ls_data_cond'
-# TODO imeta ls -[l]d <data-object> <attribute>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_ls_data_attr_cond'
 
 # ls -R
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_ls_admin_flag_cond'
