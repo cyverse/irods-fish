@@ -6,26 +6,12 @@
 function __irods_collection_suggestions --argument-names sugBegin \
     --description 'generates a list of collection suggestions'
 
-  function split_path --argument-names path
-    set --erase parts
-    if string match --invert --quiet -- '*/*' $path
-      set parts[1] ''
-      set parts[2] $path
-    else
-      set parts (string split --right --max 1 / $path)
-      if string match --quiet '/*' $path
-        set parts[1] (__irods_join_path / $parts[1])
-      end
-    end
-    printf '%s\n%s\n' $parts[1] $parts[2]
-  end
-
   set sugBase ''
   if not __irods_is_path_absolute $sugBegin
     set sugBase (command ipwd)
   end
 
-  set sugParts (split_path (__irods_absolute_path $sugBegin))
+  set sugParts (__irods_split_path (__irods_absolute_path $sugBegin))
   set sugParent $sugParts[1]
   set sugColl $sugParts[2]
 
