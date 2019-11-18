@@ -1,17 +1,15 @@
 # This function generates a set of collections and data objects in iRODS visible
-# to the current user that begin with token currently being editted on the
-# command line. If the token is the beginning of a relative path or there isn't
-# one, the suggested paths will all be relative the user's current working
-# collection.
+# to the current user that begin with the provided argument on the. If the
+# argument is the beginning of a relative path or there isn't one, the suggested
+# paths will all be relative the user's current working collection.
 
-function __irods_path_suggestions \
+function __irods_path_suggestions --argument-names sugBegin \
     --description 'suggests collections and data objects in iRODS'
 
-  set curArg (commandline --current-token)
-
+  # TODO replace with __irods_absolute_path
   set dirName ''
-  if string match --quiet --regex -- / $curArg
-    set pathParts (string split --right --max 1 / $curArg)
+  if string match --quiet --regex -- / $sugBegin
+    set pathParts (string split --right --max 1 / $sugBegin)
     set dirName $pathParts[1]/
   end
 

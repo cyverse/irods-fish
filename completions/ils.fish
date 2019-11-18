@@ -71,7 +71,7 @@ function __ils_path_suggestions
     if contains -- -r $args
       set suggestions (__irods_collection_suggestions $args[-1])
     else
-      set suggestions (__irods_path_suggestions)
+      set suggestions (__irods_path_suggestions $args[-1])
     end
   end
   set --erase cmdLineCanonicalPaths

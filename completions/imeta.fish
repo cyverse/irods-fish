@@ -674,7 +674,7 @@ function __imeta_data_args --argument-names cmdline
     if test (count $_flag_d) -eq 2 -a (count $_unparsed_args) -eq 1
       set ignored $_unparsed_args[1]
     end
-    __irods_path_suggestions | string match --all --invert $ignored
+    __irods_path_suggestions $_curr_token | string match --all --invert $ignored
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
