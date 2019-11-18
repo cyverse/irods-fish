@@ -4,15 +4,6 @@
 # Helper Functions
 #
 
-function __irm_mk_path_absolute --argument-names path
-  set canonicalPath (string trim --right --chars / $path)
-  if __irods_is_path_absolute $canonicalPath
-    echo $canonicalPath
-  else
-    echo (__irods_join_path (command ipwd) $canonicalPath)
-  end
-end
-
 function __irm_tokenize_cmdline
   __irods_tokenize_cmdline hfrUvV n
 end
@@ -48,12 +39,12 @@ function __irm_path_suggestions
   if test (count $args) -gt 1
     for arg in $args[1..-2]
       if string match --quiet --regex -- '^[^-]' $arg
-        set cmdLineCanonicalPaths $cmdLineCanonicalPaths (__irm_mk_path_absolute $arg)
+        set cmdLineCanonicalPaths $cmdLineCanonicalPaths (__irods_absolute_path $arg)
       end
     end
   end
   for suggestion in $suggestions
-    set canonicalSug (__irm_mk_path_absolute $suggestion)
+    set canonicalSug (__irods_absolute_path $suggestion)
     if not contains $canonicalSug $cmdLineCanonicalPaths
       echo $suggestion
     end
