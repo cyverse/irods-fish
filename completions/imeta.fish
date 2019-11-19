@@ -617,6 +617,10 @@ function __imeta_ls_user_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_user ls $cmdline
 end
 
+function __imeta_ls_user_attr_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' ls $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -806,10 +810,20 @@ function __imeta_user_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-function __imeta_user_attr_args --argument-names cmdline
+function __imeta_any_user_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
     __irods_quest '%s' "select META_USER_ATTR_NAME where META_USER_ATTR_NAME like '$attrPat'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_given_user_attr_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set user $_unparsed_args[1]
+    set attrPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_USER_ATTR_NAME where USER_NAME = '$user' and META_USER_ATTR_NAME like '$attrPat'"
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
@@ -990,7 +1004,7 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_user_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_attr_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_user_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_user_attr_cond' \
   --description 'existing for users'
 complete --command imeta \
@@ -1117,7 +1131,9 @@ __imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_ls_admin_flag
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_ls_user_cond'
-# TODO imeta ls -u <user> <attribute>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_ls_user_attr_cond'
 
 # lsw
 
