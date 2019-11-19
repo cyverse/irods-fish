@@ -609,6 +609,10 @@ function __imeta_ls_resc_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_resc ls $cmdline
 end
 
+function __imeta_ls_resc_attr_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' ls $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -744,10 +748,20 @@ function __imeta_resc_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-function __imeta_resc_attr_args --argument-names cmdline
+function __imeta_any_resc_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
     __irods_quest '%s' "select META_RESC_ATTR_NAME where META_RESC_ATTR_NAME like '$attrPat'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_given_resc_attr_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set resc $_unparsed_args[1]
+    set attrPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_RESC_ATTR_NAME where RESC_NAME = '$resc' and META_RESC_ATTR_NAME like '$attrPat'"
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
@@ -954,7 +968,7 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_resc_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_attr_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_resc_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_resc_attr_cond' \
   --description 'existing for resources'
 complete --command imeta \
@@ -1090,7 +1104,9 @@ __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_ls_admin_
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_ls_resc_cond'
-# TODO imeta ls -R <resource> <attribute>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_ls_resc_attr_cond'
 
 # ls -u
 __imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_ls_admin_flag_cond'
