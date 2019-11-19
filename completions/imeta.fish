@@ -605,6 +605,10 @@ function __imeta_ls_data_attr_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' ls $cmdline
 end
 
+function __imeta_ls_resc_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_resc ls $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1083,7 +1087,10 @@ complete --command imeta \
 
 # ls -R
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_ls_admin_flag_cond'
-# TODO imeta ls -R <resource> [<attribute>]
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_ls_resc_cond'
+# TODO imeta ls -R <resource> <attribute>
 
 # ls -u
 __imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_ls_admin_flag_cond'
