@@ -634,6 +634,11 @@ function __imeta_lsw_admin_flag_cond --argument-names cmdline
   and __imeta_am_admin
 end
 
+function __imeta_lsw_coll_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_coll lsw $cmdline
+end
+
+
 #
 # Suggestion functions
 #
@@ -1153,20 +1158,24 @@ __imeta_mk_cmd_completion lsw 'list existing AVUs using wildcards' __imeta_no_cm
 
 # lsw -C
 __imeta_mk_flag_completions C 'of collection' __imeta_lsw_flag_cond
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_lsw_coll_cond'
 
 # lsw -[l]d
 __imeta_mk_flag_completions d 'of data object' __imeta_lsw_flag_cond
 complete --command imeta --arguments '-ld' \
   --condition '__imeta_eval_with_cmdline __imeta_lsw_flag_cond' \
   --description 'of data object, show set time'
+# TODO imeta lsw -[l]d <data>
 
 # lsw -R
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow  __imeta_lsw_admin_flag_cond'
+# TODO imeta lsw -R <resc>
 
 # lsw -R
 __imeta_mk_flag_completions u 'of user' '__irods_exec_slow  __imeta_lsw_admin_flag_cond'
-
-# TODO imeta lsw (-C|-[l]d|-R|-u) <entity>
+# TODO imeta lsw -u <user>
 
 # mod
 
