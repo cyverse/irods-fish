@@ -237,6 +237,8 @@ function __imeta_parse_cmd_for --argument-names consumer cmd cmdline
           __imeta_parse_cp_args_for $consumer "$_unparsed_args"
         case ls
           __imeta_parse_ls_args_for $consumer "$_unparsed_args"
+        case lsw
+          __imeta_parse_ls_args_for $consumer "$_unparsed_args"
         case '*'
           __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
       end
@@ -1147,15 +1149,16 @@ __imeta_mk_cmd_completion lsw 'list existing AVUs using wildcards' __imeta_no_cm
 
 # lsw -C
 __imeta_mk_flag_completions C 'of collection' __imeta_lsw_flag_cond
-# TODO imeta lsw -C <coll>
 
 # lsw -[l]d
 __imeta_mk_flag_completions d 'of data object' __imeta_lsw_flag_cond
-# TODO imeta lsw -ld
-# TODO imeta lsw -[l]d <data>
+complete --command imeta --arguments '-ld' \
+  --condition '__imeta_eval_with_cmdline __imeta_lsw_flag_cond' \
+  --description 'of data object, show set time'
 
-# TODO imeta lsw -R <resc>
-# TODO imeta lsw -u <user>
+# TODO imeta lsw -R
+# TODO imeta lsw -u
+# TODO imeta lsw (-C|-[l]d|-R|-u) <entity>
 
 # mod
 
