@@ -621,6 +621,12 @@ function __imeta_ls_user_attr_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' ls $cmdline
 end
 
+# lsw conditions
+
+function __imeta_lsw_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args lsw $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1138,7 +1144,14 @@ complete --command imeta \
 # lsw
 
 __imeta_mk_cmd_completion lsw 'list existing AVUs using wildcards' __imeta_no_cmd_or_help_cond
-# TODO imeta lsw (-C|-[l]d|-R|-u) <entity>
+
+# lsw -C
+__imeta_mk_flag_completions C 'of collection' __imeta_lsw_flag_cond
+# TODO imeta lsw -C <coll>
+
+# TODO imeta lsw -[l]d <data>
+# TODO imeta lsw -R <resc>
+# TODO imeta lsw -u <user>
 
 # mod
 
