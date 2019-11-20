@@ -1149,7 +1149,11 @@ __imeta_mk_cmd_completion lsw 'list existing AVUs using wildcards' __imeta_no_cm
 __imeta_mk_flag_completions C 'of collection' __imeta_lsw_flag_cond
 # TODO imeta lsw -C <coll>
 
+# lsw -[l]d
+__imeta_mk_flag_completions d 'of data object' __imeta_lsw_flag_cond
+# TODO imeta lsw -ld
 # TODO imeta lsw -[l]d <data>
+
 # TODO imeta lsw -R <resc>
 # TODO imeta lsw -u <user>
 
