@@ -1163,7 +1163,9 @@ complete --command imeta --arguments '-ld' \
 # lsw -R
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow  __imeta_lsw_admin_flag_cond'
 
-# TODO imeta lsw -u
+# lsw -R
+__imeta_mk_flag_completions u 'of user' '__irods_exec_slow  __imeta_lsw_admin_flag_cond'
+
 # TODO imeta lsw (-C|-[l]d|-R|-u) <entity>
 
 # mod
