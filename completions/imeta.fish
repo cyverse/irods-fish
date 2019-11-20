@@ -629,6 +629,10 @@ function __imeta_lsw_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args lsw $cmdline
 end
 
+function __imeta_lsw_admin_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args lsw $cmdline
+  and __imeta_am_admin
+end
 
 #
 # Suggestion functions
@@ -1156,7 +1160,9 @@ complete --command imeta --arguments '-ld' \
   --condition '__imeta_eval_with_cmdline __imeta_lsw_flag_cond' \
   --description 'of data object, show set time'
 
-# TODO imeta lsw -R
+# lsw -R
+__imeta_mk_flag_completions R 'of resource' '__irods_exec_slow  __imeta_lsw_admin_flag_cond'
+
 # TODO imeta lsw -u
 # TODO imeta lsw (-C|-[l]d|-R|-u) <entity>
 
