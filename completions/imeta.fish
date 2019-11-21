@@ -1210,7 +1210,9 @@ __imeta_mk_cmd_completion mod 'modify AVU' __imeta_no_cmd_or_help_cond
 # mod -C
 __imeta_mk_flag_completions C 'of collection' __imeta_mod_flag_cond
 
-# TODO imeta mod -d
+# mod -d
+__imeta_mk_flag_completions d 'of data object' __imeta_mod_flag_cond
+
 # TODO imeta mod -R
 # TODO imeta mod -u
 # TODO imeta mod (-C|-d|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
