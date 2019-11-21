@@ -644,6 +644,10 @@ function __imeta_lsw_data_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_data lsw $cmdline
 end
 
+function __imeta_lsw_resc_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_resc lsw $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1179,7 +1183,9 @@ complete --command imeta \
 
 # lsw -R
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow  __imeta_lsw_admin_flag_cond'
-# TODO imeta lsw -R <resc>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_lsw_resc_cond'
 
 # lsw -R
 __imeta_mk_flag_completions u 'of user' '__irods_exec_slow  __imeta_lsw_admin_flag_cond'
