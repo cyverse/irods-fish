@@ -712,7 +712,7 @@ function __imeta_given_coll_attr_args --argument-names cmdline
 __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-function __imeta_coll_attr_val_args --argument-names cmdline
+function __imeta_any_coll_attr_val_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
     set valPat $_curr_token%
@@ -1003,7 +1003,7 @@ complete --command imeta \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_cond' \
   --description 'existing for collections'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_attr_val_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_val_cond' \
   --description 'existing for attribute'
 complete --command imeta \
