@@ -671,6 +671,11 @@ function __imeta_mod_coll_attr_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' mod $cmdline
 end
 
+function __imeta_mod_coll_attr_val_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 2' mod $cmdline
+end
+
+
 #
 # Suggestion functions
 #
@@ -719,6 +724,21 @@ function __imeta_any_coll_attr_val_args --argument-names cmdline
     __irods_quest '%s' \
       "select META_COLL_ATTR_VALUE
        where META_COLL_ATTR_NAME = '$attr' and META_COLL_ATTR_VALUE like '$valPat'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_given_coll_attr_val_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set coll $_unparsed_args[1]
+    set attr $_unparsed_args[2]
+    set valPat $_curr_token%
+    set absColl (__irods_absolute_path $coll)
+    __irods_quest '%s' \
+      "select META_COLL_ATTR_VALUE
+       where COLL_NAME = '$absColl'
+         and META_COLL_ATTR_NAME = '$attr'
+         and META_COLL_ATTR_VALUE like '$valPat'"
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
@@ -1227,7 +1247,9 @@ complete --command imeta \
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_coll_attr_cond'
-# TODO imeta mod -C <coll> <attr> <val>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_attr_val_cond'
 # TODO imeta mod -C <coll> <attr> <val> [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
 
 # mod -d
