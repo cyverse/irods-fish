@@ -1220,7 +1220,9 @@ __imeta_mk_flag_completions d 'of data object' __imeta_mod_flag_cond
 # mod -R
 __imeta_mk_flag_completions R 'of resource' __imeta_mod_admin_flag_cond
 
-# TODO imeta mod -u
+# mod -u
+__imeta_mk_flag_completions u 'of user' __imeta_mod_admin_flag_cond
+
 # TODO imeta mod (-C|-d|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
 
 # qu
