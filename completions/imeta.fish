@@ -743,7 +743,7 @@ function __imeta_given_coll_attr_val_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-function __imeta_coll_attr_val_unit_args --argument-names cmdline
+function __imeta_any_coll_attr_val_unit_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
     set val $_unparsed_args[3]
@@ -1027,7 +1027,7 @@ complete --command imeta \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_val_cond' \
   --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_attr_val_unit_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_coll_avu_cond' \
   --description 'existing for attribute-value'
 
@@ -1250,6 +1250,7 @@ complete --command imeta \
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_coll_attr_val_cond'
+# TODO imeta mod -C <coll> <attr> <val> <unit>
 # TODO imeta mod -C <coll> <attr> <val> [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
 
 # mod -d
