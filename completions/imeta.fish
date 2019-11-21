@@ -658,6 +658,10 @@ function __imeta_mod_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args mod $cmdline
 end
 
+function __imeta_mod_admin_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args mod $cmdline
+  and __imeta_am_admin
+end
 
 #
 # Suggestion functions
@@ -1213,7 +1217,9 @@ __imeta_mk_flag_completions C 'of collection' __imeta_mod_flag_cond
 # mod -d
 __imeta_mk_flag_completions d 'of data object' __imeta_mod_flag_cond
 
-# TODO imeta mod -R
+# mod -R
+__imeta_mk_flag_completions R 'of resource' __imeta_mod_admin_flag_cond
+
 # TODO imeta mod -u
 # TODO imeta mod (-C|-d|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
 
