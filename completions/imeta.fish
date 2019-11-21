@@ -652,6 +652,12 @@ function __imeta_lsw_user_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_user lsw $cmdline
 end
 
+# mod conditions
+
+function __imeta_mod_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args mod $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1200,6 +1206,13 @@ complete --command imeta \
 # mod
 
 __imeta_mk_cmd_completion mod 'modify AVU' __imeta_no_cmd_or_help_cond
+
+# mod -C
+__imeta_mk_flag_completions C 'of collection' __imeta_mod_flag_cond
+
+# TODO imeta mod -d
+# TODO imeta mod -R
+# TODO imeta mod -u
 # TODO imeta mod (-C|-d|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
 
 # qu
