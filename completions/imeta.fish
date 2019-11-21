@@ -663,6 +663,11 @@ function __imeta_mod_admin_flag_cond --argument-names cmdline
   and __imeta_am_admin
 end
 
+function __imeta_mod_coll_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_coll mod $cmdline
+end
+
+
 #
 # Suggestion functions
 #
@@ -1213,27 +1218,34 @@ __imeta_mk_cmd_completion mod 'modify AVU' __imeta_no_cmd_or_help_cond
 
 # mod -C
 __imeta_mk_flag_completions C 'of collection' __imeta_mod_flag_cond
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_cond'
+# TODO imeta mod -C <coll> <attr>
+# TODO imeta mod -C <coll> <attr> <val>
+# TODO imeta mod -C <coll> <attr> <val> [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
 
 # mod -d
 __imeta_mk_flag_completions d 'of data object' __imeta_mod_flag_cond
+# TODO imeta mod -d <data> <attr> <val> [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
 
 # mod -R
 __imeta_mk_flag_completions R 'of resource' __imeta_mod_admin_flag_cond
+# TODO imeta mod -R <resc> <attr> <val> [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
 
 # mod -u
 __imeta_mk_flag_completions u 'of user' __imeta_mod_admin_flag_cond
-
-# TODO imeta mod (-C|-d|-R|-u) <entity> <attribute> <value> [<unit>][n:<new-attribute>][v:<new-value>][u:<new-units>]
+# TODO imeta mod -u <user> <attr> <val> [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
 
 # qu
 
 __imeta_mk_cmd_completion qu 'query entities with matching AVUs' __imeta_no_cmd_or_help_cond
-# TODO imeta qu (-d|-C|-R|-u) <attribute> <op> <value> ...
+# TODO imeta qu (-d|-C|-R|-u) <attr> <op> <val> ...
 
 # rm
 
 __imeta_mk_cmd_completion rm 'remove AVU' __imeta_no_cmd_or_help_cond
-# TODO imeta rm (-C|-d|-R|-u) <entity> <attribute> <value> [<units>]
+# TODO imeta rm (-C|-d|-R|-u) <entity> <attr> <val> [<units>]
 
 # rmi
 
@@ -1243,12 +1255,12 @@ __imeta_mk_cmd_completion rmi 'remove AVU by metadata id' __imeta_no_cmd_or_help
 # rmw
 
 __imeta_mk_cmd_completion rmw 'remove AVU using wildcards' __imeta_no_cmd_or_help_cond
-# TODO imeta rmw (-C|-d|-R|-u) <entity> <attribute> <value> [<units>]
+# TODO imeta rmw (-C|-d|-R|-u) <entity> <attr> <val> [<units>]
 
 # set
 
 __imeta_mk_cmd_completion set 'assign a single value' __imeta_no_cmd_or_help_cond
-# TODO imeta set (-C|-d|-R|-u) <entity> <attribute> <new-value> [<new-units>]
+# TODO imeta set (-C|-d|-R|-u) <entity> <attr> <new-val> [<new-units>]
 
 
 functions --erase __imeta_mk_flag_completions __imeta_mk_cmd_completion
