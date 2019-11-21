@@ -217,6 +217,8 @@ function __imeta_parse_any_cmd_for --argument-names consumer cmdline
           __imeta_parse_cp_args_for $consumer "$_unparsed_args"
         case ls
           __imeta_parse_ls_args_for $consumer "$_unparsed_args"
+        case lsw
+          __imeta_parse_ls_args_for $consumer "$_unparsed_args"
         case '*'
           __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
       end
@@ -636,6 +638,10 @@ end
 
 function __imeta_lsw_coll_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_coll lsw $cmdline
+end
+
+function __imeta_lsw_data_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_data lsw $cmdline
 end
 
 
@@ -1167,7 +1173,9 @@ __imeta_mk_flag_completions d 'of data object' __imeta_lsw_flag_cond
 complete --command imeta --arguments '-ld' \
   --condition '__imeta_eval_with_cmdline __imeta_lsw_flag_cond' \
   --description 'of data object, show set time'
-# TODO imeta lsw -[l]d <data>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_lsw_data_cond'
 
 # lsw -R
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow  __imeta_lsw_admin_flag_cond'
