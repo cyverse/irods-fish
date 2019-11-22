@@ -675,6 +675,10 @@ function __imeta_mod_coll_attr_val_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 2' mod $cmdline
 end
 
+function __imeta_mod_coll_avu_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' mod $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -751,6 +755,23 @@ function __imeta_any_coll_attr_val_unit_args --argument-names cmdline
     __irods_quest '%s' \
       "select META_COLL_ATTR_UNITS
        where META_COLL_ATTR_NAME = '$attr'
+         and META_COLL_ATTR_VALUE = '$val'
+         and META_COLL_ATTR_UNITS like '$unitPat'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_given_coll_attr_val_unit_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set coll $_unparsed_args[1]
+    set attr $_unparsed_args[2]
+    set val $_unparsed_args[3]
+    set unitPat $_curr_token%
+    set absColl (__irods_absolute_path $coll)
+    __irods_quest '%s' \
+      "select META_COLL_ATTR_UNITS
+       where COLL_NAME = '$absColl'
+         and META_COLL_ATTR_NAME = '$attr'
          and META_COLL_ATTR_VALUE = '$val'
          and META_COLL_ATTR_UNITS like '$unitPat'"
   end
@@ -1250,8 +1271,12 @@ complete --command imeta \
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_coll_attr_val_cond'
-# TODO imeta mod -C <coll> <attr> <val> <unit>
-# TODO imeta mod -C <coll> <attr> <val> [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
+complete --command imeta \
+  --arguments \
+    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_unit_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_avu_cond'
+# TODO imeta mod -C <coll> <attr> <val> [n:<new-attr>][v:<new-val>][u:<new-units>]
+# TODO imeta mod -C <coll> <attr> <val> <unit> [n:<new-attr>][v:<new-val>][u:<new-units>]
 
 # mod -d
 __imeta_mk_flag_completions d 'of data object' __imeta_mod_flag_cond
