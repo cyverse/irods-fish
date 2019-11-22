@@ -20,6 +20,16 @@ function __imeta_cmdline_args
   string join -- \n $args
 end
 
+function __imeta_count_unitless_coll_attr_val --argument-names coll attr val
+  set absColl (__irods_absolute_path $coll)
+  __irods_quest '%s' \
+    "select count(META_COLL_ATTR_UNITS)
+     where COLL_NAME = '$absColl'
+       and META_COLL_ATTR_NAME = '$attr'
+       and META_COLL_ATTR_VALUE = '$val'
+       and META_COLL_ATTR_UNITS = ''"
+end
+
 function __imeta_eval_with_cmdline
   set cmdline (__imeta_cmdline_args)
   eval (string escape $argv "$cmdline")
@@ -680,20 +690,28 @@ function __imeta_mod_coll_avu_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' mod $cmdline
 end
 
-function __imeta_mod_coll_new_attr_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    __imeta_cmd_has_flag_with_num_args _flag_C 3
-    and string match --quiet --regex '^(n(:.*)?)?$' $_curr_token
+function __imeta_mod_coll_new_cond --argument-name termLbl cmdline
+  function condition --no-scope-shadowing --argument-name termLbl
+    if __imeta_cmd_has_flag_with_num_args _flag_C 3
+      if string match --quiet --regex '^'$termLbl: $_curr_token
+        true
+      else
+        string match --quiet --regex '^'$termLbl'?$' $_curr_token
+        and test (__imeta_count_unitless_coll_attr_val $_unparsed_args) -ge 1
+      end
+    else
+      false
+    end
   end
-  __imeta_parse_cmd_for condition mod $cmdline
+  __imeta_parse_cmd_for "condition $termLbl" mod $cmdline
+end
+
+function __imeta_mod_coll_new_attr_cond --argument-names cmdline
+  __imeta_mod_coll_new_cond n $cmdline
 end
 
 function __imeta_mod_coll_new_val_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    __imeta_cmd_has_flag_with_num_args _flag_C 3
-    and string match --quiet --regex '^(v(:.*)?)?$' $_curr_token
-  end
-  __imeta_parse_cmd_for condition mod $cmdline
+  __imeta_mod_coll_new_cond v $cmdline
 end
 
 
@@ -1319,20 +1337,14 @@ complete --command imeta \
   --description 'current unit'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_new_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_new_attr_cond' \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_attr_cond' \
   --description 'new attribute'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_new_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_new_val_cond' \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_val_cond' \
   --description 'new value'
-
-# TODO figure out if u:<new-units> requires a <unit>
-# TODO imeta mod -C <coll> <attr> <val> u:<new-units>
-
-# TODO imeta mod -C <coll> <attr> <val> \
-#        [n:<new-attr>][v:<new-val>][u:<new-units>]
-# TODO learn if a set of [n:<new-attr>][v:<new-val>][u:<new-units>] have to
-#      appear in order
+# TODO imeta mod -C <coll> <attr> <val> n:<new-attr> v:<new-val>
+# TODO imeta mod -C <coll> <attr> <val> v:<new-val> n:<new-attr>
 
 # TODO imeta mod -C <coll> <attr> <val> <unit> \
 #        [n:<new-attr>][v:<new-val>][u:<new-units>]
