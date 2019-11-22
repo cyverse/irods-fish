@@ -1,7 +1,8 @@
 # tab completion for imeta
 # TODO verify spaces are handled correctly
 # TODO document
-# TODO if using argparse is successfuly, convert all other completions to using it.
+# TODO if using argparse is successfuly, convert all other completions to using
+#      it.
 # TODO remove any unused functions/__irods_*.
 
 #
@@ -679,6 +680,14 @@ function __imeta_mod_coll_avu_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' mod $cmdline
 end
 
+function __imeta_mod_coll_new_attr_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    __imeta_cmd_has_flag_with_num_args _flag_C 3
+    and string match --quiet --regex '^(n(:.*)?)?$' $_curr_token
+  end
+  __imeta_parse_cmd_for condition mod $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -719,6 +728,16 @@ function __imeta_given_coll_attr_args --argument-names cmdline
        where COLL_NAME = '$absColl' and META_COLL_ATTR_NAME like '$attrPat'"
   end
 __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_any_coll_new_attr_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set oldAttr $_unparsed_args[2]
+    set newAttrPat (string replace --regex '^(?:n\:?)?(.*)' '$1%' $_curr_token)
+    __irods_quest 'n:%s' \
+      "select META_COLL_ATTR_NAME where META_COLL_ATTR_NAME <> '$oldAttr' && like '$newAttrPat'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_coll_attr_val_args --argument-names cmdline
@@ -1274,21 +1293,41 @@ complete --command imeta \
 complete --command imeta \
   --arguments \
     '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_avu_cond'
-# TODO imeta mod -C <coll> <attr> <val> [n:<new-attr>][v:<new-val>][u:<new-units>]
-# TODO imeta mod -C <coll> <attr> <val> <unit> [n:<new-attr>][v:<new-val>][u:<new-units>]
+  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_avu_cond' \
+  --description 'current unit'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_new_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_new_attr_cond' \
+  --description 'new attribute'
+# TODO imeta mod -C <coll> <attr> <val> v:<new-val>
+
+# TODO figure out if u:<new-units> requires a <unit>
+# TODO imeta mod -C <coll> <attr> <val> u:<new-units>
+
+# TODO imeta mod -C <coll> <attr> <val> \
+#        [n:<new-attr>][v:<new-val>][u:<new-units>]
+# TODO learn if a set of [n:<new-attr>][v:<new-val>][u:<new-units>] have to
+#      appear in order
+
+# TODO imeta mod -C <coll> <attr> <val> <unit> \
+#        [n:<new-attr>][v:<new-val>][u:<new-units>]
+# TODO learn if <unit> can appear after or in the middle of a set of
+#      [n:<new-attr>][v:<new-val>][u:<new-units>]
 
 # mod -d
 __imeta_mk_flag_completions d 'of data object' __imeta_mod_flag_cond
-# TODO imeta mod -d <data> <attr> <val> [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
+# TODO imeta mod -d <data> <attr> <val> \
+#        [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
 
 # mod -R
 __imeta_mk_flag_completions R 'of resource' __imeta_mod_admin_flag_cond
-# TODO imeta mod -R <resc> <attr> <val> [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
+# TODO imeta mod -R <resc> <attr> <val> \
+#        [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
 
 # mod -u
 __imeta_mk_flag_completions u 'of user' __imeta_mod_admin_flag_cond
-# TODO imeta mod -u <user> <attr> <val> [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
+# TODO imeta mod -u <user> <attr> <val> \
+#        [<unit>] [n:<new-attr>][v:<new-val>][u:<new-units>]
 
 # qu
 
