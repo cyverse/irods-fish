@@ -690,8 +690,8 @@ function __imeta_mod_coll_avu_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' mod $cmdline
 end
 
-function __imeta_mod_coll_new_cond --argument-name termLbl cmdline
-  function condition --no-scope-shadowing --argument-name termLbl
+function __imeta_mod_coll_new_cond --argument-names termLbl cmdline
+  function condition --no-scope-shadowing --argument-names termLbl
     if __imeta_cmd_has_flag_with_num_args _flag_C 3
       if string match --quiet --regex '^'$termLbl: $_curr_token
         true
@@ -700,7 +700,9 @@ function __imeta_mod_coll_new_cond --argument-name termLbl cmdline
         and test (__imeta_count_unitless_coll_attr_val $_unparsed_args) -ge 1
       end
     else
-      false
+      __imeta_cmd_has_flag_with_num_args _flag_C 4
+      and string match --invert --quiet --regex '^'$termLbl: $_unparsed_args[4]
+      and string match --quiet --regex '^('$termLbl'(:.*)?)?$' $_curr_token
     end
   end
   __imeta_parse_cmd_for "condition $termLbl" mod $cmdline
@@ -1343,8 +1345,6 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_new_val_args)' \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_val_cond' \
   --description 'new value'
-# TODO imeta mod -C <coll> <attr> <val> n:<new-attr> v:<new-val>
-# TODO imeta mod -C <coll> <attr> <val> v:<new-val> n:<new-attr>
 
 # TODO imeta mod -C <coll> <attr> <val> <unit> \
 #        [n:<new-attr>][v:<new-val>][u:<new-units>]
