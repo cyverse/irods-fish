@@ -5,6 +5,9 @@
 #      it.
 # TODO remove any unused functions/__irods_*.
 
+# TODO In a future version, have tab completions suggest wildcards where
+#      appropriate.
+
 #
 # Helper Functions
 #
@@ -90,7 +93,6 @@ function __imeta_parse_for --argument-names optSpec exclusive consumer cmdline
   set cmdTokens (__imeta_tokenize_cmdline $optSpecArray -- (string split -- ' ' $cmdline))
   set _curr_token $cmdTokens[-1]
   set --erase cmdTokens[-1]
-  set exclusizeOpt ''
   if test -n "$exclusive"
     set exclusiveOpt '--exclusive' $exclusive
   end
@@ -693,16 +695,12 @@ end
 function __imeta_mod_coll_new_cond --argument-names termLbl cmdline
   function condition --no-scope-shadowing --argument-names termLbl
     if __imeta_cmd_has_flag_with_num_args _flag_C 3
-      if string match --quiet --regex '^'$termLbl: $_curr_token
-        true
-      else
-        string match --quiet --regex '^'$termLbl'?$' $_curr_token
-        and test (__imeta_count_unitless_coll_attr_val $_unparsed_args) -ge 1
-      end
+      string match --quiet --regex '^'$termLbl'?$' $_curr_token
+      and test (__imeta_count_unitless_coll_attr_val $_unparsed_args) -ge 1
     else
       __imeta_cmd_has_flag_with_num_args _flag_C 4
       and string match --invert --quiet --regex '^'$termLbl: $_unparsed_args[4]
-      and string match --quiet --regex '^('$termLbl'(:.*)?)?$' $_curr_token
+      and string match --quiet --regex '^'$termLbl'?$' $_curr_token
     end
   end
   __imeta_parse_cmd_for "condition $termLbl" mod $cmdline
@@ -1337,19 +1335,23 @@ complete --command imeta \
     '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_coll_avu_cond' \
   --description 'current unit'
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_new_attr_args)' \
+complete --command imeta --arguments n: \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_attr_cond' \
   --description 'new attribute'
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_new_val_args)' \
+complete --command imeta --arguments v: \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_val_cond' \
   --description 'new value'
+# TODO imeta mod -C <coll> <attr> <val> <unit> u:
 
-# TODO imeta mod -C <coll> <attr> <val> <unit> \
-#        [n:<new-attr>][v:<new-val>][u:<new-units>]
+# TODO imeta mod -C <coll> <attr> <val> <unit> n:<new-attr> \
+#        [v:<new-val>][u:<new-unit>]
+# TODO imeta mod -C <coll> <attr> <val> <unit> v:<new-val> \
+#        [n:<new-attr>][u:<new-unit>]
+# TODO Learn if u:<new-unit> can appear before a set of n:<new-attr> and/or
+#      v:<new-val>.
+
 # TODO learn if <unit> can appear after or in the middle of a set of
-#      [n:<new-attr>][v:<new-val>][u:<new-units>]
+#      n:<new-attr>, v:<new-val>, and/or u:<new-unit>.
 
 # mod -d
 __imeta_mk_flag_completions d 'of data object' __imeta_mod_flag_cond
