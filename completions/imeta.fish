@@ -714,6 +714,10 @@ function __imeta_mod_coll_new_val_cond --argument-names cmdline
   __imeta_mod_coll_new_cond v $cmdline
 end
 
+function __imeta_mod_coll_new_unit_cond --argument-names cmdline
+  __imeta_mod_coll_new_cond u $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1341,7 +1345,14 @@ complete --command imeta --arguments n: \
 complete --command imeta --arguments v: \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_val_cond' \
   --description 'new value'
-# TODO imeta mod -C <coll> <attr> <val> <unit> u:
+complete --command imeta --arguments u: \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_unit_cond' \
+  --description 'new unit'
+
+# TODO imeta mod -C <coll> <attr> <val> n:<new-attr> (v:<new-val>|u:<new-unit>) \
+#      (v:<new-val>|u:<new-unit>)
+# TODO imeta mod -C <coll> <attr> <val> v:<new-val> (n:<new-attr>|u:<new-unit>) \
+#      (n:<new-attr>|u:<new-unit>)
 
 # TODO imeta mod -C <coll> <attr> <val> <unit> n:<new-attr> \
 #        [v:<new-val>][u:<new-unit>]
