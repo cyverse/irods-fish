@@ -697,10 +697,14 @@ function __imeta_mod_coll_new_cond --argument-names termLbl cmdline
     if __imeta_cmd_has_flag_with_num_args _flag_C 3
       string match --quiet --regex '^'$termLbl'?$' $_curr_token
       and test (__imeta_count_unitless_coll_attr_val $_unparsed_args) -ge 1
-    else
-      __imeta_cmd_has_flag_with_num_args _flag_C 4
-      and string match --invert --quiet --regex '^'$termLbl: $_unparsed_args[4]
+    else if __imeta_cmd_has_flag_with_num_args _flag_C 4
+      string match --invert --quiet --regex '^'$termLbl: $_unparsed_args[4]
       and string match --quiet --regex '^'$termLbl'?$' $_curr_token
+    else
+       __imeta_cmd_has_flag_with_num_args _flag_C 5
+       and string match --invert --quiet --regex '^'$termLbl: $_unparsed_args[4]
+       and string match --invert --quiet --regex '^'$termLbl: $_unparsed_args[5]
+       and string match --quiet --regex '^'$termLbl'?$' $_curr_token
     end
   end
   __imeta_parse_cmd_for "condition $termLbl" mod $cmdline
@@ -1348,6 +1352,7 @@ complete --command imeta --arguments v: \
 complete --command imeta --arguments u: \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_unit_cond' \
   --description 'new unit'
+# TODO imeta mod -C <coll> <attr> <val> n:<new-attr> u:<new-unit> v:<new-val>
 
 # TODO imeta mod -C <coll> <attr> <val> n:<new-attr> (v:<new-val>|u:<new-unit>) \
 #      (v:<new-val>|u:<new-unit>)
@@ -1358,8 +1363,6 @@ complete --command imeta --arguments u: \
 #        [v:<new-val>][u:<new-unit>]
 # TODO imeta mod -C <coll> <attr> <val> <unit> v:<new-val> \
 #        [n:<new-attr>][u:<new-unit>]
-# TODO Learn if u:<new-unit> can appear before a set of n:<new-attr> and/or
-#      v:<new-val>.
 
 # TODO learn if <unit> can appear after or in the middle of a set of
 #      n:<new-attr>, v:<new-val>, and/or u:<new-unit>.
