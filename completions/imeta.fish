@@ -729,6 +729,10 @@ function __imeta_mod_data_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_data mod $cmdline
 end
 
+function __imeta_mod_data_attr_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' mod $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1365,7 +1369,9 @@ __imeta_mk_flag_completions d 'of data object' __imeta_mod_flag_cond
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_data_cond'
-# TODO imeta mod -d <data> <attr>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_mod_data_attr_cond'
 # TODO imeta mod -d <data> <attr> <val>
 # TODO imeta mod -d <data> <attr> <val> <unit>
 
