@@ -33,6 +33,17 @@ function __imeta_count_unitless_coll_attr_val --argument-names coll attr val
        and META_COLL_ATTR_UNITS = ''"
 end
 
+function __imeta_count_unitless_data_attr_val --argument-names data attr val
+  set pathParts (__irods_split_path (__irods_absolute_path $data))
+  __irods_quest '%s' \
+    "select count(META_DATA_ATTR_UNITS)
+     where COLL_NAME = '$pathParts[1]'
+       and DATA_NAME = '$pathParts[2]'
+       and META_DATA_ATTR_NAME = '$attr'
+       and META_DATA_ATTR_VALUE = '$val'
+       and META_DATA_ATTR_UNITS = ''"
+end
+
 function __imeta_eval_with_cmdline
   set cmdline (__imeta_cmdline_args)
   eval (string escape $argv "$cmdline")
@@ -741,6 +752,31 @@ function __imeta_mod_data_avu_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 3' mod $cmdline
 end
 
+function __imeta_mod_data_new_cond --argument-names termLbl cmdline
+  function condition --no-scope-shadowing --argument-names termLbl
+    set argCnt (count $_unparsed_args)
+    if not set --query _flag_d
+       or test "$argCnt" -lt 3 -o "$argCnt" -gt 6
+       or string match --invert --quiet --regex '^'$termLbl'?$' $_curr_token
+      false
+    else if test "$argCnt" -eq 3
+      test (__imeta_count_unitless_data_attr_val $_unparsed_args) -ge 1
+    else
+      for arg in $_unparsed_args
+        if string match --quiet --regex '^'$termLbl: $arg
+          return 1
+        end
+      end
+      true
+    end
+  end
+  __imeta_parse_cmd_for "condition $termLbl" mod $cmdline
+end
+
+function __imeta_mod_data_new_attr_cond --argument-names cmdline
+  __imeta_mod_data_new_cond n $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1391,15 +1427,22 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_data_attr_cond' \
   --description 'current attribute'
-  complete --command imeta \
-    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_args)' \
-    --condition '__imeta_eval_with_cmdline __imeta_mod_data_attr_val_cond' \
-    --description 'current value'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_mod_data_attr_val_cond' \
+  --description 'current value'
 complete --command imeta \
   --arguments \
     '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_data_avu_cond' \
   --description 'current unit'
+# TODO imeta mod -d <data> <attr> <val> n:
+complete --command imeta --arguments n: \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_data_new_attr_cond' \
+  --description 'new attribute'
+
+# TODO imeta mod -d <data> <attr> <val> n:<new-attr> \
+#        (v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])
 
 # TODO imeta mod -d <data> <attr> <val> \
 #        (n:<new-attr> (v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])
