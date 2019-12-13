@@ -777,6 +777,10 @@ function __imeta_mod_data_new_attr_cond --argument-names cmdline
   __imeta_mod_data_new_cond n $cmdline
 end
 
+function __imeta_mod_data_new_val_cond --argument-names cmdline
+  __imeta_mod_data_new_cond v $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1436,13 +1440,15 @@ complete --command imeta \
     '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_data_avu_cond' \
   --description 'current unit'
-# TODO imeta mod -d <data> <attr> <val> n:
 complete --command imeta --arguments n: \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_data_new_attr_cond' \
   --description 'new attribute'
+complete --command imeta --arguments v: \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_data_new_val_cond' \
+  --description 'new value'
+# TODO imeta mod -d <data> <attr> <val> n:<new-attr> v:<new-val> u:
 
-# TODO imeta mod -d <data> <attr> <val> n:<new-attr> \
-#        (v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])
+# TODO imeta mod -d <data> <attr> <val> n:<new-attr> u:<new-units> [v:<new-val>])
 
 # TODO imeta mod -d <data> <attr> <val> \
 #        (n:<new-attr> (v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])
