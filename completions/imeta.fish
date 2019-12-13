@@ -694,17 +694,20 @@ end
 
 function __imeta_mod_coll_new_cond --argument-names termLbl cmdline
   function condition --no-scope-shadowing --argument-names termLbl
-    if __imeta_cmd_has_flag_with_num_args _flag_C 3
-      string match --quiet --regex '^'$termLbl'?$' $_curr_token
-      and test (__imeta_count_unitless_coll_attr_val $_unparsed_args) -ge 1
-    else if __imeta_cmd_has_flag_with_num_args _flag_C 4
-      string match --invert --quiet --regex '^'$termLbl: $_unparsed_args[4]
-      and string match --quiet --regex '^'$termLbl'?$' $_curr_token
+    set argCnt (count $_unparsed_args)
+    if not set --query _flag_C
+       or test "$argCnt" -lt 3 -o "$argCnt" -gt 6
+       or string match --invert --quiet --regex '^'$termLbl'?$' $_curr_token
+      false
+    else if test "$argCnt" -eq 3
+      test (__imeta_count_unitless_coll_attr_val $_unparsed_args) -ge 1
     else
-       __imeta_cmd_has_flag_with_num_args _flag_C 5
-       and string match --invert --quiet --regex '^'$termLbl: $_unparsed_args[4]
-       and string match --invert --quiet --regex '^'$termLbl: $_unparsed_args[5]
-       and string match --quiet --regex '^'$termLbl'?$' $_curr_token
+      for arg in $_unparsed_args
+        if string match --quiet --regex '^'$termLbl: $arg
+          return 1
+        end
+      end
+      true
     end
   end
   __imeta_parse_cmd_for "condition $termLbl" mod $cmdline
@@ -1352,17 +1355,12 @@ complete --command imeta --arguments v: \
 complete --command imeta --arguments u: \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_unit_cond' \
   --description 'new unit'
-# TODO imeta mod -C <coll> <attr> <val> n:<new-attr> u:<new-unit> v:<new-val>
 
-# TODO imeta mod -C <coll> <attr> <val> n:<new-attr> (v:<new-val>|u:<new-unit>) \
-#      (v:<new-val>|u:<new-unit>)
-# TODO imeta mod -C <coll> <attr> <val> v:<new-val> (n:<new-attr>|u:<new-unit>) \
-#      (n:<new-attr>|u:<new-unit>)
+# TODO imeta mod -C <coll> <attr> <val> <unit> n:<new-attr> u:<new-unit> [v:<new-val>])
 
-# TODO imeta mod -C <coll> <attr> <val> <unit> n:<new-attr> \
-#        [v:<new-val>][u:<new-unit>]
-# TODO imeta mod -C <coll> <attr> <val> <unit> v:<new-val> \
-#        [n:<new-attr>][u:<new-unit>]
+# TODO imeta mod -C <coll> <attr> <val> <unit> v:<new-val> [n:<new-attr>][u:<new-unit>]
+
+# TODO imeta mod -C <coll> <attr> <val> <unit> [n:<new-attr>][v:<new-val>][u:<new-unit>]
 
 # TODO learn if <unit> can appear after or in the middle of a set of
 #      n:<new-attr>, v:<new-val>, and/or u:<new-unit>.
