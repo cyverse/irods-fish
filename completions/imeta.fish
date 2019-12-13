@@ -781,6 +781,10 @@ function __imeta_mod_data_new_val_cond --argument-names cmdline
   __imeta_mod_data_new_cond v $cmdline
 end
 
+function __imeta_mod_data_new_unit_cond --argument-names cmdline
+  __imeta_mod_data_new_cond u $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1446,19 +1450,18 @@ complete --command imeta --arguments n: \
 complete --command imeta --arguments v: \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_data_new_val_cond' \
   --description 'new value'
-# TODO imeta mod -d <data> <attr> <val> n:<new-attr> v:<new-val> u:
+complete --command imeta --arguments u: \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_data_new_unit_cond' \
+  --description 'new unit'
+# TODO imeta mod -d <data> <attr> <val> <unit> n:<new-attr> v:<new-val> u:
 
-# TODO imeta mod -d <data> <attr> <val> n:<new-attr> u:<new-units> [v:<new-val>])
+# TODO imeta mod -d <data> <attr> <val> <unit> n:<new-attr> u:<new-units> [v:<new-val>]
 
-# TODO imeta mod -d <data> <attr> <val> \
-#        (n:<new-attr> (v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])
-#        |v:<new-val> (n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])
-#        |u:<new-units> (n:<new-attr> [v:<new-val>]|v:<new-val> [n:<new-attr>]))
+# TODO imeta mod -d <data> <attr> <val> <unit> v:<new-val> \
+#        [(n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])]
 
-# TODO imeta mod -d <data> <attr> <val> <unit> \
-#        (n:<new-attr> (v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])
-#        |v:<new-val> (n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])
-#        |u:<new-units> (n:<new-attr> [v:<new-val>]|v:<new-val> [n:<new-attr>]))
+# TODO imeta mod -d <data> <attr> <val> <unit> u:<new-units> \
+#        [(n:<new-attr> [v:<new-val>]|v:<new-val> [n:<new-attr>])]
 
 # mod -R
 __imeta_mk_flag_completions R 'of resource' __imeta_mod_admin_flag_cond
