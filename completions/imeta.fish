@@ -737,6 +737,10 @@ function __imeta_mod_data_attr_val_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 2' mod $cmdline
 end
 
+function __imeta_mod_data_avu_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 3' mod $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -885,7 +889,7 @@ function __imeta_given_data_attr_val_args --argument-names cmdline
     set attr $_unparsed_args[2]
     set valPat $_curr_token%
     __irods_quest '%s' \
-      "select META_COLL_ATTR_VALUE
+      "select META_DATA_ATTR_VALUE
        where COLL_NAME = '$pathParts[1]'
          and DATA_NAME = '$pathParts[2]'
          and META_DATA_ATTR_NAME = '$attr'
@@ -894,7 +898,7 @@ function __imeta_given_data_attr_val_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
-function __imeta_data_attr_val_unit_args --argument-names cmdline
+function __imeta_any_data_attr_val_unit_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attr $_unparsed_args[2]
     set val $_unparsed_args[3]
@@ -902,6 +906,23 @@ function __imeta_data_attr_val_unit_args --argument-names cmdline
     __irods_quest '%s' \
       "select META_DATA_ATTR_UNITS
        where META_DATA_ATTR_NAME = '$attr'
+         and META_DATA_ATTR_VALUE = '$val'
+         and META_DATA_ATTR_UNITS like '$unitPat'"
+  end
+  __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_given_data_attr_val_unit_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set pathParts (__irods_split_path (__irods_absolute_path $_unparsed_args[1]))
+    set attr $_unparsed_args[2]
+    set val $_unparsed_args[3]
+    set unitPat $_curr_token%
+    __irods_quest '%s' \
+      "select META_DATA_ATTR_UNITS
+       where COLL_NAME = '$pathParts[1]'
+         and DATA_NAME = '$pathParts[2]'
+         and META_DATA_ATTR_NAME = '$attr'
          and META_DATA_ATTR_VALUE = '$val'
          and META_DATA_ATTR_UNITS like '$unitPat'"
   end
@@ -1139,7 +1160,7 @@ complete --command imeta \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_attr_val_cond' \
   --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_attr_val_unit_args)' \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_data_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_data_avu_cond' \
   --description 'existing for attribute-value'
 
@@ -1374,7 +1395,11 @@ complete --command imeta \
     --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_args)' \
     --condition '__imeta_eval_with_cmdline __imeta_mod_data_attr_val_cond' \
     --description 'current value'
-# TODO imeta mod -d <data> <attr> <val> <unit>
+complete --command imeta \
+  --arguments \
+    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_unit_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_mod_data_avu_cond' \
+  --description 'current unit'
 
 # TODO imeta mod -d <data> <attr> <val> \
 #        (n:<new-attr> (v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])
