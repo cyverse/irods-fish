@@ -802,6 +802,10 @@ function __imeta_mod_resc_new_attr_cond --argument-names cmdline
   __imeta_mod_new_cond _flag_R n $cmdline
 end
 
+function __imeta_mod_resc_new_val_cond --argument-names cmdline
+  __imeta_mod_new_cond _flag_R v $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1522,9 +1526,12 @@ complete --command imeta \
 complete --command imeta --arguments n: \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_resc_new_attr_cond' \
   --description 'new attribute'
+complete --command imeta --arguments v: \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_resc_new_val_cond' \
+  --description 'new value'
+# TODO imeta mod -R <resc> <attr> <val> n:<new-attr> v:<new-val> u:
 
-# TODO imeta mod -R <resc> <attr> <val> n:<new-attr> \
-#        (v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])
+# TODO imeta mod -R <resc> <attr> <val> n:<new-attr> u:<new-units> [v:<new-val>]
 
 # TODO imeta mod -R <resc> <attr> <val> v:<new-val> \
 #        [(n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])]
