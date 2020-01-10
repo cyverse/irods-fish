@@ -44,6 +44,15 @@ function __imeta_count_unitless_data_attr_val --argument-names data attr val
        and META_DATA_ATTR_UNITS = ''"
 end
 
+function __imeta_count_unitless_resc_attr_val --argument-names resc attr val
+  __irods_quest '%s' \
+    "select count(META_RESC_ATTR_UNITS)
+     where RESC_NAME = '$resc'
+       and META_RESC_ATTR_NAME = '$attr'
+       and META_RESC_ATTR_VALUE = '$val'
+       and META_RESC_ATTR_UNITS = ''"
+end
+
 function __imeta_eval_with_cmdline
   set cmdline (__imeta_cmdline_args)
   eval (string escape $argv "$cmdline")
@@ -678,6 +687,36 @@ end
 
 # mod conditions
 
+function __imeta_mod_new_cond --argument-names flag termLbl cmdline
+  function condition --no-scope-shadowing --argument-names flag termLbl
+    set argCnt (count $_unparsed_args)
+    if not set --query $flag
+       or test "$argCnt" -lt 3 -o "$argCnt" -gt 6
+       or string match --invert --quiet --regex '^'$termLbl'?$' $_curr_token
+      false
+    else if test "$argCnt" -eq 3
+      switch $flag
+        case _flag_C
+          test (__imeta_count_unitless_coll_attr_val $_unparsed_args) -ge 1
+        case _flag_d
+          test (__imeta_count_unitless_data_attr_val $_unparsed_args) -ge 1
+        case _flag_R
+          test (__imeta_count_unitless_resc_attr_val $_unparsed_args) -ge 1
+        case '*'
+          false
+      end
+    else
+      for arg in $_unparsed_args
+        if string match --quiet --regex '^'$termLbl: $arg
+          return 1
+        end
+      end
+      true
+    end
+  end
+  __imeta_parse_cmd_for "condition $flag $termLbl" mod $cmdline
+end
+
 function __imeta_mod_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args mod $cmdline
 end
@@ -703,37 +742,16 @@ function __imeta_mod_coll_avu_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' mod $cmdline
 end
 
-function __imeta_mod_coll_new_cond --argument-names termLbl cmdline
-  function condition --no-scope-shadowing --argument-names termLbl
-    set argCnt (count $_unparsed_args)
-    if not set --query _flag_C
-       or test "$argCnt" -lt 3 -o "$argCnt" -gt 6
-       or string match --invert --quiet --regex '^'$termLbl'?$' $_curr_token
-      false
-    else if test "$argCnt" -eq 3
-      test (__imeta_count_unitless_coll_attr_val $_unparsed_args) -ge 1
-    else
-      for arg in $_unparsed_args
-        if string match --quiet --regex '^'$termLbl: $arg
-          return 1
-        end
-      end
-      true
-    end
-  end
-  __imeta_parse_cmd_for "condition $termLbl" mod $cmdline
-end
-
 function __imeta_mod_coll_new_attr_cond --argument-names cmdline
-  __imeta_mod_coll_new_cond n $cmdline
+  __imeta_mod_new_cond _flag_C n $cmdline
 end
 
 function __imeta_mod_coll_new_val_cond --argument-names cmdline
-  __imeta_mod_coll_new_cond v $cmdline
+  __imeta_mod_new_cond _flag_C v $cmdline
 end
 
 function __imeta_mod_coll_new_unit_cond --argument-names cmdline
-  __imeta_mod_coll_new_cond u $cmdline
+  __imeta_mod_new_cond _flag_C u $cmdline
 end
 
 function __imeta_mod_data_cond --argument-names cmdline
@@ -752,37 +770,16 @@ function __imeta_mod_data_avu_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 3' mod $cmdline
 end
 
-function __imeta_mod_data_new_cond --argument-names termLbl cmdline
-  function condition --no-scope-shadowing --argument-names termLbl
-    set argCnt (count $_unparsed_args)
-    if not set --query _flag_d
-       or test "$argCnt" -lt 3 -o "$argCnt" -gt 6
-       or string match --invert --quiet --regex '^'$termLbl'?$' $_curr_token
-      false
-    else if test "$argCnt" -eq 3
-      test (__imeta_count_unitless_data_attr_val $_unparsed_args) -ge 1
-    else
-      for arg in $_unparsed_args
-        if string match --quiet --regex '^'$termLbl: $arg
-          return 1
-        end
-      end
-      true
-    end
-  end
-  __imeta_parse_cmd_for "condition $termLbl" mod $cmdline
-end
-
 function __imeta_mod_data_new_attr_cond --argument-names cmdline
-  __imeta_mod_data_new_cond n $cmdline
+  __imeta_mod_new_cond _flag_d n $cmdline
 end
 
 function __imeta_mod_data_new_val_cond --argument-names cmdline
-  __imeta_mod_data_new_cond v $cmdline
+  __imeta_mod_new_cond _flag_d v $cmdline
 end
 
 function __imeta_mod_data_new_unit_cond --argument-names cmdline
-  __imeta_mod_data_new_cond u $cmdline
+  __imeta_mod_new_cond _flag_d u $cmdline
 end
 
 function __imeta_mod_resc_cond --argument-names cmdline
@@ -799,6 +796,10 @@ end
 
 function __imeta_mod_resc_avu_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 3' mod $cmdline
+end
+
+function __imeta_mod_resc_new_attr_cond --argument-names cmdline
+  __imeta_mod_new_cond _flag_R n $cmdline
 end
 
 
@@ -1518,11 +1519,18 @@ complete --command imeta \
     '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_resc_avu_cond' \
   --description 'current unit'
+complete --command imeta --arguments n: \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_resc_new_attr_cond' \
+  --description 'new attribute'
 
-# TODO imeta mod -R <resc> <attr> <val> \
-#        ( n:<new-attr> [(v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])]  | \
-#          v:<new-val> [(n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])] | \
-#          u:<new-units> [(n:<new-attr> [v:<new-val>]|v:<new-val> [n:<new-attr>])]     )
+# TODO imeta mod -R <resc> <attr> <val> n:<new-attr> \
+#        (v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])
+
+# TODO imeta mod -R <resc> <attr> <val> v:<new-val> \
+#        [(n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])]
+
+# TODO imeta mod -R <resc> <attr> <val> u:<new-units> \
+#        [(n:<new-attr> [v:<new-val>]|v:<new-val> [n:<new-attr>])]
 
 # TODO imeta mod -R <resc> <attr> <val> <unit> \
 #        ( n:<new-attr> [(v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])]  | \
