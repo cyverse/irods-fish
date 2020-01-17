@@ -1682,10 +1682,18 @@ complete --command imeta --arguments n= \
 complete --command imeta --arguments 'n\<\>' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
   --description 'doesn\'t equal numerically'
-# TODO imeta qu -C <attr> n<
-# TODO imeta qu -C <attr> n<=
-# TODO imeta qu -C <attr> n=>
-# TODO imeta qu -C <attr> n>
+complete --command imeta --arguments 'n\<' \
+  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+  --description 'less than numerically'
+complete --command imeta --arguments 'n\<=' \
+  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+  --description 'less than or equals numerically'
+complete --command imeta --arguments 'n\>=' \
+  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+  --description 'greater than or equals numerically'
+complete --command imeta --arguments 'n\>' \
+  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+  --description 'greater than numerically'
 
 # TODO imeta qu -C <attr> <op> <val>
 
