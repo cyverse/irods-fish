@@ -814,6 +814,10 @@ function __imeta_mod_user_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_user mod $cmdline
 end
 
+function __imeta_mod_user_attr_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' mod $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1546,7 +1550,10 @@ __imeta_mk_flag_completions u 'of user' __imeta_mod_admin_flag_cond
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_user_cond'
-# TODO imeta mod -u <user> <attr>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_mod_user_attr_cond' \
+  --description 'current attribute'
 # TODO imeta mod -u <user> <attr> <val>
 
 # TODO imeta mod -u <user> <attr> <val> \
