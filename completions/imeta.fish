@@ -849,6 +849,12 @@ function __imeta_mod_user_new_unit_cond --argument-names cmdline
   __imeta_mod_new_cond _flag_u u $cmdline
 end
 
+# qu conditions
+
+function __imeta_qu_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args qu $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1634,15 +1640,21 @@ complete --command imeta --arguments u: \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_user_new_unit_cond' \
   --description 'new unit'
 
-# TODO imeta mod -u <user> <attr> <val> <unit> \
-#        ( n:<new-attr> [(v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])]  | \
-#          v:<new-val> [(n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])] | \
-#          u:<new-units> [(n:<new-attr> [v:<new-val>]|v:<new-val> [n:<new-attr>])]     )
-
 # qu
 
 __imeta_mk_cmd_completion qu 'query entities with matching AVUs' __imeta_no_cmd_or_help_cond
-# TODO imeta qu (-d|-C|-R|-u) <attr> <op> <val> ...
+
+# qu -C
+__imeta_mk_flag_completions C 'of collection' __imeta_qu_flag_cond
+# TODO imeta qu -C <attr>
+# TODO imeta qu -C <attr> <op>
+# TODO imeta qu -C <attr> <op> <val>
+
+# TODO imeta qu -C <attr> <op> <val> ...
+
+# TODO imeta qu -d <attr> <op> <val> [...]
+# TODO imeta qu -R <attr> <op> <val> [...]
+# TODO imeta qu -u <attr> <op> <val> [...]
 
 # rm
 
