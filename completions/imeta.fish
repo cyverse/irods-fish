@@ -857,14 +857,24 @@ end
 
 function __imeta_qu_op_cond --argument-names cmdline
   function condition --no-scope-shadowing
-    test (math (count $_unparsed_args) \% 4) -eq 1
+    if set --query _flag_C
+       or set --query _flag_d
+      test (math (count $_unparsed_args) \% 4) -eq 1
+    else
+      test (count $_unparsed_args) -eq 1
+    end
   end
   __imeta_parse_cmd_for condition qu $cmdline
 end
 
 function __imeta_qu_and_cond --argument-names cmdline
   function condition --no-scope-shadowing
-    test (math (count $_unparsed_args) \% 4) -eq 3
+    if set --query _flag_C
+       or set --query _flag_d
+      test (math (count $_unparsed_args) \% 4) -eq 3
+    else
+      false
+    end
   end
   __imeta_parse_cmd_for condition qu $cmdline
 end
@@ -1659,6 +1669,7 @@ complete --command imeta --arguments u: \
 __imeta_mk_cmd_completion qu 'query entities with matching AVUs' __imeta_no_cmd_or_help_cond
 __imeta_mk_flag_completions C collections __imeta_qu_flag_cond
 __imeta_mk_flag_completions d 'data objects' __imeta_qu_flag_cond
+__imeta_mk_flag_completions R resources __imeta_qu_flag_cond
 
 # qu operators
 complete --command imeta --arguments = \
