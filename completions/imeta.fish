@@ -810,6 +810,10 @@ function __imeta_mod_resc_new_unit_cond --argument-names cmdline
   __imeta_mod_new_cond _flag_R u $cmdline
 end
 
+function __imeta_mod_user_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_user mod $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1537,22 +1541,20 @@ complete --command imeta --arguments u: \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_resc_new_unit_cond' \
   --description 'new unit'
 
-# TODO imeta mod -R <resc> <attr> <val> n:<new-attr> u:<new-units> [v:<new-val>]
+# mod -u
+__imeta_mk_flag_completions u 'of user' __imeta_mod_admin_flag_cond
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_mod_user_cond'
+# TODO imeta mod -u <user> <attr>
+# TODO imeta mod -u <user> <attr> <val>
 
-# TODO imeta mod -R <resc> <attr> <val> v:<new-val> \
-#        [(n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])]
-
-# TODO imeta mod -R <resc> <attr> <val> u:<new-units> \
-#        [(n:<new-attr> [v:<new-val>]|v:<new-val> [n:<new-attr>])]
-
-# TODO imeta mod -R <resc> <attr> <val> <unit> \
+# TODO imeta mod -u <user> <attr> <val> \
 #        ( n:<new-attr> [(v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])]  | \
 #          v:<new-val> [(n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])] | \
 #          u:<new-units> [(n:<new-attr> [v:<new-val>]|v:<new-val> [n:<new-attr>])]     )
 
-# mod -u
-__imeta_mk_flag_completions u 'of user' __imeta_mod_admin_flag_cond
-# TODO imeta mod -u <user> <attr> <val> [<unit>] \
+# TODO imeta mod -u <user> <attr> <val> <unit> \
 #        ( n:<new-attr> [(v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])]  | \
 #          v:<new-val> [(n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])] | \
 #          u:<new-units> [(n:<new-attr> [v:<new-val>]|v:<new-val> [n:<new-attr>])]     )
