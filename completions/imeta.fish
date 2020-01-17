@@ -1657,9 +1657,10 @@ complete --command imeta --arguments u: \
 # qu
 
 __imeta_mk_cmd_completion qu 'query entities with matching AVUs' __imeta_no_cmd_or_help_cond
+__imeta_mk_flag_completions C collections __imeta_qu_flag_cond
+__imeta_mk_flag_completions d 'data objects' __imeta_qu_flag_cond
 
-# qu -C
-__imeta_mk_flag_completions C 'of collection' __imeta_qu_flag_cond
+# qu operators
 complete --command imeta --arguments = \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
   --description 'equals lexicographically'
@@ -1703,17 +1704,16 @@ complete --command imeta --arguments 'n\>' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
   --description 'greater than numerically'
 
-# TODO imeta qu -C <attr> <op> <val> or <op> <val> ...
-# TODO imeta qu -C <attr> <op> <val> or <op> <val> ... and <attr> <op> <val> [or <op> <val> ...]
+# qu joins
+# TODO imeta qu (-C|-d) <attr> <op> <val> or ...
+# TODO imeta qu (-C|-d) <attr> <op> <val> or <op> <val> ... and ...
 # Waiting for https://github.com/irods/irods/issues/4458 to be fixed.
-
 complete --command imeta --arguments and \
   --condition '__imeta_eval_with_cmdline __imeta_qu_and_cond' \
   --description 'intersect with condition on other attribute'
 
-# TODO imeta qu -d <attr> <op> <val> [...]
-# TODO imeta qu -R <attr> <op> <val> [...]
-# TODO imeta qu -u <attr> <op> <val> [...]
+# TODO imeta qu -R <attr> <op> <val>
+# TODO imeta qu -u <attr> <op> <val>
 
 # rm
 
