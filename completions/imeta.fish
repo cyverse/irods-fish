@@ -855,6 +855,12 @@ function __imeta_qu_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args qu $cmdline
 end
 
+function __imeta_qu_op_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (count $_unparsed_args) -eq 1
+  end
+  __imeta_parse_cmd_for condition qu $cmdline
+end
 
 #
 # Suggestion functions
@@ -1646,8 +1652,22 @@ __imeta_mk_cmd_completion qu 'query entities with matching AVUs' __imeta_no_cmd_
 
 # qu -C
 __imeta_mk_flag_completions C 'of collection' __imeta_qu_flag_cond
-# TODO imeta qu -C <attr>
-# TODO imeta qu -C <attr> <op>
+complete --command imeta --arguments = \
+  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+  --description equals
+# TODO imeta qu -C <attr> <>
+# TODO imeta qu -C <attr> <
+# TODO imeta qu -C <attr> <=
+# TODO imeta qu -C <attr> =>
+# TODO imeta qu -C <attr> >
+# TODO imeta qu -C <attr> like
+# TODO imeta qu -C <attr> 'not like'
+# TODO imeta qu -C <attr> n<>
+# TODO imeta qu -C <attr> n<
+# TODO imeta qu -C <attr> n<=
+# TODO imeta qu -C <attr> n=>
+# TODO imeta qu -C <attr> n>
+
 # TODO imeta qu -C <attr> <op> <val>
 
 # TODO imeta qu -C <attr> <op> <val> ...
