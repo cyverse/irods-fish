@@ -857,10 +857,18 @@ end
 
 function __imeta_qu_op_cond --argument-names cmdline
   function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 1
+    test (math (count $_unparsed_args) \% 4) -eq 1
   end
   __imeta_parse_cmd_for condition qu $cmdline
 end
+
+function __imeta_qu_and_cond --argument-names cmdline
+  function condition --no-scope-shadowing
+    test (math (count $_unparsed_args) \% 4) -eq 3
+  end
+  __imeta_parse_cmd_for condition qu $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1695,9 +1703,13 @@ complete --command imeta --arguments 'n\>' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
   --description 'greater than numerically'
 
-# TODO imeta qu -C <attr> <op> <val>
+# TODO imeta qu -C <attr> <op> <val> or <op> <val> ...
+# TODO imeta qu -C <attr> <op> <val> or <op> <val> ... and <attr> <op> <val> [or <op> <val> ...]
+# Waiting for https://github.com/irods/irods/issues/4458 to be fixed.
 
-# TODO imeta qu -C <attr> <op> <val> ...
+complete --command imeta --arguments and \
+  --condition '__imeta_eval_with_cmdline __imeta_qu_and_cond' \
+  --description 'intersect with condition on other attribute'
 
 # TODO imeta qu -d <attr> <op> <val> [...]
 # TODO imeta qu -R <attr> <op> <val> [...]
