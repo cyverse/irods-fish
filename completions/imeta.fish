@@ -53,6 +53,15 @@ function __imeta_count_unitless_resc_attr_val --argument-names resc attr val
        and META_RESC_ATTR_UNITS = ''"
 end
 
+function __imeta_count_unitless_user_attr_val --argument-names user attr val
+  __irods_quest '%s' \
+    "select count(META_USER_ATTR_UNITS)
+     where USER_NAME = '$user'
+       and META_USER_ATTR_NAME = '$attr'
+       and META_USER_ATTR_VALUE = '$val'
+       and META_USER_ATTR_UNITS = ''"
+end
+
 function __imeta_eval_with_cmdline
   set cmdline (__imeta_cmdline_args)
   eval (string escape $argv "$cmdline")
@@ -702,6 +711,8 @@ function __imeta_mod_new_cond --argument-names flag termLbl cmdline
           test (__imeta_count_unitless_data_attr_val $_unparsed_args) -ge 1
         case _flag_R
           test (__imeta_count_unitless_resc_attr_val $_unparsed_args) -ge 1
+        case _flag_u
+          test (__imeta_count_unitless_user_attr_val $_unparsed_args) -ge 1
         case '*'
           false
       end
@@ -820,6 +831,10 @@ end
 
 function __imeta_mod_user_attr_val_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 2' mod $cmdline
+end
+
+function __imeta_mod_user_new_attr_cond --argument-names cmdline
+  __imeta_mod_new_cond _flag_u n $cmdline
 end
 
 
@@ -1576,11 +1591,18 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_user_attr_val_cond' \
   --description 'current value'
+complete --command imeta --arguments n: \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_user_new_attr_cond' \
+  --description 'new attribute'
 
-# TODO imeta mod -u <user> <attr> <val> \
-#        ( n:<new-attr> [(v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])]  | \
-#          v:<new-val> [(n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])] | \
-#          u:<new-units> [(n:<new-attr> [v:<new-val>]|v:<new-val> [n:<new-attr>])]     )
+# TODO imeta mod -u <user> <attr> <val> n:<new-attr> \
+#        (v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])
+
+# TODO imeta mod -u <user> <attr> <val> v:<new-val> \
+#        [(n:<new-attr> [u:<new-units>]|u:<new-units> [n:<new-attr>])]
+
+# TODO imeta mod -u <user> <attr> <val> u:<new-units> \
+#        [(n:<new-attr> [v:<new-val>]|v:<new-val> [n:<new-attr>])]
 
 # TODO imeta mod -u <user> <attr> <val> <unit> \
 #        ( n:<new-attr> [(v:<new-val> [u:<new-units>]|u:<new-units> [v:<new-val>])]  | \
