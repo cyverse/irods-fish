@@ -1654,28 +1654,29 @@ __imeta_mk_cmd_completion qu 'query entities with matching AVUs' __imeta_no_cmd_
 __imeta_mk_flag_completions C 'of collection' __imeta_qu_flag_cond
 complete --command imeta --arguments = \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description equals
+  --description 'equals lexicographically'
 complete --command imeta --arguments '\<\>' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'not equals'
+  --description 'doesn\'t equal lexicographically'
 complete --command imeta --arguments '\<' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'less than'
+  --description 'less than lexicographically'
 complete --command imeta --arguments '\<=' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'less than or equals'
+  --description 'less than or equals lexicographically'
 complete --command imeta --arguments '\>=' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'greater than or equals'
+  --description 'greater than or equals lexicographically'
 complete --command imeta --arguments '\>' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'greater than'
+  --description 'greater than lexicographically'
 complete --command imeta --arguments like \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
   --description 'matches wildcard'
 complete --command imeta --arguments 'not\ like' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
   --description 'doesn\'t match wildcard'
+# TODO imeta qu -C <attr> n=
 # TODO imeta qu -C <attr> n<>
 # TODO imeta qu -C <attr> n<
 # TODO imeta qu -C <attr> n<=
