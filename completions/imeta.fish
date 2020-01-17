@@ -1676,8 +1676,12 @@ complete --command imeta --arguments like \
 complete --command imeta --arguments 'not\ like' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
   --description 'doesn\'t match wildcard'
-# TODO imeta qu -C <attr> n=
-# TODO imeta qu -C <attr> n<>
+complete --command imeta --arguments n= \
+  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+  --description 'equals numerically'
+complete --command imeta --arguments 'n\<\>' \
+  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+  --description 'doesn\'t equal numerically'
 # TODO imeta qu -C <attr> n<
 # TODO imeta qu -C <attr> n<=
 # TODO imeta qu -C <attr> n=>
