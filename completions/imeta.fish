@@ -1655,10 +1655,12 @@ __imeta_mk_flag_completions C 'of collection' __imeta_qu_flag_cond
 complete --command imeta --arguments = \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
   --description equals
-complete --command imeta --arguments "'<>'" \
+complete --command imeta --arguments '\<\>' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
   --description 'not equals'
-# TODO imeta qu -C <attr> <
+complete --command imeta --arguments '\<' \
+  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+  --description 'less than'
 # TODO imeta qu -C <attr> <=
 # TODO imeta qu -C <attr> =>
 # TODO imeta qu -C <attr> >
