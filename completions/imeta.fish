@@ -1673,7 +1673,9 @@ complete --command imeta --arguments '\>' \
 complete --command imeta --arguments like \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
   --description 'matches wildcard'
-# TODO imeta qu -C <attr> 'not like'
+complete --command imeta --arguments 'not\ like' \
+  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+  --description 'doesn\'t match wildcard'
 # TODO imeta qu -C <attr> n<>
 # TODO imeta qu -C <attr> n<
 # TODO imeta qu -C <attr> n<=
