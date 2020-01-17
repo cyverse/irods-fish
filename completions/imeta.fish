@@ -1664,7 +1664,9 @@ complete --command imeta --arguments '\<' \
 complete --command imeta --arguments '\<=' \
   --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
   --description 'less than or equals'
-# TODO imeta qu -C <attr> =>
+  complete --command imeta --arguments '\>=' \
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'greater than or equals'
 # TODO imeta qu -C <attr> >
 # TODO imeta qu -C <attr> like
 # TODO imeta qu -C <attr> 'not like'
