@@ -879,6 +879,12 @@ function __imeta_qu_and_cond --argument-names cmdline
   __imeta_parse_cmd_for condition qu $cmdline
 end
 
+# rm conditions
+
+function __imeta_rm_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args rm $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1727,7 +1733,15 @@ complete --command imeta --arguments and \
 # rm
 
 __imeta_mk_cmd_completion rm 'remove AVU' __imeta_no_cmd_or_help_cond
-# TODO imeta rm (-C|-d|-R|-u) <entity> <attr> <val> [<units>]
+__imeta_mk_flag_completions C collections __imeta_rm_flag_cond
+# TODO imeta rm -C <coll>
+# TODO imeta rm -C <coll> <attr>
+# TODO imeta rm -C <coll> <attr> <val>
+# TODO imeta rm -C <coll> <attr> <val> <units>
+
+# TODO imeta rm -d <data> <attr> <val> [<units>]
+# TODO imeta rm -R <resc> <attr> <val> [<units>]
+# TODO imeta rm -u <user> <attr> <val> [<units>]
 
 # rmi
 
