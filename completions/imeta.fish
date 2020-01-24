@@ -877,6 +877,11 @@ function __imeta_rm_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args rm $cmdline
 end
 
+function __imeta_rm_admin_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args rm $cmdline
+  and __imeta_am_admin
+end
+
 function __imeta_rm_coll_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_coll rm $cmdline
 end
@@ -1791,7 +1796,7 @@ complete --command imeta \
   --condition '__imeta_eval_with_cmdline __imeta_rm_data_avu_cond'
 
 # rm -R
-# __imeta_mk_flag_completions d 'of data object' __imeta_rm_flag_cond
+__imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_rm_admin_flag_cond'
 # complete --command imeta \
 #   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
 #   --condition '__imeta_eval_with_cmdline __imeta_rm_data_cond'
