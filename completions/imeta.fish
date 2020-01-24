@@ -980,6 +980,14 @@ function __imeta_rmi_resc_meta_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' rmi $cmdline
 end
 
+function __imeta_rmi_user_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_user rmi $cmdline
+end
+
+function __imeta_rmi_user_meta_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' rmi $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1291,6 +1299,14 @@ function __imeta_user_args --argument-names cmdline
     __irods_quest '%s' "select USER_NAME where USER_NAME != '$ignored'"
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_user_meta_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set user $_unparsed_args[1]
+    __irods_quest '%s' "select META_USER_ATTR_ID where USER_NAME = '$user'"
+  end
+__imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_user_attr_args --argument-names cmdline
@@ -1954,7 +1970,14 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_meta_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_rmi_resc_meta_cond'
 
-# TODO imeta rmi -u <user> <metadata-id>
+# rmi -u
+__imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_rmi_admin_flag_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_rmi_user_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_meta_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rmi_user_meta_cond'
 
 # rmw
 
