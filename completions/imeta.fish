@@ -951,6 +951,11 @@ function __imeta_rmi_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args rmi $cmdline
 end
 
+function __imeta_rmi_admin_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args rmi $cmdline
+  and __imeta_am_admin
+end
+
 function __imeta_rmi_coll_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_coll rmi $cmdline
 end
@@ -965,6 +970,14 @@ end
 
 function __imeta_rmi_data_meta_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' rmi $cmdline
+end
+
+function __imeta_rmi_resc_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_resc rmi $cmdline
+end
+
+function __imeta_rmi_resc_meta_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' rmi $cmdline
 end
 
 
@@ -1186,6 +1199,14 @@ function __imeta_resc_args --argument-names cmdline
     __irods_quest '%s' "select RESC_NAME where RESC_NAME != '$ignored'"
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_resc_meta_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set resc $_unparsed_args[1]
+    __irods_quest '%s' "select META_RESC_ATTR_ID where RESC_NAME = '$resc'"
+  end
+__imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_resc_attr_args --argument-names cmdline
@@ -1924,7 +1945,15 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_meta_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_rmi_data_meta_cond'
 
-# TODO imeta rmi -R <resc> <metadata-id>
+# rmi -R
+__imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_rmi_admin_flag_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rmi_resc_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_meta_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rmi_resc_meta_cond'
+
 # TODO imeta rmi -u <user> <metadata-id>
 
 # rmw
