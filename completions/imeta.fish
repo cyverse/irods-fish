@@ -951,6 +951,15 @@ function __imeta_rmi_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args rmi $cmdline
 end
 
+function __imeta_rmi_coll_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_coll rmi $cmdline
+end
+
+function __imeta_rmi_coll_meta_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' rmi $cmdline
+end
+
+
 
 #
 # Suggestion functions
@@ -971,6 +980,15 @@ function __imeta_coll_args --argument-names cmdline
       | string match --all --invert $ignored
   end
   __imeta_parse_any_cmd_for suggestions $cmdline
+end
+
+function __imeta_coll_meta_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set coll $_unparsed_args[1]
+    set absColl (__irods_absolute_path $coll)
+    __irods_quest '%s' "select META_COLL_ATTR_ID where COLL_NAME = '$absColl'"
+  end
+__imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_coll_attr_args --argument-names cmdline
@@ -1868,8 +1886,12 @@ complete --command imeta \
 
 __imeta_mk_cmd_completion rmi 'remove AVU by metadata id' __imeta_no_cmd_or_help_cond
 __imeta_mk_flag_completions C 'of collection' __imeta_rmi_flag_cond
-# TODO imeta rmi -C <coll>
-# TODO imeta rmi -C <coll> <metadata-id>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rmi_coll_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_meta_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rmi_coll_meta_cond'
 
 # TODO imeta rmi -d <data> <metadata-id>
 # TODO imeta rmi -R <resc> <metadata-id>
