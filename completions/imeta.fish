@@ -945,6 +945,12 @@ function __imeta_rm_user_avu_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 3' rm $cmdline
 end
 
+# rmi conditions
+
+function __imeta_rmi_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args rmi $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1861,7 +1867,13 @@ complete --command imeta \
 # rmi
 
 __imeta_mk_cmd_completion rmi 'remove AVU by metadata id' __imeta_no_cmd_or_help_cond
-# TODO imeta rmi (-C|-d|-R|-u) <entity> <metadata-id>
+__imeta_mk_flag_completions C 'of collection' __imeta_rmi_flag_cond
+# TODO imeta rmi -C <coll>
+# TODO imeta rmi -C <coll> <metadata-id>
+
+# TODO imeta rmi -d <data> <metadata-id>
+# TODO imeta rmi -R <resc> <metadata-id>
+# TODO imeta rmi -u <user> <metadata-id>
 
 # rmw
 
