@@ -1670,6 +1670,7 @@ __imeta_mk_cmd_completion qu 'query entities with matching AVUs' __imeta_no_cmd_
 __imeta_mk_flag_completions C collections __imeta_qu_flag_cond
 __imeta_mk_flag_completions d 'data objects' __imeta_qu_flag_cond
 __imeta_mk_flag_completions R resources __imeta_qu_flag_cond
+__imeta_mk_flag_completions u users __imeta_qu_flag_cond
 
 # qu operators
 complete --command imeta --arguments = \
@@ -1722,9 +1723,6 @@ complete --command imeta --arguments 'n\>' \
 complete --command imeta --arguments and \
   --condition '__imeta_eval_with_cmdline __imeta_qu_and_cond' \
   --description 'intersect with condition on other attribute'
-
-# TODO imeta qu -R <attr> <op> <val>
-# TODO imeta qu -u <attr> <op> <val>
 
 # rm
 
