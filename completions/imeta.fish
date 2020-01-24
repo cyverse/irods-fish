@@ -657,7 +657,6 @@ end
 
 function __imeta_ls_user_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_user ls $cmdline
-  and __imeta_am_admin
 end
 
 function __imeta_ls_user_attr_cond --argument-names cmdline
@@ -684,7 +683,6 @@ end
 
 function __imeta_lsw_user_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_user lsw $cmdline
-  and __imeta_am_admin
 end
 
 # mod conditions
@@ -1374,7 +1372,7 @@ complete --command imeta \
 __imeta_mk_flag_completions u 'to user' '__irods_exec_slow __imeta_add_admin_flag_cond'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_add_user_cond'
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_add_user_cond'
 
 # adda
 
@@ -1439,7 +1437,7 @@ complete --command imeta \
 __imeta_mk_flag_completions u 'to user' __imeta_adda_flag_cond
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_user_cond'
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_adda_user_cond'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_user_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_adda_user_attr_cond' \
@@ -1508,7 +1506,7 @@ complete --command imeta \
   --description 'source resource'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_src_user_cond' \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_cp_src_user_cond' \
   --description 'source resource'
 
 # cp (-C|-d|-R|-u) (-C|-d|-R|-u) <from-entity> <to-entity>
@@ -1526,7 +1524,7 @@ complete --command imeta \
   --description 'destination resource'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_user_cond' \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_cp_to_user_cond' \
   --description 'destination user'
 
 # ls
@@ -1567,10 +1565,10 @@ complete --command imeta \
 __imeta_mk_flag_completions u 'of user' __imeta_ls_flag_cond
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_ls_user_cond'
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_ls_user_cond'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_ls_user_attr_cond'
+  --condition '__imeta_eval_with_cmdline __imeta_ls_user_attr_cond'
 
 # lsw
 
@@ -1695,7 +1693,7 @@ complete --command imeta --arguments u: \
 __imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_mod_admin_flag_cond'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_user_cond'
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_user_cond'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_user_attr_cond' \
