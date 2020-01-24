@@ -959,6 +959,13 @@ function __imeta_rmi_coll_meta_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' rmi $cmdline
 end
 
+function __imeta_rmi_data_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_data rmi $cmdline
+end
+
+function __imeta_rmi_data_meta_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' rmi $cmdline
+end
 
 
 #
@@ -1079,6 +1086,16 @@ function __imeta_data_args --argument-names cmdline
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
+function __imeta_data_meta_args --argument-names cmdline
+  function suggestions --no-scope-shadowing
+    set data $_unparsed_args[1]
+    set pathParts (__irods_split_path (__irods_absolute_path $data))
+    __irods_quest '%s' \
+      "select META_DATA_ATTR_ID where COLL_NAME = '$pathParts[1]' and DATA_NAME = '$pathParts[2]'"
+  end
+__imeta_parse_any_cmd_for suggestions $cmdline
+end
+
 function __imeta_any_data_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set attrPat $_curr_token%
@@ -1089,8 +1106,9 @@ end
 
 function __imeta_given_data_attr_args --argument-names cmdline
   function suggestions --no-scope-shadowing
-    set pathParts (__irods_split_path (__irods_absolute_path $_unparsed_args[1]))
+    set data $_unparsed_args[1]
     set attrPat $_curr_token%
+    set pathParts (__irods_split_path (__irods_absolute_path $data))
     __irods_quest '%s' \
       "select META_DATA_ATTR_NAME
        where COLL_NAME = '$pathParts[1]'
@@ -1113,9 +1131,10 @@ end
 
 function __imeta_given_data_attr_val_args --argument-names cmdline
   function suggestions --no-scope-shadowing
-    set pathParts (__irods_split_path (__irods_absolute_path $_unparsed_args[1]))
+    set data $_unparsed_args[1]
     set attr $_unparsed_args[2]
     set valPat $_curr_token%
+    set pathParts (__irods_split_path (__irods_absolute_path $data))
     __irods_quest '%s' \
       "select META_DATA_ATTR_VALUE
        where COLL_NAME = '$pathParts[1]'
@@ -1142,10 +1161,11 @@ end
 
 function __imeta_given_data_attr_val_unit_args --argument-names cmdline
   function suggestions --no-scope-shadowing
-    set pathParts (__irods_split_path (__irods_absolute_path $_unparsed_args[1]))
+    set data $_unparsed_args[1]
     set attr $_unparsed_args[2]
     set val $_unparsed_args[3]
     set unitPat $_curr_token%
+    set pathParts (__irods_split_path (__irods_absolute_path $data))
     __irods_quest '%s' \
       "select META_DATA_ATTR_UNITS
        where COLL_NAME = '$pathParts[1]'
@@ -1885,6 +1905,8 @@ complete --command imeta \
 # rmi
 
 __imeta_mk_cmd_completion rmi 'remove AVU by metadata id' __imeta_no_cmd_or_help_cond
+
+# rmi -C
 __imeta_mk_flag_completions C 'of collection' __imeta_rmi_flag_cond
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
@@ -1893,7 +1915,15 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_meta_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_rmi_coll_meta_cond'
 
-# TODO imeta rmi -d <data> <metadata-id>
+# rmi -d
+__imeta_mk_flag_completions d 'of data object' __imeta_rmi_flag_cond
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rmi_data_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_meta_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rmi_data_meta_cond'
+
 # TODO imeta rmi -R <resc> <metadata-id>
 # TODO imeta rmi -u <user> <metadata-id>
 
