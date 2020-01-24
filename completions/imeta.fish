@@ -914,6 +914,22 @@ function __imeta_rm_data_avu_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 3' rm $cmdline
 end
 
+function __imeta_rm_resc_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_resc rm $cmdline
+end
+
+function __imeta_rm_resc_attr_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' rm $cmdline
+end
+
+function __imeta_rm_resc_attr_val_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 2' rm $cmdline
+end
+
+function __imeta_rm_resc_avu_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 3' rm $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1797,19 +1813,19 @@ complete --command imeta \
 
 # rm -R
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_rm_admin_flag_cond'
-# complete --command imeta \
-#   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-#   --condition '__imeta_eval_with_cmdline __imeta_rm_data_cond'
-# complete --command imeta \
-#   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
-#   --condition '__imeta_eval_with_cmdline __imeta_rm_data_attr_cond'
-# complete --command imeta \
-#   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_args)' \
-#   --condition '__imeta_eval_with_cmdline __imeta_rm_data_attr_val_cond'
-# complete --command imeta \
-#   --arguments \
-#     '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_unit_args)' \
-#   --condition '__imeta_eval_with_cmdline __imeta_rm_data_avu_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rm_resc_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rm_resc_attr_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_val_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rm_resc_attr_val_cond'
+complete --command imeta \
+  --arguments \
+    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_val_unit_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rm_resc_avu_cond'
 
 # TODO imeta rm -u <user> <attr> <val> [<units>]
 
