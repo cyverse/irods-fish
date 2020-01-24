@@ -988,6 +988,33 @@ function __imeta_rmi_user_meta_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' rmi $cmdline
 end
 
+# rmw conditions
+
+function __imeta_rmw_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args rmw $cmdline
+end
+
+function __imeta_rmw_admin_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args rmw $cmdline
+  and __imeta_am_admin
+end
+
+function __imeta_rmw_coll_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_coll rmw $cmdline
+end
+
+function __imeta_rmw_data_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_data rmw $cmdline
+end
+
+function __imeta_rmw_resc_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_resc rmw $cmdline
+end
+
+function __imeta_rmw_user_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_user rmw $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1982,7 +2009,30 @@ complete --command imeta \
 # rmw
 
 __imeta_mk_cmd_completion rmw 'remove AVU using wildcards' __imeta_no_cmd_or_help_cond
-# TODO imeta rmw (-C|-d|-R|-u) <entity> <attr> <val> [<units>]
+
+# rmw -C
+__imeta_mk_flag_completions C 'of collection' __imeta_rmw_flag_cond
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rmw_coll_cond'
+
+# rmw -d
+__imeta_mk_flag_completions d 'of data object' __imeta_rmw_flag_cond
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rmw_data_cond'
+
+# rmw -R
+__imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_rmw_admin_flag_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rmw_resc_cond'
+
+# rmw -u
+__imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_rmw_admin_flag_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_rmw_user_cond'
 
 # set
 
