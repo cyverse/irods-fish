@@ -933,6 +933,19 @@ function __imeta_rm_user_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_user rm $cmdline
 end
 
+function __imeta_rm_user_attr_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' rm $cmdline
+end
+
+function __imeta_rm_user_attr_val_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 2' rm $cmdline
+end
+
+function __imeta_rm_user_avu_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 3' rm $cmdline
+end
+
+
 #
 # Suggestion functions
 #
@@ -1834,9 +1847,16 @@ __imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_rm_admin_flag
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_rm_user_cond'
-# TODO imeta rm -u <user> <attr>
-# TODO imeta rm -u <user> <attr> <val>
-# TODO imeta rm -u <user> <attr> <val> <units>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rm_user_attr_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_val_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rm_user_attr_val_cond'
+complete --command imeta \
+  --arguments \
+    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_val_unit_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rm_user_avu_cond'
 
 # rmi
 
