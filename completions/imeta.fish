@@ -1639,7 +1639,7 @@ complete --command imeta --arguments u: \
   --description 'new unit'
 
 # mod -R
-__imeta_mk_flag_completions R 'of resource' __imeta_mod_admin_flag_cond
+__imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_mod_admin_flag_cond'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_resc_cond'
@@ -1667,7 +1667,7 @@ complete --command imeta --arguments u: \
   --description 'new unit'
 
 # mod -u
-__imeta_mk_flag_completions u 'of user' __imeta_mod_admin_flag_cond
+__imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_mod_admin_flag_cond'
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_mod_user_cond'
@@ -1790,7 +1790,22 @@ complete --command imeta \
     '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_unit_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_rm_data_avu_cond'
 
-# TODO imeta rm -R <resc> <attr> <val> [<units>]
+# rm -R
+# __imeta_mk_flag_completions d 'of data object' __imeta_rm_flag_cond
+# complete --command imeta \
+#   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+#   --condition '__imeta_eval_with_cmdline __imeta_rm_data_cond'
+# complete --command imeta \
+#   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
+#   --condition '__imeta_eval_with_cmdline __imeta_rm_data_attr_cond'
+# complete --command imeta \
+#   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_args)' \
+#   --condition '__imeta_eval_with_cmdline __imeta_rm_data_attr_val_cond'
+# complete --command imeta \
+#   --arguments \
+#     '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_unit_args)' \
+#   --condition '__imeta_eval_with_cmdline __imeta_rm_data_avu_cond'
+
 # TODO imeta rm -u <user> <attr> <val> [<units>]
 
 # rmi
