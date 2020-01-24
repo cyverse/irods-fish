@@ -889,6 +889,10 @@ function __imeta_rm_coll_attr_val_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 2' rm $cmdline
 end
 
+function __imeta_rm_coll_avu_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' rm $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -1749,7 +1753,10 @@ complete --command imeta \
 complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_rm_coll_attr_val_cond'
-# TODO imeta rm -C <coll> <attr> <val> <units>
+complete --command imeta \
+  --arguments \
+    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_unit_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_rm_coll_avu_cond'
 
 # TODO imeta rm -d <data> <attr> <val> [<units>]
 # TODO imeta rm -R <resc> <attr> <val> [<units>]
