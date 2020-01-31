@@ -1015,6 +1015,12 @@ function __imeta_rmw_user_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_user rmw $cmdline
 end
 
+# set conditions
+
+function __imeta_set_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args set $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -2037,7 +2043,15 @@ complete --command imeta \
 # set
 
 __imeta_mk_cmd_completion set 'assign a single value' __imeta_no_cmd_or_help_cond
-# TODO imeta set (-C|-d|-R|-u) <entity> <attr> <new-val> [<new-units>]
+
+# set -C
+__imeta_mk_flag_completions C 'on collection' __imeta_set_flag_cond
+# TODO imeta set -C <coll>
+# TODO imeta set -C <coll> <attr>
+
+# TODO imeta set -d <data> <attr>
+# TODO imeta set -R <resc> <attr>
+# TODO imeta set -u <user> <attr>
 
 
 functions --erase __imeta_mk_flag_completions __imeta_mk_cmd_completion
