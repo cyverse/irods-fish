@@ -1021,6 +1021,11 @@ function __imeta_set_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args set $cmdline
 end
 
+function __imeta_set_admin_flag_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_no_cmd_args set $cmdline
+  and __imeta_am_admin
+end
+
 function __imeta_set_coll_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_cmd_needs_coll set $cmdline
 end
@@ -2078,7 +2083,11 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_set_data_attr_cond'
 
+# set -R
+__imeta_mk_flag_completions R 'on resource' '__irods_exec_slow __imeta_set_admin_flag_cond'
+# TODO imeta set -R <resc>
 # TODO imeta set -R <resc> <attr>
+
 # TODO imeta set -u <user> <attr>
 
 
