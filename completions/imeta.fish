@@ -1029,6 +1029,14 @@ function __imeta_set_coll_attr_cond --argument-names cmdline
   __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' set $cmdline
 end
 
+function __imeta_set_data_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_data set $cmdline
+end
+
+function __imeta_set_data_attr_cond --argument-names cmdline
+  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' set $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -2061,7 +2069,15 @@ complete --command imeta \
   --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_args)' \
   --condition '__imeta_eval_with_cmdline __imeta_set_coll_attr_cond'
 
-# TODO imeta set -d <data> <attr>
+# set -d
+__imeta_mk_flag_completions d 'on data object' __imeta_set_flag_cond
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_set_data_cond'
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_set_data_attr_cond'
+
 # TODO imeta set -R <resc> <attr>
 # TODO imeta set -u <user> <attr>
 
