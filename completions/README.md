@@ -14,10 +14,10 @@ commands are implemented, implement completion for `iquest` general queries.
 ✓      icd
 ✓      ihelp
 ✓      ils
+✓      imeta
 ✓      iquest
 ✓      irm
 - 1065 iadmin
-   748 imeta
    600 iput
    561 ichmod
    394 ips
