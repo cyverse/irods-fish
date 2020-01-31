@@ -1021,6 +1021,10 @@ function __imeta_set_flag_cond --argument-names cmdline
   __imeta_parse_cmd_for __imeta_no_cmd_args set $cmdline
 end
 
+function __imeta_set_coll_cond --argument-names cmdline
+  __imeta_parse_cmd_for __imeta_cmd_needs_coll set $cmdline
+end
+
 
 #
 # Suggestion functions
@@ -2046,7 +2050,9 @@ __imeta_mk_cmd_completion set 'assign a single value' __imeta_no_cmd_or_help_con
 
 # set -C
 __imeta_mk_flag_completions C 'on collection' __imeta_set_flag_cond
-# TODO imeta set -C <coll>
+complete --command imeta \
+  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+  --condition '__imeta_eval_with_cmdline __imeta_set_coll_cond'
 # TODO imeta set -C <coll> <attr>
 
 # TODO imeta set -d <data> <attr>
