@@ -1,9 +1,19 @@
-# TODO document
-# irods_env_color
-# irods_cwd_color
+# A function that can be added fish_prompt to display the current iRODS
+# environment and working collection with the form "<env> <cwd>?". <env> is the
+# same form displayed by ienvs. <cwd> is the absolute path to the current
+# working collection where ~ is substituted for the absolute path to the iRODS
+# user's home collection, and name of every other collection in the path,
+# excluding the working collection, is abbreviated to its first letter. For
+# example, if the iRODS user's name is user and the current working collection
+# is /tempZone/home/user/path/to/collection, then <cwd> will be
+# ~/p/t/collection.
+#
+# The two prompt elements can be colorized. The color of <env> can be set with
+# the environment variable irods_env_color, and the color of <cwd> can be set
+# with irods_cwd_color.
 
 function irods_prompt \
-    --description ''
+    --description 'displays the current iRODS environment and working collection'
 
   function read_ienv --argument-names var
     for line in (command ienv)
@@ -41,4 +51,3 @@ function irods_prompt \
 
   printf '? '
 end
-
