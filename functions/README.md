@@ -2,6 +2,7 @@
 
 Here are some fish functions for working within multiple iRODS environments.
 
+__TODO separate out the support functions into their own folder.__
 
 ## The Functions
 
