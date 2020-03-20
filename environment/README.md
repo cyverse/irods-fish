@@ -24,6 +24,8 @@ file._
 
 ## Functions
 
+__TODO__ add CLI help support.
+
 This package provides three functions for working with iRODS environments. **`ienv`** lists the
 available environments. **`iswitch`** switches to a given environment. Last, **`ido`** executes a
 provided command within the context of a given environment without switching to it. Completion
