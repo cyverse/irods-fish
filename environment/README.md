@@ -24,8 +24,6 @@ file._
 
 ## Functions
 
-__TODO__ add CLI help support.
-
 This package provides three functions for working with iRODS environments. **`ienv`** lists the
 available environments. **`iswitch`** switches to a given environment. Last, **`ido`** executes a
 provided command within the context of a given environment without switching to it. Completion
@@ -64,6 +62,6 @@ environment variables.
 ## Installation
 
 To install the environment functions and prompt locally, copy the contents of the directories
-`functions/` and `prompt/` into `<base>/functions/` and the contents of `completions/` into
-`<base>/completions/`. If installing for yourself, `<base>` is `$HOME/.config/fish`, otherwise it
-is `/etc/fish`.
+`completions/functions/`, `functions/`, and `prompt/` into `<base>/functions/` and the files
+`completions/*.fish` into `<base>/completions/`. If installing for yourself, `<base>` is
+`$HOME/.config/fish`, otherwise it is `/etc/fish`.
