@@ -1,5 +1,5 @@
 function ienvs \
-	--description 'lists the available iRODS environments'
+		--description 'lists the available iRODS environments'
 
 	function show_help
 		echo "Usage: ienvs [-h|--help]
