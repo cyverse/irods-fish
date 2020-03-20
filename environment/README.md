@@ -61,6 +61,8 @@ environment variables.
 
 ## Installation
 
+__TODO Create installation packages for CentOS and Ubuntu__
+
 To install the environment functions and prompt locally, copy the contents of the directories
 `completions/functions/`, `functions/`, and `prompt/` into `<base>/functions/` and the files
 `completions/*.fish` into `<base>/completions/`. If installing for yourself, `<base>` is
