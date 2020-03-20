@@ -17,10 +17,5 @@ end
 
 
 complete --command ido --no-files
-
-complete --command ido --arguments '-h' --condition __irods_no_args_condition \
-	--description 'shows help'
-complete --command ido --short-option h --long-option help --condition __irods_no_args_condition \
-	--description 'shows help'
-
 complete --command ido --arguments '(__ido_environ_suggestions)'
+__irods_mk_help_completions ido
