@@ -1,10 +1,5 @@
 # tab completion for ido
 
-function __ido_no_args
-	test (count (commandline --cut-at-cursor --tokenize)) -eq 1
-end
-
-
 function __ido_environ_suggestions
 	set cmdTerms (commandline --cut-at-cursor --tokenize)
 
@@ -23,8 +18,9 @@ end
 
 complete --command ido --no-files
 
-complete --command ido --arguments '-h' --condition __ido_no_args --description 'shows help'
-complete --command ido --short-option h --long-option help --condition __ido_no_args \
+complete --command ido --arguments '-h' --condition __irods_no_args_condition \
+	--description 'shows help'
+complete --command ido --short-option h --long-option help --condition __irods_no_args_condition \
 	--description 'shows help'
 
 complete --command ido --arguments '(__ido_environ_suggestions)'
