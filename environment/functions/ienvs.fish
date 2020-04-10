@@ -21,5 +21,9 @@ Options are:
 		return 0
 	end
 
-	basename --multiple --suffix .json (ls $HOME/.irods/*.json)
+  set envFiles $HOME/.irods/*.json
+
+	if [ (count $envFiles) -gt 0 ]
+  	basename --multiple --suffix .json $envFiles
+	end
 end
