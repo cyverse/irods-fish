@@ -1,0 +1,33 @@
+#!/usr/bin/fish
+#
+# This script builds the Debian package of irods-fish, placing it in the
+# temporary sibling directory .build/. If .build/ exists when the script is run,
+# the directory is first deleted to ensure the package contains no accidental
+# artifacts.
+
+
+function main
+	set pkgDir (dirname (realpath (status --current-filename)))
+	set baseDir (dirname $pkgDir)
+
+	set buildDir $baseDir/.build
+	rm --force --recursive $buildDir
+	mkdir --parents $buildDir
+
+	set stagingDir $buildDir/irods-fish
+	mkdir --parents $stagingDir
+
+	set cfgDir $stagingDir/etc/fish
+	mkdir --parents $cfgDir/completions $cfgDir/functions
+	cp $baseDir/completions/functions/* $baseDir/functions/* $baseDir/prompt/* $cfgDir/functions/
+	cp $baseDir/completions/*.fish $cfgDir/completions/
+
+	mkdir --parents $stagingDir/DEBIAN
+	cp $pkgDir/control $stagingDir/DEBIAN/
+
+	dpkg-deb --build $stagingDir $baseDir
+	rm --force --recursive $buildDir
+end
+
+
+main
