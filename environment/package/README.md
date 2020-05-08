@@ -1,6 +1,6 @@
 # Building the Deployment Package
 
-This folder contains the Debian packaging logic.
+This folder contains the Debian and Red Hat packaging logic.
 
-To build the Debian package, run the script `mk-pkg`. The package will be deposited in
-the directory `../`.  
+To build the packages, run the script `build`. The packages will be deposited in the directory
+`../`.  

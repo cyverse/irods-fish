@@ -65,39 +65,16 @@ irods-fish can be installed using a Debian package, or it can be done manually.
 
 ### Package-based installation
 
-__TODO Create installation packages for CentOS__
-
 _Installation using a package requires root privileges._
 
-On Debian systems, a package can be used to install irods-fish. To build the package, do the
-following.
+On Debian and Red Hat systems, a package can be used to install irods-fish. To build the packages,
+do the following.
 
 ```
-prompt> package/mk-pkg
-dpkg-deb: building package 'irods-fish' in '/home/user/irods-fish/environment/irods-fish_0.0.0_all.deb'.
+prompt> package/build
 ```
 
-The package can be found in this directory (`environment/`).  To install the package, do the
-following.
-
-```
-prompt> sudo apt install ./irods-fish_0.0.0_all.deb
-Building dependency tree       
-Reading state information... Done
-Note, selecting 'irods-fish' instead of './irods-fish_0.0.0_all.deb'
-The following NEW packages will be installed:
-  irods-fish
-0 upgraded, 1 newly installed, 0 to remove and 11 not upgraded.
-Need to get 0 B/3,008 B of archives.
-After this operation, 0 B of additional disk space will be used.
-Get:1 /home/user/irods-fish/environment/irods-fish_0.0.0_all.deb irods-fish all 0.0.0 [3,008 B]
-Selecting previously unselected package irods-fish.
-(Reading database ... 218850 files and directories currently installed.)
-Preparing to unpack .../irods-fish_0.0.0_all.deb ...
-Unpacking irods-fish (0.0.0) ...
-Setting up irods-fish (0.0.0) ...
-```
-
+The packages can be found in this directory (`environment/`).
 
 ### Manual installation
 

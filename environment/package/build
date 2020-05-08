@@ -1,9 +1,9 @@
 #!/usr/bin/fish
 #
-# This script builds the Debian package of irods-fish, placing it in the
-# temporary sibling directory .build/. If .build/ exists when the script is run,
-# the directory is first deleted to ensure the package contains no accidental
-# artifacts.
+# This script builds the Debian and Red Hat packages of irods-fish, placing them
+# in the temporary sibling directory .build/. If .build/ exists when the script
+# is run, the directory is first deleted to ensure the packages contain no
+# accidental artifacts.
 
 
 function main
@@ -25,7 +25,16 @@ function main
 	mkdir --parents $stagingDir/DEBIAN
 	cp $pkgDir/control $stagingDir/DEBIAN/
 
-	dpkg-deb --build $stagingDir $baseDir
+	set dpkgResp (dpkg-deb --build $stagingDir $baseDir)
+	set debPkg (string replace --filter --regex '.* in \'(.*)\'\.' '$1' $dpkgResp)
+
+	if test $debPkg = ''
+		 or not fpm --force --log error --input-type deb --output-type rpm $debPkg > /dev/null 2>&1
+
+		printf 'Failed to generate the RPM package\n' >&2
+		return 1
+	end
+
 	rm --force --recursive $buildDir
 end
 
