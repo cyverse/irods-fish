@@ -1,11 +1,13 @@
 Package: irods-fish
-Version: 0.1.0-1
+Version: 0.2.0-1
 Section: misc
 Priority: optional
 Architecture: all
 Depends: fish (>= 2.7)
 Maintainer: Tony Edgin <tedgin@cyverse.org>
-Description: fish support for iRODS environments
+Description: fish support for iRODS
  Being able to switch between iRODS zones is useful for someone who works in
  multiple zones. For users of fish, this package provides commands that simplify
  working in multiple zones or, more generally, with multiple iRODS environments.
+ It also provides of a port Bruno Bzeznik's bash tab completions for iRODS to
+ fish.

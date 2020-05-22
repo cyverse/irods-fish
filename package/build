@@ -19,8 +19,14 @@ function main
 
 	set cfgDir $stagingDir/etc/fish
 	mkdir --parents $cfgDir/completions $cfgDir/functions
-	cp $baseDir/completions/functions/* $baseDir/functions/* $baseDir/prompt/* $cfgDir/functions/
-	cp $baseDir/completions/*.fish $cfgDir/completions/
+
+	set envDir $baseDir/environment
+	cp $envDir/completions/functions/* $envDir/functions/* $envDir/prompt/* $cfgDir/functions/
+	cp $envDir/completions/*.fish $cfgDir/completions/
+
+  set portDir $baseDir/irods_completion-orig
+	cp $portDir/functions/* $cfgDir/functions/
+  cp $portDir/completions/* $cfgDir/completions/
 
 	mkdir --parents $stagingDir/DEBIAN
 	cp $pkgDir/control $stagingDir/DEBIAN/

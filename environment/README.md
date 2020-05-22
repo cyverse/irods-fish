@@ -59,26 +59,9 @@ environment variables.
 * **`irods_cwd_color`** defines the color of the current working collection token.
 
 
-## Installation
+## [Installation](#installation)
 
-irods-fish can be installed using a Debian package, or it can be done manually.
-
-### Package-based installation
-
-_Installation using a package requires root privileges._
-
-On Debian and Red Hat systems, a package can be used to install irods-fish. To build the packages,
-do the following.
-
-```
-prompt> package/build
-```
-
-The packages can be found in this directory (`environment/`).
-
-### Manual installation
-
-To install irods-fish manually, copy the contents of the directories `completions/functions/`,
-`functions/`, and `prompt/` into `<base>/functions/` and the files `completions/*.fish` into
-`<base>/completions/`. If installing for yourself, `<base>` is `$HOME/.config/fish`, otherwise
-`/etc/fish`.
+To install environment related support, copy the contents of the directories
+`completions/functions/`, `functions/`, and `prompt/` into `<base>/functions/` and the files
+`completions/*.fish` into `<base>/completions/`. If installing for yourself, `<base>` is
+`$HOME/.config/fish`, otherwise `/etc/fish`.

@@ -5,9 +5,8 @@ These iCommands tab completions are ported from the bash script
 by Bruno Bzeznik.
 
 
-## Installation
+## [Installation](#installation)
 
-To install the functions and tab completions locally, they need to be copied into the
-`.config/fish/functions/` and `.config/fish/completions/` directories under the user's home
-directory, respectively. To install them system wide, they need to be copied into
-`/etc/fish/functions/` and `/etc/fish/completions/`, respectively.
+To install the ported completions, copy the contents of the directory `functions/` into
+`<base>/functions/` and the contents `completions/` into `<base>/completions/`. If installing for
+yourself, `<base>` is `$HOME/.config/fish`, otherwise `/etc/fish`.
