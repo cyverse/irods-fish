@@ -5,6 +5,6 @@ function __irods_mk_help_completions --argument-names cmd \
 		--condition __irods_no_args_condition \
 		--description 'shows help'
 
-	complete --command $cmd --arguments '-h' --condition __irods_no_args_condition \
-		--description 'shows help'
+  complete --command $cmd --arguments '--help' --condition __irods_no_args_condition \
+	  --description 'shows help'
 end
