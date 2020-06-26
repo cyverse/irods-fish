@@ -95,7 +95,7 @@ end
 # Completions
 #
 
-__irods_help_completion ils
+__irods_icommand_help_completion ils
 __irods_verbose_completion ils '__ils_suggest -V -v --bundle'
 
 complete --command ils --short-option A  \

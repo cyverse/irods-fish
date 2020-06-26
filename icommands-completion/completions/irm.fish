@@ -56,7 +56,7 @@ end
 # Completions
 #
 
-__irods_help_completion irm
+__irods_icommand_help_completion irm
 __irods_verbose_completion ils '__irm_suggest -V -v'
 
 # irm (<collection>|<data-object>)

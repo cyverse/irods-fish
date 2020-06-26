@@ -2,7 +2,7 @@
 
 complete --command ihelp --no-files
 
-__irods_help_completion ihelp
+__irods_icommand_help_completion ihelp
 
 complete --command ihelp --short-option a \
   --description 'prints the help text for all the iCommands' \

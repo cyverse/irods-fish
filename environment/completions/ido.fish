@@ -18,4 +18,4 @@ end
 
 complete --command ido --no-files
 complete --command ido --arguments "(__ido_environ_suggestions (__irods_tokenize_cmdline h ''))"
-__irods_mk_help_completions ido
+__irods_env_help_completion ido

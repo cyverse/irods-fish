@@ -18,7 +18,7 @@ end
 # Completions
 #
 
-__irods_help_completion icd
+__irods_icommand_help_completion icd
 __irods_verbose_completion icd "__irods_tokenize_cmdline hVv '' | __irods_missing -h -V -v"
 
 complete --command icd \

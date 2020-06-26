@@ -130,7 +130,7 @@ end
 
 complete --command iquest --no-files
 
-__irods_help_completion iquest
+__irods_icommand_help_completion iquest
 
 #
 # iquest [-z <zone>][--no-page][[no-distinct] [uppercase] [<format>]] <general-query>

@@ -1,4 +1,4 @@
 # tab completion for ienvs
 
 complete --command ienvs --no-files
-__irods_mk_help_completions ienvs
+__irods_env_help_completion ienvs
