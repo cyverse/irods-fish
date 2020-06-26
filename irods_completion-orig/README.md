@@ -7,6 +7,6 @@ by Bruno Bzeznik.
 
 ## [Installation](#installation)
 
-To install the ported completions, copy the contents of the directory `functions/` into
+To install the ported completions, copy the contents of the directory `../functions/` into
 `<base>/functions/` and the contents `completions/` into `<base>/completions/`. If installing for
 yourself, `<base>` is `$HOME/.config/fish`, otherwise `/etc/fish`.

@@ -3,6 +3,8 @@
 # It is assumed that $argv will contain the arguments passed to another command
 # on the command line.
 
+# TODO make this version and the common version identical
+
 function __irods_no_args_condition \
     --description 'checks to see if a command line has any arguments on it'
 

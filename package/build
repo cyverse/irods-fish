@@ -20,6 +20,8 @@ function main
 	set cfgDir $stagingDir/etc/fish
 	mkdir --parents $cfgDir/completions $cfgDir/functions
 
+	cp $baseDir/functions/*.fish $cfgDir/functions/
+
 	set envDir $baseDir/environment
 	cp $envDir/completions/functions/* $envDir/functions/* $envDir/prompt/* $cfgDir/functions/
 	cp $envDir/completions/*.fish $cfgDir/completions/

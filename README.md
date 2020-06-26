@@ -17,6 +17,9 @@ to fish.
 The [`icommands-completion`](icommands-completion/README.md) folder contains an incomplete set of
 tab completions for iCommands. __They are not released__.
 
+The [`functions`](functions/README.md) folder contains internal functions common to `environment`,
+`icommands-completion`, and `irods_completion-orig`. _They are not intended for public usage_.
+
 
 ## Installation
 
@@ -34,11 +37,11 @@ do the following.
 prompt> package/build
 ```
 
-The packages can be found in the root directory.
+The packages will be in the root directory.
 
 
 ### Manual installation
 
 See [environment installation](environment/README.md#installation) for instructions on manually
-installing the environment related support. To manually install iCommands tab completions port, see
-[tab completions port installation](irods_completion-orig/README.md#installation).
+installing the environment related support. To manually install the iCommands tab completions port,
+see [tab completions port installation](irods_completion-orig/README.md#installation).

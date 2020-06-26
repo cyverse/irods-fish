@@ -61,7 +61,7 @@ environment variables.
 
 ## [Installation](#installation)
 
-To install environment related support, copy the contents of the directories
+To install environment related support, copy the contents of the directories `../functions/`,
 `completions/functions/`, `functions/`, and `prompt/` into `<base>/functions/` and the files
 `completions/*.fish` into `<base>/completions/`. If installing for yourself, `<base>` is
 `$HOME/.config/fish`, otherwise `/etc/fish`.
