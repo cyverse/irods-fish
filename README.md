@@ -43,5 +43,7 @@ The packages will be in the root directory.
 ### Manual installation
 
 See [environment installation](environment/README.md#installation) for instructions on manually
-installing the environment related support. To manually install the iCommands tab completions port,
-see [tab completions port installation](irods_completion-orig/README.md#installation).
+installing the environment related support. To manually install the ported iCommands tab
+completions (see [portted tab completions installation](irods_completion-orig/README.md#installation)) followed by
+the new iCommands tab completions (see
+[new tab completions installation](icommands-completion/README.md#installation)).
