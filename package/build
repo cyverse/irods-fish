@@ -27,13 +27,12 @@ function main
 	cp $envDir/completions/*.fish $cfgDir/completions/
 
   set portDir $baseDir/irods_completion-orig
-	cp $portDir/functions/* $cfgDir/functions/
   cp $portDir/completions/* $cfgDir/completions/
 
   set cmdDir $baseDir/icommands-completion
 	cp $cmdDir/functions/* $cfgDir/functions/
 	cp $cmdDir/completions/* $cfgDir/completions/
-	
+
 	mkdir --parents $stagingDir/DEBIAN
 	cp $pkgDir/control $stagingDir/DEBIAN/
 
