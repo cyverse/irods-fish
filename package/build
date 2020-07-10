@@ -30,6 +30,10 @@ function main
 	cp $portDir/functions/* $cfgDir/functions/
   cp $portDir/completions/* $cfgDir/completions/
 
+  set cmdDir $baseDir/icommands-completion
+	cp $cmdDir/functions/* $cfgDir/functions/
+	cp $cmdDir/completions/* $cfgDir/completions/
+	
 	mkdir --parents $stagingDir/DEBIAN
 	cp $pkgDir/control $stagingDir/DEBIAN/
 
