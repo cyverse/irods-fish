@@ -14,14 +14,14 @@
 #
 
 function __imeta_am_admin
-  set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
-  test "$userType" = rodsadmin
+    set userType (command iuserinfo | string replace --filter --regex '^type: ' '')
+    test "$userType" = rodsadmin
 end
 
 function __imeta_cmdline_args
-  set args (commandline --cut-at-cursor --tokenize) (commandline --cut-at-cursor --current-token)
-  set --erase args[1]
-  string join -- \n $args
+    set args (commandline --cut-at-cursor --tokenize) (commandline --cut-at-cursor --current-token)
+    set --erase args[1]
+    string join -- \n $args
 end
 
 function __imeta_count_unitless_coll_attr_val --argument-names coll attr val
@@ -64,8 +64,8 @@ function __imeta_count_unitless_user_attr_val --argument-names user attr val
 end
 
 function __imeta_eval_with_cmdline
-  set cmdline (__imeta_cmdline_args)
-  eval (string escape $argv "$cmdline")
+    set cmdline (__imeta_cmdline_args)
+    eval (string escape $argv "$cmdline")
 end
 
 function __imeta_tokenize_cmdline
@@ -186,7 +186,7 @@ function __imeta_tokenize_cmdline
 end
 
 # This is supposed to work like (string split -- ' ' $cmdline), but respecting \
-function __split_cmdline --argument-names cmdline
+function __imeta_split_cmdline --argument-names cmdline
     if string match --invert --quiet --regex -- '.*\\\\ .*' $cmdline
         string split -- ' ' $cmdline
     else
@@ -241,7 +241,7 @@ function __split_cmdline --argument-names cmdline
         printf '%s\n' $tokens
     end
 end
-# function test__split_cmdline
+# function test__imeta_split_cmdline
 #     set errCnt 0
 # 
 #     function fmt_val
@@ -258,8 +258,7 @@ end
 # 
 #     function assert --no-scope-shadowing --argument-names arg
 #         set expRes $argv[2..-1]
-#         set actRes (__split_cmdline $arg)
-# 
+#         set actRes (__imeta_split_cmdline $arg)
 #         set match yes
 #         if [ (count $actRes) -ne (count $expRes) ]
 #             set match no
@@ -271,15 +270,16 @@ end
 #                 end
 #             end
 #         end
-# 
 #         if [ $match = no ]
 #             set argFmt (fmt_val $arg)
 #             set actResFmt (fmt_list $actRes)
 #             set expResFmt (fmt_list $expRes)
-#             printf '__split_cmdline %s -> [%s], expected [%s]\n' "$argFmt" "$actResFmt" "$expResFmt"
+#             printf '__imeta_split_cmdline %s -> [%s], expected [%s]\n' \
+#                 "$argFmt" "$actResFmt" "$expResFmt"
 #             set errCnt (math $errCnt + 1)
 #         end
 #     end
+#
 #     # TEST CASES
 #     assert '' ''
 #     assert q q
@@ -404,9 +404,10 @@ end
 #     end
 # end
 
+
 function __imeta_parse_for --argument-names optSpec exclusive consumer cmdline
     set optSpecArray (string split -- ' ' $optSpec)
-    set cmdTokens (__imeta_tokenize_cmdline $optSpecArray -- (__split_cmdline $cmdline))
+    set cmdTokens (__imeta_tokenize_cmdline $optSpecArray -- (__imeta_split_cmdline $cmdline))
     set _curr_token $cmdTokens[-1]
     set --erase cmdTokens[-1]
     if test -n "$exclusive"
@@ -423,146 +424,146 @@ function __imeta_parse_for --argument-names optSpec exclusive consumer cmdline
 end
 
 function __imeta_parse_main_for --argument-names consumer cmdline
-  function opts
-    fish_opt --short h
-    fish_opt --short V
-    fish_opt --short v
-    fish_opt --short z --required
-  end
-  set optSpec (opts)
-  __imeta_parse_for "$optSpec" '' $consumer $cmdline
+    function opts
+        fish_opt --short h
+        fish_opt --short V
+        fish_opt --short v
+        fish_opt --short z --required
+    end
+    set optSpec (opts)
+    __imeta_parse_for "$optSpec" '' $consumer $cmdline
 end
 
 function __imeta_parse_cmd_args_for --argument-names consumer cmdline
-  function opts
-    fish_opt --short C
-    fish_opt --short d
-    fish_opt --short R
-    fish_opt --short u
-  end
-  set optSpec (opts)
-  __imeta_parse_for "$optSpec" C,d,R,u $consumer $cmdline
+    function opts
+        fish_opt --short C
+        fish_opt --short d
+        fish_opt --short R
+        fish_opt --short u
+    end
+    set optSpec (opts)
+    __imeta_parse_for "$optSpec" C,d,R,u $consumer $cmdline
 end
 
 function __imeta_parse_cp_args_for --argument-names consumer cmdline
-  function opts
-    fish_opt --short C
-    fish_opt --short d
-    fish_opt --short R
-    fish_opt --short u
-  end
-  set cmdTokens (__imeta_tokenize_cmdline (opts) -- (string split -- ' ' $cmdline))
-  set _curr_token $cmdTokens[-1]
-  set --erase cmdTokens[-1]
-  if test (count $cmdTokens) -ge 1
-    switch $cmdTokens[1]
-      case -C
-        set _flag_C 1
-      case -d
-        set _flag_d 1
-      case -R
-        set _flag_R 1
-      case -u
-        set _flag_u 1
-      case '*'
-        set unknown_flag $cmdTokens[1]
+    function opts
+        fish_opt --short C
+        fish_opt --short d
+        fish_opt --short R
+        fish_opt --short u
     end
-    if not set --query unknown_flag
-      set --erase cmdTokens[1]
-      if test (count $cmdTokens) -ge 1
+    set cmdTokens (__imeta_tokenize_cmdline (opts) -- (__imeta_split_cmdline $cmdline))
+    set _curr_token $cmdTokens[-1]
+    set --erase cmdTokens[-1]
+    if test (count $cmdTokens) -ge 1
         switch $cmdTokens[1]
-          case -C
-            set _flag_C $_flag_C 2
-          case -d
-            set _flag_d $_flag_d 2
-          case -R
-            set _flag_R $_flag_R 2
-          case -u
-            set _flag_u $_flag_u 2
-          case '*'
-            set unknown_flag $cmdTokens[1]
+            case -C
+                set _flag_C 1
+            case -d
+                set _flag_d 1
+            case -R
+                set _flag_R 1
+            case -u
+                set _flag_u 1
+            case '*'
+                set unknown_flag $cmdTokens[1]
         end
         if not set --query unknown_flag
-          set --erase cmdTokens[1]
+            set --erase cmdTokens[1]
+            if test (count $cmdTokens) -ge 1
+                switch $cmdTokens[1]
+                    case -C
+                        set _flag_C $_flag_C 2
+                    case -d
+                        set _flag_d $_flag_d 2
+                    case -R
+                        set _flag_R $_flag_R 2
+                    case -u
+                        set _flag_u $_flag_u 2
+                    case '*'
+                        set unknown_flag $cmdTokens[1]
+                end
+                if not set --query unknown_flag
+                    set --erase cmdTokens[1]
+                end
+            end
         end
-      end
     end
-  end
-  set _unparsed_args $cmdTokens
-  eval "$consumer"
+    set _unparsed_args $cmdTokens
+    eval "$consumer"
 end
 
 function __imeta_parse_ls_args_for --argument-names consumer cmdline
-  set cmdTokens (string split -- ' ' $cmdline)
-  set _curr_token $cmdTokens[-1]
-  set --erase cmdTokens[-1]
-  if test (count $cmdTokens) -ge 1
-    switch $cmdTokens[1]
-      case -C
-        set _flag_C -C
-      case -d
-        set _flag_d -d
-      case -ld
-        set _flag_d -ld
-      case -R
-        set _flag_R -R
-      case -u
-        set _flag_u -u
-      case '*'
-        set unknown_flag $cmdTokens[1]
+    set cmdTokens (string split -- ' ' $cmdline)
+    set _curr_token $cmdTokens[-1]
+    set --erase cmdTokens[-1]
+    if test (count $cmdTokens) -ge 1
+        switch $cmdTokens[1]
+            case -C
+                set _flag_C -C
+            case -d
+                set _flag_d -d
+            case -ld
+                set _flag_d -ld
+            case -R
+                set _flag_R -R
+            case -u
+                set _flag_u -u
+            case '*'
+                set unknown_flag $cmdTokens[1]
+        end
+        if not set --query unknown_flag
+            set --erase cmdTokens[1]
+        end
     end
-    if not set --query unknown_flag
-      set --erase cmdTokens[1]
-    end
-  end
-  set _unparsed_args $cmdTokens
-  eval "$consumer"
+    set _unparsed_args $cmdTokens
+    eval "$consumer"
 end
 
 function __imeta_parse_any_cmd_for --argument-names consumer cmdline
-  function condition --no-scope-shadowing --argument-names consumer
-    if test (count $_unparsed_args) -eq 0
-      false
-    else
-      set cmd $_unparsed_args[1]
-      set _unparsed_args $_unparsed_args $_curr_token
-      set --erase _unparsed_args[1]
-      switch $cmd
-        case cp
-          __imeta_parse_cp_args_for $consumer "$_unparsed_args"
-        case ls
-          __imeta_parse_ls_args_for $consumer "$_unparsed_args"
-        case lsw
-          __imeta_parse_ls_args_for $consumer "$_unparsed_args"
-        case '*'
-          __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
-      end
+    function condition --no-scope-shadowing --argument-names consumer
+        if test (count $_unparsed_args) -eq 0
+            false
+        else
+            set cmd $_unparsed_args[1]
+            set _unparsed_args $_unparsed_args $_curr_token
+            set --erase _unparsed_args[1]
+            switch $cmd
+                case cp
+                    __imeta_parse_cp_args_for $consumer "$_unparsed_args"
+                case ls
+                    __imeta_parse_ls_args_for $consumer "$_unparsed_args"
+                case lsw
+                    __imeta_parse_ls_args_for $consumer "$_unparsed_args"
+                case '*'
+                    __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
+            end
+        end
     end
-  end
-  __imeta_parse_main_for "condition $consumer" $cmdline
+    __imeta_parse_main_for "condition $consumer" $cmdline
 end
 
 function __imeta_parse_cmd_for --argument-names consumer cmd cmdline
-  function cmd_condition --no-scope-shadowing --argument-names cmd consumer
-    if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != "$cmd"
-      false
-    else
-      set _unparsed_args $_unparsed_args $_curr_token
-      set --erase _unparsed_args[1]
-      switch $cmd
-        case cp
-          __imeta_parse_cp_args_for $consumer "$_unparsed_args"
-        case ls
-          __imeta_parse_ls_args_for $consumer "$_unparsed_args"
-        case lsw
-          __imeta_parse_ls_args_for $consumer "$_unparsed_args"
-        case '*'
-          __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
-      end
+    function cmd_condition --no-scope-shadowing --argument-names cmd consumer
+        if test (count $_unparsed_args) -eq 0 -o "$_unparsed_args[1]" != "$cmd"
+            false
+        else
+            set _unparsed_args $_unparsed_args $_curr_token
+            set --erase _unparsed_args[1]
+            switch $cmd
+                case cp
+                    __imeta_parse_cp_args_for $consumer "$_unparsed_args"
+                case ls
+                    __imeta_parse_ls_args_for $consumer "$_unparsed_args"
+                case lsw
+                    __imeta_parse_ls_args_for $consumer "$_unparsed_args"
+                case '*'
+                    __imeta_parse_cmd_args_for $consumer "$_unparsed_args"
+            end
+        end
     end
-  end
-  set escConsumer (string escape $consumer)
-  __imeta_parse_main_for "cmd_condition $cmd $escConsumer" $cmdline
+    set escConsumer (string escape $consumer)
+    __imeta_parse_main_for "cmd_condition $cmd $escConsumer" $cmdline
 end
 
 
@@ -573,762 +574,762 @@ end
 # shared condition tests
 
 function __imeta_no_cmd_args --no-scope-shadowing
-  test (count $_unparsed_args) -eq 0
-  and not set --query _flag_C
-  and not set --query _flag_d
-  and not set --query _flag_R
-  and not set --query _flag_u
+    test (count $_unparsed_args) -eq 0
+    and not set --query _flag_C
+    and not set --query _flag_d
+    and not set --query _flag_R
+    and not set --query _flag_u
 end
 
 function __imeta_cmd_has_flag_with_num_args --no-scope-shadowing --argument-names flag argCnt
-  set --query $flag
-  and test (count $_unparsed_args) -eq "$argCnt"
+    set --query $flag
+    and test (count $_unparsed_args) -eq "$argCnt"
 end
 
 function __imeta_cmd_needs_coll --no-scope-shadowing
-  __imeta_cmd_has_flag_with_num_args _flag_C 0
+    __imeta_cmd_has_flag_with_num_args _flag_C 0
 end
 
 function __imeta_cmd_needs_data --no-scope-shadowing
-  __imeta_cmd_has_flag_with_num_args _flag_d 0
+    __imeta_cmd_has_flag_with_num_args _flag_d 0
 end
 
 function __imeta_cmd_needs_resc --no-scope-shadowing
-  __imeta_cmd_has_flag_with_num_args _flag_R 0
+    __imeta_cmd_has_flag_with_num_args _flag_R 0
 end
 
 function __imeta_cmd_needs_user --no-scope-shadowing
-  __imeta_cmd_has_flag_with_num_args _flag_u 0
-  and __imeta_am_admin
+    __imeta_cmd_has_flag_with_num_args _flag_u 0
+    and __imeta_am_admin
 end
 
 # main conditions
 
 function __imeta_no_cmd_or_help_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 0
-    and not set --query _flag_h
-  end
-  __imeta_parse_main_for condition $cmdline
+    function condition --no-scope-shadowing
+        test (count $_unparsed_args) -eq 0
+        and not set --query _flag_h
+    end
+    __imeta_parse_main_for condition $cmdline
 end
 
 function __imeta_help_needs_cmd --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 1 -a "$_unparsed_args[1]" = help
-    and not set --query _flag_h
-    and not set --query _flag_V
-    and not set --query _flag_v
-    and not set --query _flag_z
-  end
-  __imeta_parse_main_for condition $cmdline
+    function condition --no-scope-shadowing
+        test (count $_unparsed_args) -eq 1 -a "$_unparsed_args[1]" = help
+        and not set --query _flag_h
+        and not set --query _flag_V
+        and not set --query _flag_v
+        and not set --query _flag_z
+    end
+    __imeta_parse_main_for condition $cmdline
 end
 
 function __imeta_verbose_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_unparsed_args) -eq 0
-    and not set --query _flag_h
-    and not set --query _flag_V
-    and not set --query _flag_v
-  end
-  __imeta_parse_main_for condition $cmdline
+    function condition --no-scope-shadowing
+        test (count $_unparsed_args) -eq 0
+        and not set --query _flag_h
+        and not set --query _flag_V
+        and not set --query _flag_v
+    end
+    __imeta_parse_main_for condition $cmdline
 end
 
 function __imeta_zone_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    if set --query _flag_z
-      test -z "$_flag_z"
-    else
-      test (count $_unparsed_args) -eq 0
-      and not set --query _flag_h
+    function condition --no-scope-shadowing
+        if set --query _flag_z
+            test -z "$_flag_z"
+        else
+            test (count $_unparsed_args) -eq 0
+            and not set --query _flag_h
+        end
     end
-  end
-  __imeta_parse_main_for condition $cmdline
+    __imeta_parse_main_for condition $cmdline
 end
 
 # add conditions
 
 function __imeta_add_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args add $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args add $cmdline
 end
 
 function __imeta_add_admin_flag_cond --argument-names cmdline
-  __imeta_add_flag_cond $cmdline
-  and __imeta_am_admin
+    __imeta_add_flag_cond $cmdline
+    and __imeta_am_admin
 end
 
 function __imeta_add_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_coll add $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_coll add $cmdline
 end
 
 function __imeta_add_data_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_data add $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_data add $cmdline
 end
 
 function __imeta_add_resc_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_resc add $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_resc add $cmdline
 end
 
 function __imeta_add_user_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_user add $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_user add $cmdline
 end
 
 # adda conditions
 
 function __imeta_adda_cond --argument-names cmdline
-  __imeta_no_cmd_or_help_cond $cmdline
-  and __imeta_am_admin
+    __imeta_no_cmd_or_help_cond $cmdline
+    and __imeta_am_admin
 end
 
 function __imeta_adda_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args adda $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args adda $cmdline
 end
 
 function __imeta_adda_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_coll adda $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_coll adda $cmdline
 end
 
 function __imeta_adda_coll_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' adda $cmdline
 end
 
 function __imeta_adda_coll_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 2' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 2' adda $cmdline
 end
 
 function __imeta_adda_coll_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' adda $cmdline
 end
 
 function __imeta_adda_data_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_data adda $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_data adda $cmdline
 end
 
 function __imeta_adda_data_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' adda $cmdline
 end
 
 function __imeta_adda_data_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 2' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 2' adda $cmdline
 end
 
 function __imeta_adda_data_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 3' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 3' adda $cmdline
 end
 
 function __imeta_adda_resc_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_resc adda $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_resc adda $cmdline
 end
 
 function __imeta_adda_resc_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' adda $cmdline
 end
 
 function __imeta_adda_resc_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 2' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 2' adda $cmdline
 end
 
 function __imeta_adda_resc_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 3' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 3' adda $cmdline
 end
 
 function __imeta_adda_user_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_user adda $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_user adda $cmdline
 end
 
 function __imeta_adda_user_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' adda $cmdline
 end
 
 function __imeta_adda_user_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 2' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 2' adda $cmdline
 end
 
 function __imeta_adda_user_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 3' adda $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 3' adda $cmdline
 end
 
 # addw conditions
 
 function __imeta_addw_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args addw $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args addw $cmdline
 end
 
 # cp conditions
 
 function __imeta_cp_src_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args cp $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args cp $cmdline
 end
 
 function __imeta_cp_admin_src_flag_cond --argument-names cmdline
-  __imeta_cp_src_flag_cond $cmdline
-  and __imeta_am_admin
+    __imeta_cp_src_flag_cond $cmdline
+    and __imeta_am_admin
 end
 
 function __imeta_cp_coll_dest_flag_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_flag_C) -eq 1 -a (count $_unparsed_args) -eq 0
-    and not set --query _flag_d
-    and not set --query _flag_R
-    and not set --query _flag_u
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    function condition --no-scope-shadowing
+        test (count $_flag_C) -eq 1 -a (count $_unparsed_args) -eq 0
+        and not set --query _flag_d
+        and not set --query _flag_R
+        and not set --query _flag_u
+    end
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_admin_coll_dest_flag_cond --argument-names cmdline
-  __imeta_cp_coll_dest_flag_cond $cmdline
-  and __imeta_am_admin
+    __imeta_cp_coll_dest_flag_cond $cmdline
+    and __imeta_am_admin
 end
 
 function __imeta_cp_src_coll_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    if test "$_flag_C[1]" = 1 -a (count $_unparsed_args) -eq 0
-      test (count $_flag_C) -eq 2
-      or set --query _flag_d
-      or set --query _flag_R
-      or set --query _flag_u
-    else
-      false
+    function condition --no-scope-shadowing
+        if test "$_flag_C[1]" = 1 -a (count $_unparsed_args) -eq 0
+            test (count $_flag_C) -eq 2
+            or set --query _flag_d
+            or set --query _flag_R
+            or set --query _flag_u
+        else
+            false
+        end
     end
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_data_dest_flag_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_flag_d) -eq 1 -a (count $_unparsed_args) -eq 0
-    and not set --query _flag_C
-    and not set --query _flag_R
-    and not set --query _flag_u
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    function condition --no-scope-shadowing
+        test (count $_flag_d) -eq 1 -a (count $_unparsed_args) -eq 0
+        and not set --query _flag_C
+        and not set --query _flag_R
+        and not set --query _flag_u
+    end
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_admin_data_dest_flag_cond --argument-names cmdline
-  __imeta_cp_data_dest_flag_cond $cmdline
-  and __imeta_am_admin
+    __imeta_cp_data_dest_flag_cond $cmdline
+    and __imeta_am_admin
 end
 
 function __imeta_cp_src_data_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    if test "$_flag_d[1]" = 1 -a (count $_unparsed_args) -eq 0
-      test (count $_flag_d) -eq 2
-      or set --query _flag_C
-      or set --query _flag_R
-      or set --query _flag_u
-    else
-      false
+    function condition --no-scope-shadowing
+        if test "$_flag_d[1]" = 1 -a (count $_unparsed_args) -eq 0
+            test (count $_flag_d) -eq 2
+            or set --query _flag_C
+            or set --query _flag_R
+            or set --query _flag_u
+        else
+            false
+        end
     end
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_resc_dest_flag_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_flag_R) -eq 1 -a (count $_unparsed_args) -eq 0
-    and not set --query _flag_C
-    and not set --query _flag_d
-    and not set --query _flag_u
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    function condition --no-scope-shadowing
+        test (count $_flag_R) -eq 1 -a (count $_unparsed_args) -eq 0
+        and not set --query _flag_C
+        and not set --query _flag_d
+        and not set --query _flag_u
+    end
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_src_resc_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    if test "$_flag_R[1]" = 1 -a (count $_unparsed_args) -eq 0
-      test (count $_flag_R) -eq 2
-      or set --query _flag_C
-      or set --query _flag_d
-      or set --query _flag_u
-    else
-      false
+    function condition --no-scope-shadowing
+        if test "$_flag_R[1]" = 1 -a (count $_unparsed_args) -eq 0
+            test (count $_flag_R) -eq 2
+            or set --query _flag_C
+            or set --query _flag_d
+            or set --query _flag_u
+        else
+            false
+        end
     end
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_user_dest_flag_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test (count $_flag_u) -eq 1 -a (count $_unparsed_args) -eq 0
-    and not set --query _flag_C
-    and not set --query _flag_d
-    and not set --query _flag_R
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    function condition --no-scope-shadowing
+        test (count $_flag_u) -eq 1 -a (count $_unparsed_args) -eq 0
+        and not set --query _flag_C
+        and not set --query _flag_d
+        and not set --query _flag_R
+    end
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_src_user_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    if test "$_flag_u[1]" = 1 -a (count $_unparsed_args) -eq 0
-      test (count $_flag_u) -eq 2
-      or set --query _flag_C
-      or set --query _flag_d
-      or set --query _flag_R
-    else
-      false
+    function condition --no-scope-shadowing
+        if test "$_flag_u[1]" = 1 -a (count $_unparsed_args) -eq 0
+            test (count $_flag_u) -eq 2
+            or set --query _flag_C
+            or set --query _flag_d
+            or set --query _flag_R
+        else
+            false
+        end
     end
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_to_coll_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test "$_flag_C[-1]" = 2 -a (count $_unparsed_args) -eq 1
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    function condition --no-scope-shadowing
+        test "$_flag_C[-1]" = 2 -a (count $_unparsed_args) -eq 1
+    end
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_to_data_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test "$_flag_d[-1]" = 2 -a (count $_unparsed_args) -eq 1
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    function condition --no-scope-shadowing
+        test "$_flag_d[-1]" = 2 -a (count $_unparsed_args) -eq 1
+    end
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_to_resc_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test "$_flag_R[-1]" = 2 -a (count $_unparsed_args) -eq 1
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    function condition --no-scope-shadowing
+        test "$_flag_R[-1]" = 2 -a (count $_unparsed_args) -eq 1
+    end
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 function __imeta_cp_to_user_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    test "$_flag_u[-1]" = 2 -a (count $_unparsed_args) -eq 1
-  end
-  __imeta_parse_cmd_for condition cp $cmdline
+    function condition --no-scope-shadowing
+        test "$_flag_u[-1]" = 2 -a (count $_unparsed_args) -eq 1
+    end
+    __imeta_parse_cmd_for condition cp $cmdline
 end
 
 # ls conditions
 
 function __imeta_ls_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args ls $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args ls $cmdline
 end
 
 function __imeta_ls_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_coll ls $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_coll ls $cmdline
 end
 
 function __imeta_ls_coll_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' ls $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' ls $cmdline
 end
 
 function __imeta_ls_data_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_data ls $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_data ls $cmdline
 end
 
 function __imeta_ls_data_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' ls $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' ls $cmdline
 end
 
 function __imeta_ls_resc_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_resc ls $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_resc ls $cmdline
 end
 
 function __imeta_ls_resc_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' ls $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' ls $cmdline
 end
 
 function __imeta_ls_user_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_user ls $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_user ls $cmdline
 end
 
 function __imeta_ls_user_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' ls $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' ls $cmdline
 end
 
 # lsw conditions
 
 function __imeta_lsw_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args lsw $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args lsw $cmdline
 end
 
 function __imeta_lsw_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_coll lsw $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_coll lsw $cmdline
 end
 
 function __imeta_lsw_data_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_data lsw $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_data lsw $cmdline
 end
 
 function __imeta_lsw_resc_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_resc lsw $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_resc lsw $cmdline
 end
 
 function __imeta_lsw_user_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_user lsw $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_user lsw $cmdline
 end
 
 # mod conditions
 
 function __imeta_mod_new_cond --argument-names flag termLbl cmdline
-  function condition --no-scope-shadowing --argument-names flag termLbl
-    set argCnt (count $_unparsed_args)
-    if not set --query $flag
-       or test "$argCnt" -lt 3 -o "$argCnt" -gt 6
-       or string match --invert --quiet --regex '^'$termLbl'?$' $_curr_token
-      false
-    else if test "$argCnt" -eq 3
-      switch $flag
-        case _flag_C
-          test (__imeta_count_unitless_coll_attr_val $_unparsed_args) -ge 1
-        case _flag_d
-          test (__imeta_count_unitless_data_attr_val $_unparsed_args) -ge 1
-        case _flag_R
-          test (__imeta_count_unitless_resc_attr_val $_unparsed_args) -ge 1
-        case _flag_u
-          test (__imeta_count_unitless_user_attr_val $_unparsed_args) -ge 1
-        case '*'
-          false
-      end
-    else
-      for arg in $_unparsed_args
-        if string match --quiet --regex '^'$termLbl: $arg
-          return 1
+    function condition --no-scope-shadowing --argument-names flag termLbl
+        set argCnt (count $_unparsed_args)
+        if not set --query $flag
+            or test "$argCnt" -lt 3 -o "$argCnt" -gt 6
+            or string match --invert --quiet --regex '^'$termLbl'?$' $_curr_token
+            false
+        else if test "$argCnt" -eq 3
+            switch $flag
+                case _flag_C
+                    test (__imeta_count_unitless_coll_attr_val $_unparsed_args) -ge 1
+                case _flag_d
+                    test (__imeta_count_unitless_data_attr_val $_unparsed_args) -ge 1
+                case _flag_R
+                    test (__imeta_count_unitless_resc_attr_val $_unparsed_args) -ge 1
+                case _flag_u
+                    test (__imeta_count_unitless_user_attr_val $_unparsed_args) -ge 1
+                case '*'
+                    false
+            end
+        else
+            for arg in $_unparsed_args
+                if string match --quiet --regex '^'$termLbl: $arg
+                    return 1
+                end
+            end
+            true
         end
-      end
-      true
     end
-  end
-  __imeta_parse_cmd_for "condition $flag $termLbl" mod $cmdline
+    __imeta_parse_cmd_for "condition $flag $termLbl" mod $cmdline
 end
 
 function __imeta_mod_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args mod $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args mod $cmdline
 end
 
 function __imeta_mod_admin_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args mod $cmdline
-  and __imeta_am_admin
+    __imeta_parse_cmd_for __imeta_no_cmd_args mod $cmdline
+    and __imeta_am_admin
 end
 
 function __imeta_mod_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_coll mod $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_coll mod $cmdline
 end
 
 function __imeta_mod_coll_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' mod $cmdline
 end
 
 function __imeta_mod_coll_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 2' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 2' mod $cmdline
 end
 
 function __imeta_mod_coll_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' mod $cmdline
 end
 
 function __imeta_mod_coll_new_attr_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_C n $cmdline
+    __imeta_mod_new_cond _flag_C n $cmdline
 end
 
 function __imeta_mod_coll_new_val_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_C v $cmdline
+    __imeta_mod_new_cond _flag_C v $cmdline
 end
 
 function __imeta_mod_coll_new_unit_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_C u $cmdline
+    __imeta_mod_new_cond _flag_C u $cmdline
 end
 
 function __imeta_mod_data_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_data mod $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_data mod $cmdline
 end
 
 function __imeta_mod_data_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' mod $cmdline
 end
 
 function __imeta_mod_data_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 2' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 2' mod $cmdline
 end
 
 function __imeta_mod_data_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 3' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 3' mod $cmdline
 end
 
 function __imeta_mod_data_new_attr_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_d n $cmdline
+    __imeta_mod_new_cond _flag_d n $cmdline
 end
 
 function __imeta_mod_data_new_val_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_d v $cmdline
+    __imeta_mod_new_cond _flag_d v $cmdline
 end
 
 function __imeta_mod_data_new_unit_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_d u $cmdline
+    __imeta_mod_new_cond _flag_d u $cmdline
 end
 
 function __imeta_mod_resc_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_resc mod $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_resc mod $cmdline
 end
 
 function __imeta_mod_resc_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' mod $cmdline
 end
 
 function __imeta_mod_resc_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 2' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 2' mod $cmdline
 end
 
 function __imeta_mod_resc_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 3' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 3' mod $cmdline
 end
 
 function __imeta_mod_resc_new_attr_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_R n $cmdline
+    __imeta_mod_new_cond _flag_R n $cmdline
 end
 
 function __imeta_mod_resc_new_val_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_R v $cmdline
+    __imeta_mod_new_cond _flag_R v $cmdline
 end
 
 function __imeta_mod_resc_new_unit_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_R u $cmdline
+    __imeta_mod_new_cond _flag_R u $cmdline
 end
 
 function __imeta_mod_user_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_user mod $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_user mod $cmdline
 end
 
 function __imeta_mod_user_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' mod $cmdline
 end
 
 function __imeta_mod_user_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 2' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 2' mod $cmdline
 end
 
 function __imeta_mod_user_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 3' mod $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 3' mod $cmdline
 end
 
 function __imeta_mod_user_new_attr_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_u n $cmdline
+    __imeta_mod_new_cond _flag_u n $cmdline
 end
 
 function __imeta_mod_user_new_val_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_u v $cmdline
+    __imeta_mod_new_cond _flag_u v $cmdline
 end
 
 function __imeta_mod_user_new_unit_cond --argument-names cmdline
-  __imeta_mod_new_cond _flag_u u $cmdline
+    __imeta_mod_new_cond _flag_u u $cmdline
 end
 
 # qu conditions
 
 function __imeta_qu_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args qu $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args qu $cmdline
 end
 
 function __imeta_qu_op_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    if set --query _flag_C
-       or set --query _flag_d
-      test (math (count $_unparsed_args) \% 4) -eq 1
-    else
-      test (count $_unparsed_args) -eq 1
+    function condition --no-scope-shadowing
+        if set --query _flag_C
+            or set --query _flag_d
+            test (math (count $_unparsed_args) \% 4) -eq 1
+        else
+            test (count $_unparsed_args) -eq 1
+        end
     end
-  end
-  __imeta_parse_cmd_for condition qu $cmdline
+    __imeta_parse_cmd_for condition qu $cmdline
 end
 
 function __imeta_qu_and_cond --argument-names cmdline
-  function condition --no-scope-shadowing
-    if set --query _flag_C
-       or set --query _flag_d
-      test (math (count $_unparsed_args) \% 4) -eq 3
-    else
-      false
+    function condition --no-scope-shadowing
+        if set --query _flag_C
+            or set --query _flag_d
+            test (math (count $_unparsed_args) \% 4) -eq 3
+        else
+            false
+        end
     end
-  end
-  __imeta_parse_cmd_for condition qu $cmdline
+    __imeta_parse_cmd_for condition qu $cmdline
 end
 
 # rm conditions
 
 function __imeta_rm_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args rm $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args rm $cmdline
 end
 
 function __imeta_rm_admin_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args rm $cmdline
-  and __imeta_am_admin
+    __imeta_parse_cmd_for __imeta_no_cmd_args rm $cmdline
+    and __imeta_am_admin
 end
 
 function __imeta_rm_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_coll rm $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_coll rm $cmdline
 end
 
 function __imeta_rm_coll_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' rm $cmdline
 end
 
 function __imeta_rm_coll_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 2' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 2' rm $cmdline
 end
 
 function __imeta_rm_coll_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 3' rm $cmdline
 end
 
 function __imeta_rm_data_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_data rm $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_data rm $cmdline
 end
 
 function __imeta_rm_data_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' rm $cmdline
 end
 
 function __imeta_rm_data_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 2' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 2' rm $cmdline
 end
 
 function __imeta_rm_data_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 3' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 3' rm $cmdline
 end
 
 function __imeta_rm_resc_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_resc rm $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_resc rm $cmdline
 end
 
 function __imeta_rm_resc_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' rm $cmdline
 end
 
 function __imeta_rm_resc_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 2' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 2' rm $cmdline
 end
 
 function __imeta_rm_resc_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 3' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 3' rm $cmdline
 end
 
 function __imeta_rm_user_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_user rm $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_user rm $cmdline
 end
 
 function __imeta_rm_user_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' rm $cmdline
 end
 
 function __imeta_rm_user_attr_val_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 2' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 2' rm $cmdline
 end
 
 function __imeta_rm_user_avu_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 3' rm $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 3' rm $cmdline
 end
 
 # rmi conditions
 
 function __imeta_rmi_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args rmi $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args rmi $cmdline
 end
 
 function __imeta_rmi_admin_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args rmi $cmdline
-  and __imeta_am_admin
+    __imeta_parse_cmd_for __imeta_no_cmd_args rmi $cmdline
+    and __imeta_am_admin
 end
 
 function __imeta_rmi_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_coll rmi $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_coll rmi $cmdline
 end
 
 function __imeta_rmi_coll_meta_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' rmi $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' rmi $cmdline
 end
 
 function __imeta_rmi_data_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_data rmi $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_data rmi $cmdline
 end
 
 function __imeta_rmi_data_meta_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' rmi $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' rmi $cmdline
 end
 
 function __imeta_rmi_resc_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_resc rmi $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_resc rmi $cmdline
 end
 
 function __imeta_rmi_resc_meta_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' rmi $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' rmi $cmdline
 end
 
 function __imeta_rmi_user_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_user rmi $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_user rmi $cmdline
 end
 
 function __imeta_rmi_user_meta_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' rmi $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' rmi $cmdline
 end
 
 # rmw conditions
 
 function __imeta_rmw_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args rmw $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args rmw $cmdline
 end
 
 function __imeta_rmw_admin_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args rmw $cmdline
-  and __imeta_am_admin
+    __imeta_parse_cmd_for __imeta_no_cmd_args rmw $cmdline
+    and __imeta_am_admin
 end
 
 function __imeta_rmw_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_coll rmw $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_coll rmw $cmdline
 end
 
 function __imeta_rmw_data_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_data rmw $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_data rmw $cmdline
 end
 
 function __imeta_rmw_resc_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_resc rmw $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_resc rmw $cmdline
 end
 
 function __imeta_rmw_user_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_user rmw $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_user rmw $cmdline
 end
 
 # set conditions
 
 function __imeta_set_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args set $cmdline
+    __imeta_parse_cmd_for __imeta_no_cmd_args set $cmdline
 end
 
 function __imeta_set_admin_flag_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_no_cmd_args set $cmdline
-  and __imeta_am_admin
+    __imeta_parse_cmd_for __imeta_no_cmd_args set $cmdline
+    and __imeta_am_admin
 end
 
 function __imeta_set_coll_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_coll set $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_coll set $cmdline
 end
 
 function __imeta_set_coll_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' set $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_C 1' set $cmdline
 end
 
 function __imeta_set_data_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_data set $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_data set $cmdline
 end
 
 function __imeta_set_data_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' set $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_d 1' set $cmdline
 end
 
 function __imeta_set_resc_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_resc set $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_resc set $cmdline
 end
 
 function __imeta_set_resc_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' set $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_R 1' set $cmdline
 end
 
 function __imeta_set_user_cond --argument-names cmdline
-  __imeta_parse_cmd_for __imeta_cmd_needs_user set $cmdline
+    __imeta_parse_cmd_for __imeta_cmd_needs_user set $cmdline
 end
 
 function __imeta_set_user_attr_cond --argument-names cmdline
-  __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' set $cmdline
+    __imeta_parse_cmd_for '__imeta_cmd_has_flag_with_num_args _flag_u 1' set $cmdline
 end
 
 
@@ -1349,100 +1350,100 @@ function __imeta_coll_args --argument-names cmdline
 end
 
 function __imeta_coll_meta_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set coll $_unparsed_args[1]
-    set absColl (__irods_absolute_path $coll)
-    __irods_quest '%s' "select META_COLL_ATTR_ID where COLL_NAME = '$absColl'"
-  end
-__imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set coll $_unparsed_args[1]
+        set absColl (__irods_absolute_path $coll)
+        __irods_quest '%s' "select META_COLL_ATTR_ID where COLL_NAME = '$absColl'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_coll_attr_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attrPat $_curr_token%
-    __irods_quest '%s' "select META_COLL_ATTR_NAME where META_COLL_ATTR_NAME like '$attrPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set attrPat $_curr_token%
+        __irods_quest '%s' "select META_COLL_ATTR_NAME where META_COLL_ATTR_NAME like '$attrPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_coll_attr_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set coll $_unparsed_args[1]
-    set attrPat $_curr_token%
-    set absColl (__irods_absolute_path $coll)
-    __irods_quest '%s' \
-      "select META_COLL_ATTR_NAME
+    function suggestions --no-scope-shadowing
+        set coll $_unparsed_args[1]
+        set attrPat $_curr_token%
+        set absColl (__irods_absolute_path $coll)
+        __irods_quest '%s' \
+            "select META_COLL_ATTR_NAME
        where COLL_NAME = '$absColl' and META_COLL_ATTR_NAME like '$attrPat'"
-  end
-__imeta_parse_any_cmd_for suggestions $cmdline
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_coll_attr_val_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attr $_unparsed_args[2]
-    set valPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_COLL_ATTR_VALUE
+    function suggestions --no-scope-shadowing
+        set attr $_unparsed_args[2]
+        set valPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_COLL_ATTR_VALUE
        where META_COLL_ATTR_NAME = '$attr' and META_COLL_ATTR_VALUE like '$valPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_coll_attr_val_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set coll $_unparsed_args[1]
-    set attr $_unparsed_args[2]
-    set valPat $_curr_token%
-    set absColl (__irods_absolute_path $coll)
-    __irods_quest '%s' \
-      "select META_COLL_ATTR_VALUE
+    function suggestions --no-scope-shadowing
+        set coll $_unparsed_args[1]
+        set attr $_unparsed_args[2]
+        set valPat $_curr_token%
+        set absColl (__irods_absolute_path $coll)
+        __irods_quest '%s' \
+            "select META_COLL_ATTR_VALUE
        where COLL_NAME = '$absColl'
          and META_COLL_ATTR_NAME = '$attr'
          and META_COLL_ATTR_VALUE like '$valPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_coll_attr_val_unit_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attr $_unparsed_args[2]
-    set val $_unparsed_args[3]
-    set unitPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_COLL_ATTR_UNITS
+    function suggestions --no-scope-shadowing
+        set attr $_unparsed_args[2]
+        set val $_unparsed_args[3]
+        set unitPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_COLL_ATTR_UNITS
        where META_COLL_ATTR_NAME = '$attr'
          and META_COLL_ATTR_VALUE = '$val'
          and META_COLL_ATTR_UNITS like '$unitPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_coll_attr_val_unit_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set coll $_unparsed_args[1]
-    set attr $_unparsed_args[2]
-    set val $_unparsed_args[3]
-    set unitPat $_curr_token%
-    set absColl (__irods_absolute_path $coll)
-    __irods_quest '%s' \
-      "select META_COLL_ATTR_UNITS
+    function suggestions --no-scope-shadowing
+        set coll $_unparsed_args[1]
+        set attr $_unparsed_args[2]
+        set val $_unparsed_args[3]
+        set unitPat $_curr_token%
+        set absColl (__irods_absolute_path $coll)
+        __irods_quest '%s' \
+            "select META_COLL_ATTR_UNITS
        where COLL_NAME = '$absColl'
          and META_COLL_ATTR_NAME = '$attr'
          and META_COLL_ATTR_VALUE = '$val'
          and META_COLL_ATTR_UNITS like '$unitPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_data_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set ignored ''
-    if test (count $_flag_d) -eq 2 -a (count $_unparsed_args) -eq 1
-      set ignored $_unparsed_args[1]
+    function suggestions --no-scope-shadowing
+        set ignored ''
+        if test (count $_flag_d) -eq 2 -a (count $_unparsed_args) -eq 1
+            set ignored $_unparsed_args[1]
+        end
+        __irods_path_suggestions $_curr_token | string match --all --invert $ignored
     end
-    __irods_path_suggestions $_curr_token | string match --all --invert $ignored
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_data_meta_args --argument-names cmdline
@@ -1457,11 +1458,11 @@ function __imeta_data_meta_args --argument-names cmdline
 end
 
 function __imeta_any_data_attr_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attrPat $_curr_token%
-    __irods_quest '%s' "select META_DATA_ATTR_NAME where META_DATA_ATTR_NAME like '$attrPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set attrPat $_curr_token%
+        __irods_quest '%s' "select META_DATA_ATTR_NAME where META_DATA_ATTR_NAME like '$attrPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_data_attr_args --argument-names cmdline
@@ -1538,30 +1539,30 @@ function __imeta_given_data_attr_val_unit_args --argument-names cmdline
 end
 
 function __imeta_resc_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set ignored ''
-    if test (count $_flag_R) -eq 2 -a (count $_unparsed_args) -eq 1
-      set ignored $_unparsed_args[1]
+    function suggestions --no-scope-shadowing
+        set ignored ''
+        if test (count $_flag_R) -eq 2 -a (count $_unparsed_args) -eq 1
+            set ignored $_unparsed_args[1]
+        end
+        __irods_quest '%s' "select RESC_NAME where RESC_NAME != '$ignored'"
     end
-    __irods_quest '%s' "select RESC_NAME where RESC_NAME != '$ignored'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_resc_meta_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set resc $_unparsed_args[1]
-    __irods_quest '%s' "select META_RESC_ATTR_ID where RESC_NAME = '$resc'"
-  end
-__imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set resc $_unparsed_args[1]
+        __irods_quest '%s' "select META_RESC_ATTR_ID where RESC_NAME = '$resc'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_resc_attr_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attrPat $_curr_token%
-    __irods_quest '%s' "select META_RESC_ATTR_NAME where META_RESC_ATTR_NAME like '$attrPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set attrPat $_curr_token%
+        __irods_quest '%s' "select META_RESC_ATTR_NAME where META_RESC_ATTR_NAME like '$attrPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_resc_attr_args --argument-names cmdline
@@ -1631,30 +1632,30 @@ function __imeta_given_resc_attr_val_unit_args --argument-names cmdline
 end
 
 function __imeta_user_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set ignored ''
-    if test (count $_flag_u) -eq 2 -a (count $_unparsed_args) -eq 1
-      set ignored $_unparsed_args[1]
+    function suggestions --no-scope-shadowing
+        set ignored ''
+        if test (count $_flag_u) -eq 2 -a (count $_unparsed_args) -eq 1
+            set ignored $_unparsed_args[1]
+        end
+        __irods_quest '%s' "select USER_NAME where USER_NAME != '$ignored'"
     end
-    __irods_quest '%s' "select USER_NAME where USER_NAME != '$ignored'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_user_meta_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set user $_unparsed_args[1]
-    __irods_quest '%s' "select META_USER_ATTR_ID where USER_NAME = '$user'"
-  end
-__imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set user $_unparsed_args[1]
+        __irods_quest '%s' "select META_USER_ATTR_ID where USER_NAME = '$user'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_user_attr_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attrPat $_curr_token%
-    __irods_quest '%s' "select META_USER_ATTR_NAME where META_USER_ATTR_NAME like '$attrPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set attrPat $_curr_token%
+        __irods_quest '%s' "select META_USER_ATTR_NAME where META_USER_ATTR_NAME like '$attrPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_user_attr_args --argument-names cmdline
@@ -1724,7 +1725,7 @@ function __imeta_given_user_attr_val_unit_args --argument-names cmdline
 end
 
 function __imeta_zone_args
-  __irods_quest '%s' 'select ZONE_NAME'
+    __irods_quest '%s' 'select ZONE_NAME'
 end
 
 
@@ -1733,12 +1734,12 @@ end
 #
 
 function __imeta_mk_cmd_completion --argument-names cmd description condition
-  complete --command imeta --arguments $cmd \
-    --condition '__imeta_eval_with_cmdline __imeta_help_needs_cmd' \
-    --description $description
-  complete --command imeta --arguments $cmd \
-    --condition "__imeta_eval_with_cmdline $condition" \
-    --description $description
+    complete --command imeta --arguments $cmd \
+        --condition '__imeta_eval_with_cmdline __imeta_help_needs_cmd' \
+        --description $description
+    complete --command imeta --arguments $cmd \
+        --condition "__imeta_eval_with_cmdline $condition" \
+        --description $description
 end
 
 # Having an argument completion for a flag, makes completions suggest a flag
@@ -1746,12 +1747,12 @@ end
 # an argument completion instead of a short option completion results in the
 # suggestions being unordered, so both completions are needed.
 function __imeta_mk_flag_completions --argument-names opt description condition
-  complete --command imeta --arguments "-$opt" \
-    --condition "__imeta_eval_with_cmdline $condition" \
-    --description $description
-  complete --command imeta --short-option $opt \
-    --condition "__imeta_eval_with_cmdline $condition" \
-    --description $description
+    complete --command imeta --arguments "-$opt" \
+        --condition "__imeta_eval_with_cmdline $condition" \
+        --description $description
+    complete --command imeta --short-option $opt \
+        --condition "__imeta_eval_with_cmdline $condition" \
+        --description $description
 end
 
 
@@ -1788,26 +1789,8 @@ __imeta_mk_cmd_completion add 'add new AVU triple' __imeta_no_cmd_or_help_cond
 # add -C
 __imeta_mk_flag_completions C 'to collection' __imeta_add_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_add_coll_cond'
-
-# add -d
-__imeta_mk_flag_completions d 'to data object' __imeta_add_flag_cond
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_add_data_cond'
-
-# add -R
-__imeta_mk_flag_completions R 'to resource' '__irods_exec_slow __imeta_add_admin_flag_cond'
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_add_resc_cond'
-
-# add -u
-__imeta_mk_flag_completions u 'to user' '__irods_exec_slow __imeta_add_admin_flag_cond'
-complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_add_user_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_add_coll_cond'
 
 # adda
 
