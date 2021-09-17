@@ -1063,20 +1063,15 @@ end
 # Suggestion functions
 #
 
-# XXX strip trailing / off collection suggestions. A bug in iRODS 4.1.10
-#     prevents imeta from finding the collection when it ends in /. See
-#     https://github.com/irods/irods/issues/4559. This is still present in
-#     iRODS 4.2.6.
 function __imeta_coll_args --argument-names cmdline
   function suggestions --no-scope-shadowing
     set ignored ''
     if test (count $_flag_C) -eq 2 -a (count $_unparsed_args) -eq 1
       set ignored $_unparsed_args[1]
     end
-    __irods_collection_suggestions $_curr_token \
-      | string trim --right --chars / \
-      | string match --all --invert $ignored
+    __irods_collection_suggestions $_curr_token | string match --all --invert $ignored
   end
+
   __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
