@@ -1,5 +1,6 @@
 # tab completion for imeta
-# TODO verify spaces are handled correctly
+#
+# TODO replace __irods_tokenize_cmdline with __imeta_tokenize_cmdline.
 # TODO document
 # TODO if using argparse is successfuly, convert all other completions to using
 #      it.
@@ -24,42 +25,42 @@ function __imeta_cmdline_args
 end
 
 function __imeta_count_unitless_coll_attr_val --argument-names coll attr val
-  set absColl (__irods_absolute_path $coll)
-  __irods_quest '%s' \
-    "select count(META_COLL_ATTR_UNITS)
-     where COLL_NAME = '$absColl'
-       and META_COLL_ATTR_NAME = '$attr'
-       and META_COLL_ATTR_VALUE = '$val'
-       and META_COLL_ATTR_UNITS = ''"
+    set absColl (__irods_absolute_path $coll)
+    __irods_quest '%s' \
+        "select count(META_COLL_ATTR_UNITS)
+            where COLL_NAME = '$absColl'
+                and META_COLL_ATTR_NAME = '$attr'
+                and META_COLL_ATTR_VALUE = '$val'
+                and META_COLL_ATTR_UNITS = ''"
 end
 
 function __imeta_count_unitless_data_attr_val --argument-names data attr val
-  set pathParts (__irods_split_path (__irods_absolute_path $data))
-  __irods_quest '%s' \
-    "select count(META_DATA_ATTR_UNITS)
-     where COLL_NAME = '$pathParts[1]'
-       and DATA_NAME = '$pathParts[2]'
-       and META_DATA_ATTR_NAME = '$attr'
-       and META_DATA_ATTR_VALUE = '$val'
-       and META_DATA_ATTR_UNITS = ''"
+    set pathParts (__irods_split_path (__irods_absolute_path $data))
+    __irods_quest '%s' \
+        "select count(META_DATA_ATTR_UNITS)
+            where COLL_NAME = '$pathParts[1]'
+                and DATA_NAME = '$pathParts[2]'
+                and META_DATA_ATTR_NAME = '$attr'
+                and META_DATA_ATTR_VALUE = '$val'
+                and META_DATA_ATTR_UNITS = ''"
 end
 
 function __imeta_count_unitless_resc_attr_val --argument-names resc attr val
-  __irods_quest '%s' \
-    "select count(META_RESC_ATTR_UNITS)
-     where RESC_NAME = '$resc'
-       and META_RESC_ATTR_NAME = '$attr'
-       and META_RESC_ATTR_VALUE = '$val'
-       and META_RESC_ATTR_UNITS = ''"
+    __irods_quest '%s' \
+        "select count(META_RESC_ATTR_UNITS)
+            where RESC_NAME = '$resc'
+                and META_RESC_ATTR_NAME = '$attr'
+                and META_RESC_ATTR_VALUE = '$val'
+                and META_RESC_ATTR_UNITS = ''"
 end
 
 function __imeta_count_unitless_user_attr_val --argument-names user attr val
-  __irods_quest '%s' \
-    "select count(META_USER_ATTR_UNITS)
-     where USER_NAME = '$user'
-       and META_USER_ATTR_NAME = '$attr'
-       and META_USER_ATTR_VALUE = '$val'
-       and META_USER_ATTR_UNITS = ''"
+    __irods_quest '%s' \
+        "select count(META_USER_ATTR_UNITS)
+            where USER_NAME = '$user'
+                and META_USER_ATTR_NAME = '$attr'
+                and META_USER_ATTR_VALUE = '$val'
+                and META_USER_ATTR_UNITS = ''"
 end
 
 function __imeta_eval_with_cmdline
@@ -68,85 +69,357 @@ function __imeta_eval_with_cmdline
 end
 
 function __imeta_tokenize_cmdline
-  function tokenize_arg --no-scope-shadowing --argument-names arg
-    if string match --invert --quiet --regex -- '^-[^-]' $arg
-      echo $arg
-      set matched passthru
-    else
-      set optChars (string split -- '' (string trim --left --chars '-' -- $arg))
-      while test (count $optChars) -gt 0
-        set --erase matched
-        for opt in $optSpec
-          if test "$opt" = "$optChars[1]"
-            set matched opt
-            echo -- '-'$optChars[1]
-            set --erase optChars[1]
-            break
-          else if test "$opt" = "$optChars[1]="
-            set matched opt
-            echo -- '-'$optChars[1]
-            if test (count $optChars) -gt 1
-              set matched val
-              string join -- '' $optChars[2..-1]
+    # If arg (term) is a set of short options, split into multiple terms, one 
+    # for each option. This uses optSpec from the calling environment to 
+    # determine if a character matches an option
+    function tokenize_arg --no-scope-shadowing --argument-names arg
+
+        # If the term to tokenize isn't a short option set
+        if string match --invert --quiet --regex -- '^-[^-]' $arg
+
+            # write the term to standard output on its own line
+            echo $arg
+
+            # Identify the match as passed through
+            set matched passthru
+        else
+
+            # split the short option set into individual characters
+            set optChars (string split -- '' (string trim --left --chars '-' -- $arg))
+
+            # For each character
+            while test (count $optChars) -gt 0
+                # reset the match type
+                set --erase matched
+
+                # Iterator over the option specifications
+                for opt in $optSpec
+
+                    # If the current option specification matches the current 
+                    # character
+                    if test "$opt" = "$optChars[1]"
+
+                        # Identify the character as an option
+                        set matched opt
+
+                        # write the option to standard output on its own line 
+                        # and remove it from the set of short options
+                        echo -- '-'$optChars[1]
+                        set --erase optChars[1]
+
+                        # Stop iterating over the option specifications
+                        break
+
+                        # Otherwise, if current option specification is for the 
+                        # current character with a value assigned
+                    else if test "$opt" = "$optChars[1]="
+
+                        # Identify the character as an option
+                        set matched opt
+
+                        # write the option to standard output on its own line
+                        echo -- '-'$optChars[1]
+
+                        # any remaining characters must be the value and not 
+                        # more shorts options
+                        if test (count $optChars) -gt 1
+
+                            # Identify the match as a value
+                            set matched val
+
+                            # join the remaining chacters into single string 
+                            # representing the value and write the value to 
+                            # standard output on its own line
+                            string join -- '' $optChars[2..-1]
+                        end
+
+                        # We've consumed all characters, so erase the array
+                        set --erase optChars
+
+                        # Stop iterating over the option specifications
+                        break
+                    end
+                end
+
+                # If the current character didn't match a specification
+                if not set --query matched
+
+                    # Recombine the remaining characters into single token with 
+                    # a leading hyphen, and write to standard output on its own 
+                    # line.
+                    string join -- '' '-' $optChars
+                    set --erase optChars
+                end
             end
-            set --erase optChars
-            break
-          end
         end
-        if not set --query matched
-          string join -- '' '-' $optChars
-          set --erase optChars
+
+        # If the last match was an option, exit successully, otherwise fail.
+        test "$matched" = opt
+    end
+
+    # If there is no '--'  in the input arugments, error out
+    if not set splitIdx (contains --index -- '--' $argv)
+        return 1
+    end
+
+    # If the there are input arguments before '--', store them in $optSpec.
+    test "$splitIdx" -gt 1
+    and set optSpec $argv[1..(math $splitIdx - 1)]
+
+    # Remove '--' and $optSpec from the input arguments
+    set --erase argv[1..$splitIdx]
+
+    # If there are any remaining input arguments, tokenize them
+    if test (count $argv) -gt 0
+        # Tokenize each argument using $optSpec writing the tokens to stdout
+        for arg in $argv
+            tokenize_arg $arg
         end
-      end
+
+        # if all arguments where successfully tokenized, add an empty token to
+        # indicate that the last token was completed.
+        test $status -eq 0
+        and echo ''
     end
-    test "$matched" = opt
-  end
-  if not set splitIdx (contains --index -- '--' $argv)
-    return 1
-  end
-  test "$splitIdx" -gt 1
-  and set optSpec $argv[1..(math $splitIdx - 1)]
-  set --erase argv[1..$splitIdx]
-  if test (count $argv) -gt 0
-    for arg in $argv
-      tokenize_arg $arg
-    end
-    test $status -eq 0
-    and echo ''
-  end
-  return 0
+
+    return 0
 end
 
+# This is supposed to work like (string split -- ' ' $cmdline), but respecting \
+function __split_cmdline --argument-names cmdline
+    if string match --invert --quiet --regex -- '.*\\\\ .*' $cmdline
+        string split -- ' ' $cmdline
+    else
+        set --erase tokens
+        set curToken ''
+        set curTokenEndBackslashCnt 0
+
+        # If there are no backslashes, the first and only term in the backslashSplit
+        # will be cmdline, so backslashCnt should be 0.
+        set backslashCnt -1
+
+        for backslashSplit in (string split -- \\ $cmdline)
+            set backslashCnt (math "$backslashCnt + 1")
+
+            if [ $backslashCnt -gt 0 ]
+                set curToken $curToken\\
+
+                if [ $curTokenEndBackslashCnt -ge 0 ]
+                    set curTokenEndBackslashCnt (math "$curTokenEndBackslashCnt + 1")
+                end
+            end
+
+            # first character of backslashSplit is an escaped space
+            if [ (math "$curTokenEndBackslashCnt % 2") -eq 1 ]
+                and string match --quiet --regex -- '^ ' $backslashSplit
+
+                set curToken $curToken' '
+                set curTokenEndBackslashCnt 0
+                set backslashSplit (string replace ' ' '' $backslashSplit)
+            end
+
+            if string match --invert --quiet --regex -- '.* .*' $backslashSplit
+                # backslashSplit doesn't contain a space
+
+                set curToken $curToken$backslashSplit
+
+                if [ -n $backslashSplit ]
+                    set curTokenEndBackslashCnt 0
+                end
+            else
+                # SbackslashSplit contains at least one space, spaceSplits will 
+                # have at least two elements
+                set spaceSplits (string split -- ' ' $backslashSplit)
+                set tokens {$tokens} $curToken$spaceSplits[1] {$spaceSplits[2..-2]}
+                set curToken $spaceSplits[-1]
+                set curTokenEndBackslashCnt 0
+            end
+        end
+
+        set tokens {$tokens} $curToken
+
+        printf '%s\n' $tokens
+    end
+end
+# function test__split_cmdline
+#     set errCnt 0
+# 
+#     function fmt_val
+#         if [ (count $argv) -gt 0 ]
+#             printf '\'%s\'\n' $argv
+#         end
+#     end
+# 
+#     function fmt_list
+#         if [ (count $argv) -gt 0 ]
+#             fmt_val $argv | string join ' '
+#         end
+#     end
+# 
+#     function assert --no-scope-shadowing --argument-names arg
+#         set expRes $argv[2..-1]
+#         set actRes (__split_cmdline $arg)
+# 
+#         set match yes
+#         if [ (count $actRes) -ne (count $expRes) ]
+#             set match no
+#         else
+#             for i in (seq (count $actRes))
+#                 if [ $actRes[$i] != $expRes[$i] ]
+#                     set match no
+#                     break
+#                 end
+#             end
+#         end
+# 
+#         if [ $match = no ]
+#             set argFmt (fmt_val $arg)
+#             set actResFmt (fmt_list $actRes)
+#             set expResFmt (fmt_list $expRes)
+#             printf '__split_cmdline %s -> [%s], expected [%s]\n' "$argFmt" "$actResFmt" "$expResFmt"
+#             set errCnt (math $errCnt + 1)
+#         end
+#     end
+#     # TEST CASES
+#     assert '' ''
+#     assert q q
+#     assert \\ \\
+#     assert qw qw
+#     assert q\\ q\\
+#     assert \\q \\q
+#     assert \\\\ \\\\
+#     assert qwe qwe
+#     assert \\qw \\qw
+#     assert q\\w q\\w
+#     assert qw\\ qw\\
+#     assert q\\\\ q\\\\
+#     assert \\q\\ \\q\\
+#     assert \\\\q \\\\q
+#     assert ' ' '' ''
+#     assert ' q' '' q
+#     assert 'q ' q ''
+#     assert ' \\' '' \\
+#     assert '\\ ' '\\ '
+#     assert ' qw' '' qw
+#     assert 'q w' q w
+#     assert 'qw ' qw ''
+#     assert '\\ q' '\\ q'
+#     assert ' \\q' '' \\q
+#     assert ' q\\' '' q\\
+#     assert '\\q ' \\q ''
+#     assert 'q\\ ' 'q\\ '
+#     assert 'q \\' q \\
+#     assert ' \\\\' '' \\\\
+#     assert '\\ \\' '\\ \\'
+#     assert '\\\\ ' \\\\ ''
+#     assert ' qwe' '' qwe
+#     assert 'q we' q we
+#     assert 'qw e' qw e
+#     assert 'qwe ' qwe ''
+#     assert ' qw\\' '' 'qw\\'
+#     assert 'q w\\' q w\\
+#     assert 'qw \\' qw \\
+#     assert 'qw\\ ' 'qw\\ '
+#     assert ' q\\w' '' 'q\\w'
+#     assert 'q \\w' q \\w
+#     assert 'q\\ w' 'q\\ w'
+#     assert 'q\\w ' q\\w ''
+#     assert ' \\qw' '' '\\qw'
+#     assert '\\ qw' '\\ qw'
+#     assert '\\q w' \\q w
+#     assert '\\qw ' \\qw ''
+#     assert ' q\\\\' '' q\\\\
+#     assert 'q \\\\' q \\\\
+#     assert 'q\\ \\' 'q\\ \\'
+#     assert 'q\\\\ ' q\\\\ ''
+#     assert ' \\q\\' '' \\q\\
+#     assert '\\ q\\' '\\ q\\'
+#     assert '\\q \\' \\q \\
+#     assert '\\q\\ ' '\\q\\ '
+#     assert ' \\q' '' \\q
+#     assert '\\ \\q' '\\ \\q'
+#     assert '\\\\ q' \\\\ q
+#     assert '\\\\q ' \\\\q ''
+#     assert '  ' '' '' ''
+#     assert '  q' '' '' q
+#     assert ' q ' '' q ''
+#     assert 'q  ' q '' ''
+#     assert '  \\' '' '' \\
+#     assert ' \\ ' '' '\\ '
+#     assert '\\  ' '\\ ' ''
+#     assert '  qw' '' '' qw
+#     assert ' q w' '' q w
+#     assert ' qw ' '' qw ''
+#     assert 'q w' q w
+#     assert 'q w ' q w ''
+#     assert 'qw  ' qw '' ''
+#     assert '  q\\' '' '' q\\
+#     assert ' q \\' '' q \\
+#     assert ' q\\ ' '' 'q\\ '
+#     assert 'q  \\' q '' \\
+#     assert 'q \ ' q '\\ '
+#     assert 'q\\  ' 'q\\ ' ''
+#     assert '  \\\\' '' '' \\\\
+#     assert ' \\ \\' '' '\\ \\'
+#     assert ' \\\\ ' '' \\\\ ''
+#     assert '\\  \\' '\\ ' \\
+#     assert '\\ \\ ' '\\ \\ '
+#     assert '\\\\  ' \\\\ '' ''
+#     assert '  qwe' '' '' qwe
+#     assert ' q we' '' q we
+#     assert 'qw e' qw e
+#     assert ' qwe ' '' qwe ''
+#     assert 'q  we' q '' we
+#     assert 'q w e' q w e
+#     assert 'q we ' q we ''
+#     assert 'qw  e' qw '' e
+#     assert 'qw e ' qw e ''
+#     assert 'qwe  ' qwe '' ''
+#     assert '  qw\\' '' '' qw\\
+#     assert ' q w\\' '' q w\\
+#     assert 'qw \\' qw \\
+#     assert ' qw\\ ' '' 'qw\\ '
+#     assert 'q  w\\' q '' w\\
+#     assert 'q w \\' q w \\
+#     assert 'q w\\ ' q 'w\\ '
+#     assert 'qw  \\' qw '' \\
+#     assert 'qw \\ ' qw '\\ '
+#     assert 'qw\\  ' 'qw\\ ' ''
+#     assert '  q\\\\' '' '' q\\\\
+#     assert ' q \\\\' '' q \\\\
+#     assert ' q\\ \\' '' 'q\\ \\'
+#     assert ' q\\\\ ' '' q\\\\ ''
+#     assert 'q \\\\' q \\\\
+#     assert 'q \\ \\' q '\\ \\'
+#     assert 'q \\\\ ' q \\\\ ''
+#     assert 'q\\  \\' 'q\\ ' \\
+#     assert 'q\\ \\ ' 'q\\ \\ '
+#     assert 'q\\\\  ' q\\\\ '' ''
+# 
+#     if [ $errCnt -eq 0 ]
+#         printf 'ok\n'
+#         return 0
+#     else
+#         return 1
+#     end
+# end
+
 function __imeta_parse_for --argument-names optSpec exclusive consumer cmdline
-  set optSpecArray (string split -- ' ' $optSpec)
-  set cmdTokens (__imeta_tokenize_cmdline $optSpecArray -- (string split -- ' ' $cmdline))
-  set _curr_token $cmdTokens[-1]
-  set --erase cmdTokens[-1]
-  if test -n "$exclusive"
-    set exclusiveOpt '--exclusive' $exclusive
-  end
-  argparse --stop-nonopt $exclusiveOpt --name imeta $optSpecArray -- $cmdTokens 2>&1 | read failMsg
-  if test -z "$failMsg"
-    set _unparsed_args $argv
-    eval "$consumer"
-  else
-    set needsVal (string replace --filter --regex -- '.*Expected argument for option -' '' $failMsg)
-    if test $status -eq 0
-      # Try again, removing the last option to work around the issue where
-      # _curr_token is the missing value argparse is complaining about.
-      set --erase cmdTokens[-1]
-      argparse --stop-nonopt --name imeta $optSpecArray -- $cmdTokens 2> /dev/null
-      if test $status -ne 0
-        false
-      else
-        eval set _flag_$needsVal
+    set optSpecArray (string split -- ' ' $optSpec)
+    set cmdTokens (__imeta_tokenize_cmdline $optSpecArray -- (__split_cmdline $cmdline))
+    set _curr_token $cmdTokens[-1]
+    set --erase cmdTokens[-1]
+    if test -n "$exclusive"
+        set exclusiveOpt '--exclusive' $exclusive
+    end
+    argparse --stop-nonopt $exclusiveOpt --name imeta $optSpecArray -- $cmdTokens 2>&1 \
+        | read failMsg
+    if test -z "$failMsg"
         set _unparsed_args $argv
         eval "$consumer"
-      end
     else
-      false
+        false
     end
-  end
 end
 
 function __imeta_parse_main_for --argument-names consumer cmdline
@@ -1064,15 +1337,15 @@ end
 #
 
 function __imeta_coll_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set ignored ''
-    if test (count $_flag_C) -eq 2 -a (count $_unparsed_args) -eq 1
-      set ignored $_unparsed_args[1]
+    function suggestions --no-scope-shadowing
+        set ignored ''
+        if test (count $_flag_C) -eq 2 -a (count $_unparsed_args) -eq 1
+            set ignored $_unparsed_args[1]
+        end
+        __irods_collection_suggestions $_curr_token 
     end
-    __irods_collection_suggestions $_curr_token | string match --all --invert $ignored
-  end
 
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_coll_meta_args --argument-names cmdline
@@ -1173,13 +1446,14 @@ function __imeta_data_args --argument-names cmdline
 end
 
 function __imeta_data_meta_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set data $_unparsed_args[1]
-    set pathParts (__irods_split_path (__irods_absolute_path $data))
-    __irods_quest '%s' \
-      "select META_DATA_ATTR_ID where COLL_NAME = '$pathParts[1]' and DATA_NAME = '$pathParts[2]'"
-  end
-__imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set data $_unparsed_args[1]
+        set pathParts (__irods_split_path (__irods_absolute_path $data))
+        __irods_quest '%s' \
+            "select META_DATA_ATTR_ID 
+                where COLL_NAME = '$pathParts[1]' and DATA_NAME = '$pathParts[2]'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_data_attr_args --argument-names cmdline
@@ -1191,76 +1465,76 @@ function __imeta_any_data_attr_args --argument-names cmdline
 end
 
 function __imeta_given_data_attr_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set data $_unparsed_args[1]
-    set attrPat $_curr_token%
-    set pathParts (__irods_split_path (__irods_absolute_path $data))
-    __irods_quest '%s' \
-      "select META_DATA_ATTR_NAME
-       where COLL_NAME = '$pathParts[1]'
-         and DATA_NAME = '$pathParts[2]'
-         and META_DATA_ATTR_NAME like '$attrPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set data $_unparsed_args[1]
+        set attrPat $_curr_token%
+        set pathParts (__irods_split_path (__irods_absolute_path $data))
+        __irods_quest '%s' \
+            "select META_DATA_ATTR_NAME
+                where COLL_NAME = '$pathParts[1]'
+                    and DATA_NAME = '$pathParts[2]'
+                    and META_DATA_ATTR_NAME like '$attrPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_data_attr_val_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attr $_unparsed_args[2]
-    set valPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_DATA_ATTR_VALUE
-       where META_DATA_ATTR_NAME = '$attr' and META_DATA_ATTR_VALUE like '$valPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set attr $_unparsed_args[2]
+        set valPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_DATA_ATTR_VALUE
+                where META_DATA_ATTR_NAME = '$attr' and META_DATA_ATTR_VALUE like '$valPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_data_attr_val_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set data $_unparsed_args[1]
-    set attr $_unparsed_args[2]
-    set valPat $_curr_token%
-    set pathParts (__irods_split_path (__irods_absolute_path $data))
-    __irods_quest '%s' \
-      "select META_DATA_ATTR_VALUE
-       where COLL_NAME = '$pathParts[1]'
-         and DATA_NAME = '$pathParts[2]'
-         and META_DATA_ATTR_NAME = '$attr'
-         and META_DATA_ATTR_VALUE like '$valPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set data $_unparsed_args[1]
+        set attr $_unparsed_args[2]
+        set valPat $_curr_token%
+        set pathParts (__irods_split_path (__irods_absolute_path $data))
+        __irods_quest '%s' \
+            "select META_DATA_ATTR_VALUE
+                where COLL_NAME = '$pathParts[1]'
+                    and DATA_NAME = '$pathParts[2]'
+                    and META_DATA_ATTR_NAME = '$attr'
+                    and META_DATA_ATTR_VALUE like '$valPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_data_attr_val_unit_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attr $_unparsed_args[2]
-    set val $_unparsed_args[3]
-    set unitPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_DATA_ATTR_UNITS
-       where META_DATA_ATTR_NAME = '$attr'
-         and META_DATA_ATTR_VALUE = '$val'
-         and META_DATA_ATTR_UNITS like '$unitPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set attr $_unparsed_args[2]
+        set val $_unparsed_args[3]
+        set unitPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_DATA_ATTR_UNITS
+                where META_DATA_ATTR_NAME = '$attr'
+                    and META_DATA_ATTR_VALUE = '$val'
+                    and META_DATA_ATTR_UNITS like '$unitPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_data_attr_val_unit_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set data $_unparsed_args[1]
-    set attr $_unparsed_args[2]
-    set val $_unparsed_args[3]
-    set unitPat $_curr_token%
-    set pathParts (__irods_split_path (__irods_absolute_path $data))
-    __irods_quest '%s' \
-      "select META_DATA_ATTR_UNITS
-       where COLL_NAME = '$pathParts[1]'
-         and DATA_NAME = '$pathParts[2]'
-         and META_DATA_ATTR_NAME = '$attr'
-         and META_DATA_ATTR_VALUE = '$val'
-         and META_DATA_ATTR_UNITS like '$unitPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set data $_unparsed_args[1]
+        set attr $_unparsed_args[2]
+        set val $_unparsed_args[3]
+        set unitPat $_curr_token%
+        set pathParts (__irods_split_path (__irods_absolute_path $data))
+        __irods_quest '%s' \
+            "select META_DATA_ATTR_UNITS
+                where COLL_NAME = '$pathParts[1]'
+                    and DATA_NAME = '$pathParts[2]'
+                    and META_DATA_ATTR_NAME = '$attr'
+                    and META_DATA_ATTR_VALUE = '$val'
+                    and META_DATA_ATTR_UNITS like '$unitPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_resc_args --argument-names cmdline
@@ -1291,68 +1565,69 @@ function __imeta_any_resc_attr_args --argument-names cmdline
 end
 
 function __imeta_given_resc_attr_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set resc $_unparsed_args[1]
-    set attrPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_RESC_ATTR_NAME where RESC_NAME = '$resc' and META_RESC_ATTR_NAME like '$attrPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set resc $_unparsed_args[1]
+        set attrPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_RESC_ATTR_NAME 
+                where RESC_NAME = '$resc' and META_RESC_ATTR_NAME like '$attrPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_resc_attr_val_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attr $_unparsed_args[2]
-    set valPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_RESC_ATTR_VALUE
-       where META_RESC_ATTR_NAME = '$attr' and META_RESC_ATTR_VALUE like '$valPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set attr $_unparsed_args[2]
+        set valPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_RESC_ATTR_VALUE
+                where META_RESC_ATTR_NAME = '$attr' and META_RESC_ATTR_VALUE like '$valPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_resc_attr_val_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set resc $_unparsed_args[1]
-    set attr $_unparsed_args[2]
-    set valPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_RESC_ATTR_VALUE
-       where RESC_NAME = '$resc'
-         and META_RESC_ATTR_NAME = '$attr'
-         and META_RESC_ATTR_VALUE like '$valPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set resc $_unparsed_args[1]
+        set attr $_unparsed_args[2]
+        set valPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_RESC_ATTR_VALUE
+                where RESC_NAME = '$resc'
+                    and META_RESC_ATTR_NAME = '$attr'
+                    and META_RESC_ATTR_VALUE like '$valPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_resc_attr_val_unit_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attr $_unparsed_args[2]
-    set val $_unparsed_args[3]
-    set unitPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_RESC_ATTR_UNITS
-       where META_RESC_ATTR_NAME = '$attr'
-         and META_RESC_ATTR_VALUE = '$val'
-         and META_RESC_ATTR_UNITS like '$unitPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set attr $_unparsed_args[2]
+        set val $_unparsed_args[3]
+        set unitPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_RESC_ATTR_UNITS
+                where META_RESC_ATTR_NAME = '$attr'
+                    and META_RESC_ATTR_VALUE = '$val'
+                    and META_RESC_ATTR_UNITS like '$unitPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_resc_attr_val_unit_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set resc $_unparsed_args[1]
-    set attr $_unparsed_args[2]
-    set val $_unparsed_args[3]
-    set unitPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_RESC_ATTR_UNITS
-       where RESC_NAME = '$resc'
-         and META_RESC_ATTR_NAME = '$attr'
-         and META_RESC_ATTR_VALUE = '$val'
-         and META_RESC_ATTR_UNITS like '$unitPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set resc $_unparsed_args[1]
+        set attr $_unparsed_args[2]
+        set val $_unparsed_args[3]
+        set unitPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_RESC_ATTR_UNITS
+                where RESC_NAME = '$resc'
+                    and META_RESC_ATTR_NAME = '$attr'
+                    and META_RESC_ATTR_VALUE = '$val'
+                    and META_RESC_ATTR_UNITS like '$unitPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_user_args --argument-names cmdline
@@ -1383,68 +1658,69 @@ function __imeta_any_user_attr_args --argument-names cmdline
 end
 
 function __imeta_given_user_attr_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set user $_unparsed_args[1]
-    set attrPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_USER_ATTR_NAME where USER_NAME = '$user' and META_USER_ATTR_NAME like '$attrPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set user $_unparsed_args[1]
+        set attrPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_USER_ATTR_NAME 
+                where USER_NAME = '$user' and META_USER_ATTR_NAME like '$attrPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_user_attr_val_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attr $_unparsed_args[2]
-    set valPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_USER_ATTR_VALUE
-       where META_USER_ATTR_NAME = '$attr' and META_USER_ATTR_VALUE like '$valPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set attr $_unparsed_args[2]
+        set valPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_USER_ATTR_VALUE
+                where META_USER_ATTR_NAME = '$attr' and META_USER_ATTR_VALUE like '$valPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_user_attr_val_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set user $_unparsed_args[1]
-    set attr $_unparsed_args[2]
-    set valPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_USER_ATTR_VALUE
-       where USER_NAME = '$user'
-         and META_USER_ATTR_NAME = '$attr'
-         and META_USER_ATTR_VALUE like '$valPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set user $_unparsed_args[1]
+        set attr $_unparsed_args[2]
+        set valPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_USER_ATTR_VALUE
+                where USER_NAME = '$user'
+                    and META_USER_ATTR_NAME = '$attr'
+                    and META_USER_ATTR_VALUE like '$valPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_any_user_attr_val_unit_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set attr $_unparsed_args[2]
-    set val $_unparsed_args[3]
-    set unitPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_USER_ATTR_UNITS
-       where META_USER_ATTR_NAME = '$attr'
-         and META_USER_ATTR_VALUE = '$val'
-         and META_USER_ATTR_UNITS like '$unitPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set attr $_unparsed_args[2]
+        set val $_unparsed_args[3]
+        set unitPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_USER_ATTR_UNITS
+                where META_USER_ATTR_NAME = '$attr'
+                    and META_USER_ATTR_VALUE = '$val'
+                    and META_USER_ATTR_UNITS like '$unitPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_given_user_attr_val_unit_args --argument-names cmdline
-  function suggestions --no-scope-shadowing
-    set user $_unparsed_args[1]
-    set attr $_unparsed_args[2]
-    set val $_unparsed_args[3]
-    set unitPat $_curr_token%
-    __irods_quest '%s' \
-      "select META_USER_ATTR_UNITS
-       where USER_NAME = '$user'
-         and META_USER_ATTR_NAME = '$attr'
-         and META_USER_ATTR_VALUE = '$val'
-         and META_USER_ATTR_UNITS like '$unitPat'"
-  end
-  __imeta_parse_any_cmd_for suggestions $cmdline
+    function suggestions --no-scope-shadowing
+        set user $_unparsed_args[1]
+        set attr $_unparsed_args[2]
+        set val $_unparsed_args[3]
+        set unitPat $_curr_token%
+        __irods_quest '%s' \
+            "select META_USER_ATTR_UNITS
+                where USER_NAME = '$user'
+                    and META_USER_ATTR_NAME = '$attr'
+                    and META_USER_ATTR_VALUE = '$val'
+                    and META_USER_ATTR_UNITS like '$unitPat'"
+    end
+    __imeta_parse_any_cmd_for suggestions $cmdline
 end
 
 function __imeta_zone_args
@@ -1482,28 +1758,28 @@ end
 complete --command imeta --no-files
 
 complete --command imeta --arguments help \
-  --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
-  --description 'shows help'
+    --condition '__imeta_eval_with_cmdline __imeta_no_cmd_or_help_cond' \
+    --description 'shows help'
 complete --command imeta --arguments upper \
-  --condition '__imeta_eval_with_cmdline __imeta_help_needs_cmd' \
-  --description 'toggle between upper case mode for queries'
+    --condition '__imeta_eval_with_cmdline __imeta_help_needs_cmd' \
+    --description 'toggle between upper case mode for queries'
 
 __imeta_mk_flag_completions h 'shows help' __imeta_no_cmd_or_help_cond
 
 complete --command imeta --short-option V \
-  --condition '__imeta_eval_with_cmdline __imeta_verbose_cond' \
-  --description 'very verbose'
+    --condition '__imeta_eval_with_cmdline __imeta_verbose_cond' \
+    --description 'very verbose'
 complete --command imeta --short-option v \
-  --condition '__imeta_eval_with_cmdline __imeta_verbose_cond' \
-  --description verbose
+    --condition '__imeta_eval_with_cmdline __imeta_verbose_cond' \
+    --description verbose
 
 # XXX imeta -(v|V)z doesn't make any suggestions. This is a bug in fish. See
 #     https://github.com/fish-shell/fish-shell/issues/5127. Check to see if this
 #     is still a problem after upgrading to fish 3.1+.
 complete --command imeta --short-option z \
-  --arguments '(__irods_exec_slow __imeta_zone_args)' --exclusive \
-  --condition '__imeta_eval_with_cmdline __imeta_zone_cond' \
-  --description 'work with the specified zone'
+    --arguments '(__irods_exec_slow __imeta_zone_args)' --exclusive \
+    --condition '__imeta_eval_with_cmdline __imeta_zone_cond' \
+    --description 'work with the specified zone'
 
 # add
 
@@ -1536,84 +1812,88 @@ complete --command imeta \
 # adda
 
 __imeta_mk_cmd_completion adda 'administratively add new AVU triple' \
-  '__irods_exec_slow __imeta_adda_cond'
+    '__irods_exec_slow __imeta_adda_cond'
 
 # adda -C
 __imeta_mk_flag_completions C 'to collection' __imeta_adda_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_coll_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_coll_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_cond' \
-  --description 'existing for collections'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_cond' \
+    --description 'existing for collections'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_val_cond' \
-  --description 'existing for attribute'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_coll_attr_val_cond' \
+    --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_coll_avu_cond' \
-  --description 'existing for attribute-value'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_coll_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_coll_avu_cond' \
+    --description 'existing for attribute-value'
 
 # adda -d
 __imeta_mk_flag_completions d 'to data object' __imeta_adda_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_data_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_data_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_data_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_data_attr_cond' \
-  --description 'existing for data objects'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_data_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_data_attr_cond' \
+    --description 'existing for data objects'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_data_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_data_attr_val_cond' \
-  --description 'existing for attribute'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_data_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_data_attr_val_cond' \
+    --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_data_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_data_avu_cond' \
-  --description 'existing for attribute-value'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_data_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_data_avu_cond' \
+    --description 'existing for attribute-value'
 
 # adda -R
 __imeta_mk_flag_completions R 'to resource' __imeta_adda_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_resc_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_resc_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_resc_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_resc_attr_cond' \
-  --description 'existing for resources'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_resc_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_resc_attr_cond' \
+    --description 'existing for resources'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_resc_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_resc_attr_val_cond' \
-  --description 'existing for attribute'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_resc_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_resc_attr_val_cond' \
+    --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_resc_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_resc_avu_cond' \
-  --description 'existing for attribute-value'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_resc_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_resc_avu_cond' \
+    --description 'existing for attribute-value'
 
 # adda -u
 __imeta_mk_flag_completions u 'to user' __imeta_adda_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_adda_user_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_adda_user_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_user_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_user_attr_cond' \
-  --description 'existing for users'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_user_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_user_attr_cond' \
+    --description 'existing for users'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_user_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_user_attr_val_cond' \
-  --description 'existing for attribute'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_user_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_user_attr_val_cond' \
+    --description 'existing for attribute'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_user_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_adda_user_avu_cond' \
-  --description 'existing for attribute-value'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_any_user_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_adda_user_avu_cond' \
+    --description 'existing for attribute-value'
 
 # addw
 
 __imeta_mk_cmd_completion addw 'add new AVU triple using wildcards in name' \
-  __imeta_no_cmd_or_help_cond
+    __imeta_no_cmd_or_help_cond
 __imeta_mk_flag_completions d 'to data object' __imeta_addw_flag_cond
 
 # cp
@@ -1652,39 +1932,39 @@ __imeta_mk_flag_completions u 'to user' __imeta_cp_user_dest_flag_cond
 
 # cp (-C|-d|-R|-u) (-C|-d|-R|-u) <from-entity>
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_src_coll_cond' \
-  --description 'source collection'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_cp_src_coll_cond' \
+    --description 'source collection'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_src_data_cond' \
-  --description 'source data object'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_cp_src_data_cond' \
+    --description 'source data object'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_src_resc_cond' \
-  --description 'source resource'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_cp_src_resc_cond' \
+    --description 'source resource'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_cp_src_user_cond' \
-  --description 'source resource'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_cp_src_user_cond' \
+    --description 'source resource'
 
 # cp (-C|-d|-R|-u) (-C|-d|-R|-u) <from-entity> <to-entity>
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_coll_cond' \
-  --description 'destination collection'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_cp_to_coll_cond' \
+    --description 'destination collection'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_data_cond' \
-  --description 'destination data object'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_cp_to_data_cond' \
+    --description 'destination data object'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_cp_to_resc_cond' \
-  --description 'destination resource'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_cp_to_resc_cond' \
+    --description 'destination resource'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_cp_to_user_cond' \
-  --description 'destination user'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_cp_to_user_cond' \
+    --description 'destination user'
 
 # ls
 
@@ -1693,41 +1973,41 @@ __imeta_mk_cmd_completion ls 'list existing AVUs' __imeta_no_cmd_or_help_cond
 # ls -C
 __imeta_mk_flag_completions C 'of collection' __imeta_ls_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_ls_coll_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_ls_coll_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_ls_coll_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_ls_coll_attr_cond'
 
 # ls -[l]d
 __imeta_mk_flag_completions d 'of data object' __imeta_ls_flag_cond
 complete --command imeta --arguments '-ld' \
-  --condition '__imeta_eval_with_cmdline __imeta_ls_flag_cond' \
-  --description 'of data object, show set time'
+    --condition '__imeta_eval_with_cmdline __imeta_ls_flag_cond' \
+    --description 'of data object, show set time'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_ls_data_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_ls_data_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_ls_data_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_ls_data_attr_cond'
 
 # ls -R
 __imeta_mk_flag_completions R 'of resource' __imeta_ls_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_ls_resc_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_ls_resc_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_ls_resc_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_ls_resc_attr_cond'
 
 # ls -u
 __imeta_mk_flag_completions u 'of user' __imeta_ls_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_ls_user_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_ls_user_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_ls_user_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_ls_user_attr_cond'
 
 # lsw
 
@@ -1736,29 +2016,29 @@ __imeta_mk_cmd_completion lsw 'list existing AVUs using wildcards' __imeta_no_cm
 # lsw -C
 __imeta_mk_flag_completions C 'of collection' __imeta_lsw_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_lsw_coll_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_lsw_coll_cond'
 
 # lsw -[l]d
 __imeta_mk_flag_completions d 'of data object' __imeta_lsw_flag_cond
 complete --command imeta --arguments '-ld' \
-  --condition '__imeta_eval_with_cmdline __imeta_lsw_flag_cond' \
-  --description 'of data object, show set time'
+    --condition '__imeta_eval_with_cmdline __imeta_lsw_flag_cond' \
+    --description 'of data object, show set time'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_lsw_data_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_lsw_data_cond'
 
 # lsw -R
 __imeta_mk_flag_completions R 'of resource' __imeta_lsw_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_lsw_resc_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_lsw_resc_cond'
 
 # lsw -u
 __imeta_mk_flag_completions u 'of user' __imeta_lsw_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_lsw_user_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_lsw_user_cond'
 
 # mod
 
@@ -1767,114 +2047,114 @@ __imeta_mk_cmd_completion mod 'modify AVU' __imeta_no_cmd_or_help_cond
 # mod -C
 __imeta_mk_flag_completions C 'of collection' __imeta_mod_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_coll_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_attr_cond' \
-  --description 'current attribute'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_coll_attr_cond' \
+    --description 'current attribute'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_attr_val_cond' \
-  --description 'current value'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_coll_attr_val_cond' \
+    --description 'current value'
 complete --command imeta \
-  --arguments \
-    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_coll_avu_cond' \
-  --description 'current unit'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_coll_avu_cond' \
+    --description 'current unit'
 complete --command imeta --arguments n: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_attr_cond' \
-  --description 'new attribute'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_attr_cond' \
+    --description 'new attribute'
 complete --command imeta --arguments v: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_val_cond' \
-  --description 'new value'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_val_cond' \
+    --description 'new value'
 complete --command imeta --arguments u: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_unit_cond' \
-  --description 'new unit'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_coll_new_unit_cond' \
+    --description 'new unit'
 
 # mod -d
 __imeta_mk_flag_completions d 'of data object' __imeta_mod_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_data_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_data_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_data_attr_cond' \
-  --description 'current attribute'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_data_attr_cond' \
+    --description 'current attribute'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_data_attr_val_cond' \
-  --description 'current value'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_data_attr_val_cond' \
+    --description 'current value'
 complete --command imeta \
-  --arguments \
-    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_data_avu_cond' \
-  --description 'current unit'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_data_avu_cond' \
+    --description 'current unit'
 complete --command imeta --arguments n: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_data_new_attr_cond' \
-  --description 'new attribute'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_data_new_attr_cond' \
+    --description 'new attribute'
 complete --command imeta --arguments v: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_data_new_val_cond' \
-  --description 'new value'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_data_new_val_cond' \
+    --description 'new value'
 complete --command imeta --arguments u: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_data_new_unit_cond' \
-  --description 'new unit'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_data_new_unit_cond' \
+    --description 'new unit'
 
 # mod -R
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_mod_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_resc_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_resc_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_resc_attr_cond' \
-  --description 'current attribute'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_resc_attr_cond' \
+    --description 'current attribute'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_resc_attr_val_cond' \
-  --description 'current value'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_resc_attr_val_cond' \
+    --description 'current value'
 complete --command imeta \
-  --arguments \
-    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_resc_avu_cond' \
-  --description 'current unit'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_resc_avu_cond' \
+    --description 'current unit'
 complete --command imeta --arguments n: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_resc_new_attr_cond' \
-  --description 'new attribute'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_resc_new_attr_cond' \
+    --description 'new attribute'
 complete --command imeta --arguments v: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_resc_new_val_cond' \
-  --description 'new value'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_resc_new_val_cond' \
+    --description 'new value'
 complete --command imeta --arguments u: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_resc_new_unit_cond' \
-  --description 'new unit'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_resc_new_unit_cond' \
+    --description 'new unit'
 
 # mod -u
 __imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_mod_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_user_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_user_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_user_attr_cond' \
-  --description 'current attribute'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_user_attr_cond' \
+    --description 'current attribute'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_user_attr_val_cond' \
-  --description 'current value'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_user_attr_val_cond' \
+    --description 'current value'
 complete --command imeta \
-  --arguments \
-    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_mod_user_avu_cond' \
-  --description 'current unit'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_mod_user_avu_cond' \
+    --description 'current unit'
 complete --command imeta --arguments n: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_user_new_attr_cond' \
-  --description 'new attribute'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_user_new_attr_cond' \
+    --description 'new attribute'
 complete --command imeta --arguments v: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_user_new_val_cond' \
-  --description 'new value'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_user_new_val_cond' \
+    --description 'new value'
 complete --command imeta --arguments u: \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_user_new_unit_cond' \
-  --description 'new unit'
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_mod_user_new_unit_cond' \
+    --description 'new unit'
 
 # qu
 
@@ -1886,123 +2166,125 @@ __imeta_mk_flag_completions u users __imeta_qu_flag_cond
 
 # qu operators
 complete --command imeta --arguments = \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'equals lexicographically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'equals lexicographically'
 complete --command imeta --arguments '\<\>' \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'doesn\'t equal lexicographically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'doesn\'t equal lexicographically'
 complete --command imeta --arguments '\<' \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'less than lexicographically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'less than lexicographically'
 complete --command imeta --arguments '\<=' \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'less than or equals lexicographically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'less than or equals lexicographically'
 complete --command imeta --arguments '\>=' \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'greater than or equals lexicographically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'greater than or equals lexicographically'
 complete --command imeta --arguments '\>' \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'greater than lexicographically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'greater than lexicographically'
 complete --command imeta --arguments like \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'matches wildcard'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'matches wildcard'
 complete --command imeta --arguments 'not\ like' \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'doesn\'t match wildcard'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'doesn\'t match wildcard'
 complete --command imeta --arguments n= \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'equals numerically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'equals numerically'
 complete --command imeta --arguments 'n\<\>' \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'doesn\'t equal numerically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'doesn\'t equal numerically'
 complete --command imeta --arguments 'n\<' \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'less than numerically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'less than numerically'
 complete --command imeta --arguments 'n\<=' \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'less than or equals numerically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'less than or equals numerically'
 complete --command imeta --arguments 'n\>=' \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'greater than or equals numerically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'greater than or equals numerically'
 complete --command imeta --arguments 'n\>' \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
-  --description 'greater than numerically'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_op_cond' \
+    --description 'greater than numerically'
 
 # qu joins
 # TODO imeta qu (-C|-d) <attr> <op> <val> or ...
 # TODO imeta qu (-C|-d) <attr> <op> <val> or <op> <val> ... and ...
 # Waiting for https://github.com/irods/irods/issues/4458 to be fixed.
 complete --command imeta --arguments and \
-  --condition '__imeta_eval_with_cmdline __imeta_qu_and_cond' \
-  --description 'intersect with condition on other attribute'
+    --condition '__imeta_eval_with_cmdline __imeta_qu_and_cond' \
+    --description 'intersect with condition on other attribute'
 
 # rm
 
 __imeta_mk_cmd_completion rm 'remove AVU' __imeta_no_cmd_or_help_cond
 
+# TODO add --descriptions to completions below here
+
 # rm -C
 __imeta_mk_flag_completions C 'of collection' __imeta_rm_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_coll_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_coll_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_coll_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_coll_attr_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_coll_attr_val_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_coll_attr_val_cond'
 complete --command imeta \
-  --arguments \
-    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_coll_avu_cond'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_coll_avu_cond'
 
 # rm -d
 __imeta_mk_flag_completions d 'of data object' __imeta_rm_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_data_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_data_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_data_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_data_attr_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_data_attr_val_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_data_attr_val_cond'
 complete --command imeta \
-  --arguments \
-    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_data_avu_cond'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_data_avu_cond'
 
 # rm -R
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_rm_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_resc_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_resc_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_resc_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_resc_attr_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_resc_attr_val_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_resc_attr_val_cond'
 complete --command imeta \
-  --arguments \
-    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_resc_avu_cond'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_resc_avu_cond'
 
 # rm -u
 __imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_rm_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_rm_user_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_rm_user_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_user_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_user_attr_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_val_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_user_attr_val_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_val_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_user_attr_val_cond'
 complete --command imeta \
-  --arguments \
-    '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_val_unit_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rm_user_avu_cond'
+    --arguments \
+        '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_val_unit_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rm_user_avu_cond'
 
 # rmi
 
@@ -2011,38 +2293,38 @@ __imeta_mk_cmd_completion rmi 'remove AVU by metadata id' __imeta_no_cmd_or_help
 # rmi -C
 __imeta_mk_flag_completions C 'of collection' __imeta_rmi_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rmi_coll_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rmi_coll_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_meta_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rmi_coll_meta_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_meta_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rmi_coll_meta_cond'
 
 # rmi -d
 __imeta_mk_flag_completions d 'of data object' __imeta_rmi_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rmi_data_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rmi_data_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_meta_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rmi_data_meta_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_meta_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rmi_data_meta_cond'
 
 # rmi -R
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_rmi_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rmi_resc_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rmi_resc_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_meta_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rmi_resc_meta_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_meta_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rmi_resc_meta_cond'
 
 # rmi -u
 __imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_rmi_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_rmi_user_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_rmi_user_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_meta_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rmi_user_meta_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_meta_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rmi_user_meta_cond'
 
 # rmw
 
@@ -2051,26 +2333,26 @@ __imeta_mk_cmd_completion rmw 'remove AVU using wildcards' __imeta_no_cmd_or_hel
 # rmw -C
 __imeta_mk_flag_completions C 'of collection' __imeta_rmw_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rmw_coll_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rmw_coll_cond'
 
 # rmw -d
 __imeta_mk_flag_completions d 'of data object' __imeta_rmw_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rmw_data_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rmw_data_cond'
 
 # rmw -R
 __imeta_mk_flag_completions R 'of resource' '__irods_exec_slow __imeta_rmw_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_rmw_resc_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_rmw_resc_cond'
 
 # rmw -u
 __imeta_mk_flag_completions u 'of user' '__irods_exec_slow __imeta_rmw_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_rmw_user_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+    --condition '__imeta_eval_with_cmdline __irods_exec_slow __imeta_rmw_user_cond'
 
 # set
 
@@ -2079,38 +2361,38 @@ __imeta_mk_cmd_completion set 'assign a single value' __imeta_no_cmd_or_help_con
 # set -C
 __imeta_mk_flag_completions C 'on collection' __imeta_set_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_set_coll_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_coll_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_set_coll_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_set_coll_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_coll_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_set_coll_attr_cond'
 
 # set -d
 __imeta_mk_flag_completions d 'on data object' __imeta_set_flag_cond
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_set_data_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_data_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_set_data_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_set_data_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_data_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_set_data_attr_cond'
 
 # set -R
 __imeta_mk_flag_completions R 'on resource' '__irods_exec_slow __imeta_set_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_set_resc_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_resc_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_set_resc_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_set_resc_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_resc_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_set_resc_attr_cond'
 
 # set -u
 __imeta_mk_flag_completions u 'on user' '__irods_exec_slow __imeta_set_admin_flag_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_set_user_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_user_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_set_user_cond'
 complete --command imeta \
-  --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
-  --condition '__imeta_eval_with_cmdline __imeta_set_user_attr_cond'
+    --arguments '(__imeta_eval_with_cmdline __irods_exec_slow __imeta_given_user_attr_args)' \
+    --condition '__imeta_eval_with_cmdline __imeta_set_user_attr_cond'
 
 
 functions --erase __imeta_mk_flag_completions __imeta_mk_cmd_completion
