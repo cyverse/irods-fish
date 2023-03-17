@@ -18,12 +18,6 @@ function __imeta_am_admin
     test "$userType" = rodsadmin
 end
 
-function __imeta_cmdline_args
-    set args (commandline --cut-at-cursor --tokenize) (commandline --cut-at-cursor --current-token)
-    set --erase args[1]
-    string join -- \n $args
-end
-
 function __imeta_count_unitless_coll_attr_val --argument-names coll attr val
     set absColl (__irods_absolute_path $coll)
     __irods_quest '%s' \
@@ -64,13 +58,13 @@ function __imeta_count_unitless_user_attr_val --argument-names user attr val
 end
 
 function __imeta_eval_with_cmdline
-    set cmdline (__imeta_cmdline_args)
+    set cmdline (__irods_cmdline_args)
     eval (string escape $argv "$cmdline")
 end
 
 function __imeta_tokenize_cmdline
-    # If arg (term) is a set of short options, split into multiple terms, one 
-    # for each option. This uses optSpec from the calling environment to 
+    # If arg (term) is a set of short options, split into multiple terms, one
+    # for each option. This uses optSpec from the calling environment to
     # determine if a character matches an option
     function tokenize_arg --no-scope-shadowing --argument-names arg
 
@@ -95,14 +89,14 @@ function __imeta_tokenize_cmdline
                 # Iterator over the option specifications
                 for opt in $optSpec
 
-                    # If the current option specification matches the current 
+                    # If the current option specification matches the current
                     # character
                     if test "$opt" = "$optChars[1]"
 
                         # Identify the character as an option
                         set matched opt
 
-                        # write the option to standard output on its own line 
+                        # write the option to standard output on its own line
                         # and remove it from the set of short options
                         echo -- '-'$optChars[1]
                         set --erase optChars[1]
@@ -110,7 +104,7 @@ function __imeta_tokenize_cmdline
                         # Stop iterating over the option specifications
                         break
 
-                        # Otherwise, if current option specification is for the 
+                        # Otherwise, if current option specification is for the
                         # current character with a value assigned
                     else if test "$opt" = "$optChars[1]="
 
@@ -120,15 +114,15 @@ function __imeta_tokenize_cmdline
                         # write the option to standard output on its own line
                         echo -- '-'$optChars[1]
 
-                        # any remaining characters must be the value and not 
+                        # any remaining characters must be the value and not
                         # more shorts options
                         if test (count $optChars) -gt 1
 
                             # Identify the match as a value
                             set matched val
 
-                            # join the remaining chacters into single string 
-                            # representing the value and write the value to 
+                            # join the remaining chacters into single string
+                            # representing the value and write the value to
                             # standard output on its own line
                             string join -- '' $optChars[2..-1]
                         end
@@ -144,8 +138,8 @@ function __imeta_tokenize_cmdline
                 # If the current character didn't match a specification
                 if not set --query matched
 
-                    # Recombine the remaining characters into single token with 
-                    # a leading hyphen, and write to standard output on its own 
+                    # Recombine the remaining characters into single token with
+                    # a leading hyphen, and write to standard output on its own
                     # line.
                     string join -- '' '-' $optChars
                     set --erase optChars
@@ -227,7 +221,7 @@ function __imeta_split_cmdline --argument-names cmdline
                     set curTokenEndBackslashCnt 0
                 end
             else
-                # SbackslashSplit contains at least one space, spaceSplits will 
+                # SbackslashSplit contains at least one space, spaceSplits will
                 # have at least two elements
                 set spaceSplits (string split -- ' ' $backslashSplit)
                 set tokens {$tokens} $curToken$spaceSplits[1] {$spaceSplits[2..-2]}
@@ -243,19 +237,19 @@ function __imeta_split_cmdline --argument-names cmdline
 end
 # function test__imeta_split_cmdline
 #     set errCnt 0
-# 
+#
 #     function fmt_val
 #         if [ (count $argv) -gt 0 ]
 #             printf '\'%s\'\n' $argv
 #         end
 #     end
-# 
+#
 #     function fmt_list
 #         if [ (count $argv) -gt 0 ]
 #             fmt_val $argv | string join ' '
 #         end
 #     end
-# 
+#
 #     function assert --no-scope-shadowing --argument-names arg
 #         set expRes $argv[2..-1]
 #         set actRes (__imeta_split_cmdline $arg)
@@ -395,7 +389,7 @@ end
 #     assert 'q\\  \\' 'q\\ ' \\
 #     assert 'q\\ \\ ' 'q\\ \\ '
 #     assert 'q\\\\  ' q\\\\ '' ''
-# 
+#
 #     if [ $errCnt -eq 0 ]
 #         printf 'ok\n'
 #         return 0
@@ -1343,7 +1337,7 @@ function __imeta_coll_args --argument-names cmdline
         if test (count $_flag_C) -eq 2 -a (count $_unparsed_args) -eq 1
             set ignored $_unparsed_args[1]
         end
-        __irods_collection_suggestions $_curr_token 
+        __irods_collection_suggestions $_curr_token
     end
 
     __imeta_parse_any_cmd_for suggestions $cmdline
@@ -1451,7 +1445,7 @@ function __imeta_data_meta_args --argument-names cmdline
         set data $_unparsed_args[1]
         set pathParts (__irods_split_path (__irods_absolute_path $data))
         __irods_quest '%s' \
-            "select META_DATA_ATTR_ID 
+            "select META_DATA_ATTR_ID
                 where COLL_NAME = '$pathParts[1]' and DATA_NAME = '$pathParts[2]'"
     end
     __imeta_parse_any_cmd_for suggestions $cmdline
@@ -1570,7 +1564,7 @@ function __imeta_given_resc_attr_args --argument-names cmdline
         set resc $_unparsed_args[1]
         set attrPat $_curr_token%
         __irods_quest '%s' \
-            "select META_RESC_ATTR_NAME 
+            "select META_RESC_ATTR_NAME
                 where RESC_NAME = '$resc' and META_RESC_ATTR_NAME like '$attrPat'"
     end
     __imeta_parse_any_cmd_for suggestions $cmdline
@@ -1663,7 +1657,7 @@ function __imeta_given_user_attr_args --argument-names cmdline
         set user $_unparsed_args[1]
         set attrPat $_curr_token%
         __irods_quest '%s' \
-            "select META_USER_ATTR_NAME 
+            "select META_USER_ATTR_NAME
                 where USER_NAME = '$user' and META_USER_ATTR_NAME like '$attrPat'"
     end
     __imeta_parse_any_cmd_for suggestions $cmdline
