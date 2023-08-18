@@ -3,12 +3,8 @@
 This folder contains support for robust, fish-style tab completions for iRODS iCommands.
 
 __TODO Implement tab completions for the remaining iCommands.__
-Here are the iCommands that whose completion implementations don't exist or are incomplete. If the
-first character is a `-`, it is an admin command requiring the user to be a `rodsadmin`. The number
-after the first character is how many times the iCommand shows up in my history. The are list in
-order of popularity. I plan to implement or complete the implementations of the tab completions for
-the iCommands in this order, deferring those marked with `-` to the end. After even the admin
-commands are implemented, implement completion for `iquest` general queries.
+
+Here are the iCommands that whose completion implementations don't exist or are incomplete. If the first character is a `-`, it is an admin command requiring the user to be a `rodsadmin`. The number after the first character is how many times the iCommand shows up in my history. The are list in order of popularity. I plan to implement or complete the implementations of the tab completions for the iCommands in this order, deferring those marked with `-` to the end. After even the admin commands are implemented, implement completion for `iquest` general queries.
 
 ```
 - 1065 iadmin
@@ -62,12 +58,8 @@ commands are implemented, implement completion for `iquest` general queries.
 
 ## [Installation](#installation)
 
-To install the functions and tab completions, copy the contents of the directories `../functions/`
-and `functions/` into `<base>/functions/`, and copy the contents of `completions/` into
-`<base>/completions/`.  If installing for yourself, `<base>` is `$HOME/.config/fish`, otherwise
-`/etc/fish`.
+To install the functions and tab completions, copy the contents of the directories `../functions/` and `functions/` into `<base>/functions/`, and copy the contents of `completions/` into `<base>/completions/`.  If installing for yourself, `<base>` is `$HOME/.config/fish`, otherwise `/etc/fish`.
 
 ## Acknowledgment
 
-The iCommands tab completions are derived from i-commands-auto.bash,
-https://github.com/irods/irods-legacy/blob/master/iRODS/irods_completion.bash, by Bruno Bzeznik.
+The iCommands tab completions are derived from i-commands-auto.bash, https://github.com/irods/irods-legacy/blob/master/iRODS/irods_completion.bash, by Bruno Bzeznik.
