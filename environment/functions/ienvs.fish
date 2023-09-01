@@ -21,9 +21,9 @@ Options are:
 		return 0
 	end
 
-  set envFiles $HOME/.irods/*.json
+	set envFiles $HOME/.irods/*.json
 
 	if [ (count $envFiles) -gt 0 ]
-  	basename --multiple --suffix .json $envFiles
+		basename --multiple --suffix .json $envFiles
 	end
 end
